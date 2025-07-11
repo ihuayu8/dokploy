@@ -76,10 +76,10 @@ export const ShowProjects = () => {
 							<CardHeader className="p-0">
 								<CardTitle className="text-xl flex flex-row gap-2">
 									<FolderInput className="size-6 text-muted-foreground self-center" />
-									Projects
+									项目
 								</CardTitle>
 								<CardDescription>
-									Create and manage your projects
+									创建和管理你的项目
 								</CardDescription>
 							</CardHeader>
 
@@ -100,7 +100,7 @@ export const ShowProjects = () => {
 								<>
 									<div className="w-full relative">
 										<Input
-											placeholder="Filter projects..."
+											placeholder="过滤项目..."
 											value={searchQuery}
 											onChange={(e) => setSearchQuery(e.target.value)}
 											className="pr-10"
@@ -111,7 +111,7 @@ export const ShowProjects = () => {
 										<div className="mt-6 flex h-[50vh] w-full flex-col items-center justify-center space-y-4">
 											<FolderInput className="size-8 self-center text-muted-foreground" />
 											<span className="text-center font-medium text-muted-foreground">
-												No projects found
+												暂无项目
 											</span>
 										</div>
 									)}
@@ -269,7 +269,7 @@ export const ShowProjects = () => {
 																				onClick={(e) => e.stopPropagation()}
 																			>
 																				<DropdownMenuLabel className="font-normal">
-																					Actions
+																					操作
 																				</DropdownMenuLabel>
 																				<div
 																					onClick={(e) => e.stopPropagation()}
@@ -300,34 +300,30 @@ export const ShowProjects = () => {
 																									}
 																								>
 																									<TrashIcon className="size-4" />
-																									<span>Delete</span>
+																									<span>删除</span>
 																								</DropdownMenuItem>
 																							</AlertDialogTrigger>
 																							<AlertDialogContent>
 																								<AlertDialogHeader>
 																									<AlertDialogTitle>
-																										Are you sure to delete this
-																										project?
+																										确认删除此项目?
 																									</AlertDialogTitle>
 																									{!emptyServices ? (
 																										<div className="flex flex-row gap-4 rounded-lg bg-yellow-50 p-2 dark:bg-yellow-950">
 																											<AlertTriangle className="text-yellow-600 dark:text-yellow-400" />
 																											<span className="text-sm text-yellow-600 dark:text-yellow-400">
-																												You have active
-																												services, please delete
-																												them first
+																												该项目存在活动的服务，请先删除这些服务！
 																											</span>
 																										</div>
 																									) : (
 																										<AlertDialogDescription>
-																											This action cannot be
-																											undone
+																											此操作不可恢复
 																										</AlertDialogDescription>
 																									)}
 																								</AlertDialogHeader>
 																								<AlertDialogFooter>
 																									<AlertDialogCancel>
-																										Cancel
+																										取消
 																									</AlertDialogCancel>
 																									<AlertDialogAction
 																										disabled={!emptyServices}
@@ -338,12 +334,12 @@ export const ShowProjects = () => {
 																											})
 																												.then(() => {
 																													toast.success(
-																														"Project deleted successfully",
+																														"项目删除成功",
 																													);
 																												})
 																												.catch(() => {
 																													toast.error(
-																														"Error deleting this project",
+																														"项目删除出错",
 																													);
 																												})
 																												.finally(() => {
@@ -351,7 +347,7 @@ export const ShowProjects = () => {
 																												});
 																										}}
 																									>
-																										Delete
+																										删除
 																									</AlertDialogAction>
 																								</AlertDialogFooter>
 																							</AlertDialogContent>
@@ -366,13 +362,13 @@ export const ShowProjects = () => {
 															<CardFooter className="pt-4">
 																<div className="space-y-1 text-sm flex flex-row justify-between max-sm:flex-wrap w-full gap-2 sm:gap-4">
 																	<DateTooltip date={project.createdAt}>
-																		Created
+																		创建于
 																	</DateTooltip>
 																	<span>
 																		{totalServices}{" "}
 																		{totalServices === 1
-																			? "service"
-																			: "services"}
+																			? "服务"
+																			: "服务"}
 																	</span>
 																</div>
 															</CardFooter>

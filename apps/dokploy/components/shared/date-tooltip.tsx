@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { format, formatDistanceToNow } from "date-fns";
+import { zhCN } from 'date-fns/locale';
 
 interface Props {
 	date: string;
@@ -27,6 +28,7 @@ export const DateTooltip = ({ date, children, className }: Props) => {
 						{children}{" "}
 						{formatDistanceToNow(new Date(date), {
 							addSuffix: true,
+							locale: zhCN,
 						})}
 					</span>
 				</TooltipTrigger>

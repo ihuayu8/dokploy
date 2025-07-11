@@ -116,14 +116,14 @@ export const AddApplication = ({ projectId, projectName }: Props) => {
 					onSelect={(e) => e.preventDefault()}
 				>
 					<Folder className="size-4 text-muted-foreground" />
-					<span>Application</span>
+					<span>应用</span>
 				</DropdownMenuItem>
 			</DialogTrigger>
 			<DialogContent className="max-h-screen  overflow-y-auto sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Create</DialogTitle>
+					<DialogTitle>创建</DialogTitle>
 					<DialogDescription>
-						Assign a name and description to your application
+						为你的应用程序分配一个名称和描述
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
@@ -138,10 +138,10 @@ export const AddApplication = ({ projectId, projectName }: Props) => {
 							name="name"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Name</FormLabel>
+									<FormLabel>名称</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="Frontend"
+											placeholder="请输入服务名称"
 											{...field}
 											onChange={(e) => {
 												const val = e.target.value?.trim() || "";
@@ -164,7 +164,7 @@ export const AddApplication = ({ projectId, projectName }: Props) => {
 										<Tooltip>
 											<TooltipTrigger asChild>
 												<FormLabel className="break-all w-fit flex flex-row gap-1 items-center">
-													Select a Server {!isCloud ? "(Optional)" : ""}
+													选择一个服务器 {!isCloud ? "(可选)" : ""}
 													<HelpCircle className="size-4 text-muted-foreground" />
 												</FormLabel>
 											</TooltipTrigger>
@@ -174,8 +174,7 @@ export const AddApplication = ({ projectId, projectName }: Props) => {
 												side="top"
 											>
 												<span>
-													If no server is selected, the application will be
-													deployed on the server where the user is logged in.
+													如果未选择服务器，应用程序将部署在用户登录的服务器上
 												</span>
 											</TooltipContent>
 										</Tooltip>
@@ -186,7 +185,7 @@ export const AddApplication = ({ projectId, projectName }: Props) => {
 										defaultValue={field.value}
 									>
 										<SelectTrigger>
-											<SelectValue placeholder="Select a Server" />
+											<SelectValue placeholder="选择一个服务器" />
 										</SelectTrigger>
 										<SelectContent>
 											<SelectGroup>
@@ -216,7 +215,7 @@ export const AddApplication = ({ projectId, projectName }: Props) => {
 							name="appName"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>App Name</FormLabel>
+									<FormLabel>实例名称</FormLabel>
 									<FormControl>
 										<Input placeholder="my-app" {...field} />
 									</FormControl>
@@ -229,10 +228,10 @@ export const AddApplication = ({ projectId, projectName }: Props) => {
 							name="description"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Description</FormLabel>
+									<FormLabel>描述</FormLabel>
 									<FormControl>
 										<Textarea
-											placeholder="Description of your service..."
+											placeholder="服务描述..."
 											className="resize-none"
 											{...field}
 										/>

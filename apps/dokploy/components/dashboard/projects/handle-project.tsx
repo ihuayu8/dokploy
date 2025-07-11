@@ -99,7 +99,7 @@ export const HandleProject = ({ projectId }: Props) => {
 		})
 			.then(async (data) => {
 				await utils.project.all.invalidate();
-				toast.success(projectId ? "Project Updated" : "Project Created");
+				toast.success(projectId ? "项目更新成功" : "项目创建成功");
 				setIsOpen(false);
 				if (!projectId) {
 					router.push(`/dashboard/project/${data?.projectId}`);
@@ -123,19 +123,19 @@ export const HandleProject = ({ projectId }: Props) => {
 						onSelect={(e) => e.preventDefault()}
 					>
 						<SquarePen className="size-4" />
-						<span>Update</span>
+						<span>编辑</span>
 					</DropdownMenuItem>
 				) : (
 					<Button>
 						<PlusIcon className="h-4 w-4" />
-						Create Project
+						创建项目
 					</Button>
 				)}
 			</DialogTrigger>
 			<DialogContent className="sm:m:max-w-lg ">
 				<DialogHeader>
-					<DialogTitle>{projectId ? "Update" : "Add a"} project</DialogTitle>
-					<DialogDescription>The home of something big!</DialogDescription>
+					<DialogTitle>{projectId ? "更新" : "添加一个"} 项目</DialogTitle>
+					<DialogDescription>开始你的奇思妙想!</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 				<Form {...form}>
@@ -150,9 +150,9 @@ export const HandleProject = ({ projectId }: Props) => {
 								name="name"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Name</FormLabel>
+										<FormLabel>名称</FormLabel>
 										<FormControl>
-											<Input placeholder="Vandelay Industries" {...field} />
+											<Input placeholder="请输入项目名称" {...field} />
 										</FormControl>
 
 										<FormMessage />
@@ -166,10 +166,10 @@ export const HandleProject = ({ projectId }: Props) => {
 							name="description"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Description</FormLabel>
+									<FormLabel>描述</FormLabel>
 									<FormControl>
 										<Textarea
-											placeholder="Description about your project..."
+											placeholder="关于项目的描述"
 											className="resize-none"
 											{...field}
 										/>
@@ -187,7 +187,7 @@ export const HandleProject = ({ projectId }: Props) => {
 							form="hook-form-add-project"
 							type="submit"
 						>
-							{projectId ? "Update" : "Create"}
+							{projectId ? "更新" : "创建"}
 						</Button>
 					</DialogFooter>
 				</Form>

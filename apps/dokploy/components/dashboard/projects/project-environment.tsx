@@ -90,22 +90,20 @@ export const ProjectEnvironment = ({ projectId, children }: Props) => {
 						onSelect={(e) => e.preventDefault()}
 					>
 						<FileIcon className="size-4" />
-						<span>Project Environment</span>
+						<span>项目环境变量</span>
 					</DropdownMenuItem>
 				)}
 			</DialogTrigger>
 			<DialogContent className="max-h-screen overflow-y-auto sm:max-w-6xl">
 				<DialogHeader>
-					<DialogTitle>Project Environment</DialogTitle>
+					<DialogTitle>项目环境变量</DialogTitle>
 					<DialogDescription>
-						Update the env Environment variables that are accessible to all
-						services of this project.
+						更新可被此项目所有服务访问的 env 环境变量
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 				<AlertBlock type="info">
-					Use this syntax to reference project-level variables in your service
-					environments: <code>DATABASE_URL=${"{{project.DATABASE_URL}}"}</code>
+					在服务环境中，请使用以下语法引用项目级变量：<code>DATABASE_URL=${"{{project.DATABASE_URL}}"}</code>
 				</AlertBlock>
 				<div className="grid gap-4">
 					<div className="grid items-center gap-4">
@@ -119,7 +117,7 @@ export const ProjectEnvironment = ({ projectId, children }: Props) => {
 									name="env"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Environment variables</FormLabel>
+											<FormLabel>环境变量列表</FormLabel>
 											<FormControl>
 												<CodeEditor
 													lineWrapping
@@ -141,7 +139,7 @@ PORT=3000
 								/>
 								<DialogFooter>
 									<Button isLoading={isLoading} type="submit">
-										Update
+										更新
 									</Button>
 								</DialogFooter>
 							</form>

@@ -624,13 +624,13 @@ const Project = (
 							<div className="flex flex-row gap-4 flex-wrap justify-between items-center">
 								<div className="flex flex-row gap-4 flex-wrap">
 									<ProjectEnvironment projectId={projectId}>
-										<Button variant="outline">Project Environment</Button>
+										<Button variant="outline">项目环境变量</Button>
 									</ProjectEnvironment>
 									<DropdownMenu>
 										<DropdownMenuTrigger asChild>
 											<Button>
 												<PlusIcon className="h-4 w-4" />
-												Create Service
+												创建服务
 											</Button>
 										</DropdownMenuTrigger>
 										<DropdownMenuContent
@@ -638,7 +638,7 @@ const Project = (
 											align="end"
 										>
 											<DropdownMenuLabel className="text-sm font-normal">
-												Actions
+												操作
 											</DropdownMenuLabel>
 											<DropdownMenuSeparator />
 											<AddApplication
@@ -686,7 +686,7 @@ const Project = (
 													onCheckedChange={handleSelectAll}
 												/>
 												<span className="text-sm">
-													Select All{" "}
+													全选{" "}
 													{selectedServices.length > 0 &&
 														`(${selectedServices.length}/${filteredServices.length})`}
 												</span>
@@ -706,7 +706,7 @@ const Project = (
 													</Button>
 												</DropdownMenuTrigger>
 												<DropdownMenuContent align="end">
-													<DropdownMenuLabel>Actions</DropdownMenuLabel>
+													<DropdownMenuLabel>操作</DropdownMenuLabel>
 													<DropdownMenuSeparator />
 													<DialogAction
 														title="Start Services"
