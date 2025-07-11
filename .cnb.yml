@@ -20,9 +20,9 @@ $:
           script: npm install -g pnpm 
         - name: install
           script: pnpm install
-        - name: setup
-          script: pnpm run dokploy:setup
-        - name: script
-          script: pnpm run server:script
+        # - name: setup
+        #   script: pnpm run dokploy:setup
+        # - name: script
+        #   script: pnpm run server:script
         - name: copy
           script: cp apps/dokploy/.env.example apps/dokploy/.env
