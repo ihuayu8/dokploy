@@ -262,7 +262,6 @@ Register.getLayout = (page: ReactElement) => {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
 	if (IS_CLOUD) {
 		const { user } = await validateRequest(context.req);
-
 		if (user) {
 			return {
 				redirect: {
@@ -277,16 +276,16 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 			},
 		};
 	}
-	const hasAdmin = await isAdminPresent();
-
-	if (hasAdmin) {
-		return {
-			redirect: {
-				permanent: false,
-				destination: "/",
-			},
-		};
-	}
+	// const hasAdmin = await isAdminPresent();
+	//
+	// if (hasAdmin) {
+	// 	return {
+	// 		redirect: {
+	// 			permanent: false,
+	// 			destination: "/",
+	// 		},
+	// 	};
+	// }
 	return {
 		props: {
 			isCloud: false,

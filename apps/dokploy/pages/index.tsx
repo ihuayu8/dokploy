@@ -428,7 +428,7 @@ export default function Home({ IS_CLOUD }: Props) {
 
 				<div className="flex flex-row justify-between flex-wrap">
 					<div className="mt-4 text-center text-sm flex flex-row justify-center gap-2">
-						{IS_CLOUD && (
+						{ (
 							<Link
 								className="hover:underline text-muted-foreground"
 								href="/register"
