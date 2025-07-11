@@ -27,6 +27,7 @@ CREATE TABLE "user_temp" (
 	"stripeCustomerId" text,
 	"stripeSubscriptionId" text,
 	"serversQuantity" integer DEFAULT 0 NOT NULL,
+    "balance" NUMERIC DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_temp_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
