@@ -18,7 +18,7 @@ import {
 	apiUpdateUser,
 	apikey,
 	invitation,
-	member,
+	member, users_temp,
 } from "@dokploy/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import * as bcrypt from "bcrypt";
@@ -111,6 +111,17 @@ export const userRouter = createTRPCRouter({
 		});
 
 		return memberResult;
+	}),
+	getBalance: protectedProcedure.query(async ({ ctx }) => {
+		const userInfo = await db.query.users_temp.findFirst({
+			where: eq(users_temp.id, ctx.user.id),
+			columns: {
+				balance: true,
+				id: true
+			}
+		})
+
+		return userInfo;
 	}),
 	haveRootAccess: protectedProcedure.query(async ({ ctx }) => {
 		if (!IS_CLOUD) {

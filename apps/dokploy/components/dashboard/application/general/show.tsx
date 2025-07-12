@@ -52,13 +52,13 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 		<>
 			<Card className="bg-background">
 				<CardHeader>
-					<CardTitle className="text-xl">Deploy Settings</CardTitle>
+					<CardTitle className="text-xl">部署配置</CardTitle>
 				</CardHeader>
 				<CardContent className="flex flex-row gap-4 flex-wrap">
 					<TooltipProvider delayDuration={0} disableHoverableContent={false}>
 						<DialogAction
-							title="Deploy Application"
-							description="Are you sure you want to deploy this application?"
+							title="部署应用"
+							description="确认要部署此应用吗?"
 							type="default"
 							onClick={async () => {
 								await deploy({
@@ -85,13 +85,13 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 									<TooltipTrigger asChild>
 										<div className="flex items-center">
 											<Rocket className="size-4 mr-1" />
-											Deploy
+											部署
 										</div>
 									</TooltipTrigger>
 									<TooltipPrimitive.Portal>
 										<TooltipContent sideOffset={5} className="z-[60]">
 											<p>
-												Downloads the source code and performs a complete build
+												下载源代码并执行完整构建
 											</p>
 										</TooltipContent>
 									</TooltipPrimitive.Portal>
@@ -125,12 +125,12 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 									<TooltipTrigger asChild>
 										<div className="flex items-center">
 											<RefreshCcw className="size-4 mr-1" />
-											Reload
+											重载
 										</div>
 									</TooltipTrigger>
 									<TooltipPrimitive.Portal>
 										<TooltipContent sideOffset={5} className="z-[60]">
-											<p>Reload the application without rebuilding it</p>
+											<p>重载应用但不进行重新构建</p>
 										</TooltipContent>
 									</TooltipPrimitive.Portal>
 								</Tooltip>
@@ -162,14 +162,13 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 									<TooltipTrigger asChild>
 										<div className="flex items-center">
 											<Hammer className="size-4 mr-1" />
-											Rebuild
+											重新构建
 										</div>
 									</TooltipTrigger>
 									<TooltipPrimitive.Portal>
 										<TooltipContent sideOffset={5} className="z-[60]">
 											<p>
-												Only rebuilds the application without downloading new
-												code
+												重新构建但不下载最新的源代码
 											</p>
 										</TooltipContent>
 									</TooltipPrimitive.Portal>
@@ -204,14 +203,13 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 										<TooltipTrigger asChild>
 											<div className="flex items-center">
 												<CheckCircle2 className="size-4 mr-1" />
-												Start
+												启动
 											</div>
 										</TooltipTrigger>
 										<TooltipPrimitive.Portal>
 											<TooltipContent sideOffset={5} className="z-[60]">
 												<p>
-													Start the application (requires a previous successful
-													build)
+													启动应用 (需要有成功的构建)
 												</p>
 											</TooltipContent>
 										</TooltipPrimitive.Portal>
@@ -244,12 +242,12 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 										<TooltipTrigger asChild>
 											<div className="flex items-center">
 												<Ban className="size-4 mr-1" />
-												Stop
+												停止
 											</div>
 										</TooltipTrigger>
 										<TooltipPrimitive.Portal>
 											<TooltipContent sideOffset={5} className="z-[60]">
-												<p>Stop the currently running application</p>
+												<p>停止当前正在运行的应用</p>
 											</TooltipContent>
 										</TooltipPrimitive.Portal>
 									</Tooltip>
@@ -266,11 +264,11 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 							className="flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-offset-2"
 						>
 							<Terminal className="size-4 mr-1" />
-							Open Terminal
+							打开终端
 						</Button>
 					</DockerTerminalModal>
 					<div className="flex flex-row items-center gap-2 rounded-md px-4 py-2 border">
-						<span className="text-sm font-medium">Autodeploy</span>
+						<span className="text-sm font-medium">自动部署</span>
 						<Switch
 							aria-label="Toggle autodeploy"
 							checked={data?.autoDeploy || false}
@@ -292,7 +290,7 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 					</div>
 
 					<div className="flex flex-row items-center gap-2 rounded-md px-4 py-2 border">
-						<span className="text-sm font-medium">Clean Cache</span>
+						<span className="text-sm font-medium">清理缓存</span>
 						<Switch
 							aria-label="Toggle clean cache"
 							checked={data?.cleanCache || false}

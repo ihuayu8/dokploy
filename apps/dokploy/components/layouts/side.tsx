@@ -28,6 +28,7 @@ import {
 	Trash2,
 	User,
 	Users,
+	Wallet
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import type * as React from "react";
@@ -153,30 +154,30 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Monitoring",
+			title: "监控",
 			url: "/dashboard/monitoring",
 			icon: BarChartHorizontalBigIcon,
 			// Only enabled in non-cloud environments
-			isEnabled: ({ isCloud }) => !isCloud,
+			isEnabled: ({ auth }) => auth?.user.role==='admin',
 		},
 		{
 			isSingle: true,
-			title: "Schedules",
+			title: "定时任务",
 			url: "/dashboard/schedules",
 			icon: Clock,
 			// Only enabled in non-cloud environments
-			isEnabled: ({ isCloud, auth }) => !isCloud && auth?.role === "owner",
+			isEnabled: ({ auth }) => auth?.role === "owner" && auth?.user.role==='admin',
 		},
 		{
 			isSingle: true,
-			title: "Traefik File System",
+			title: "Traefik文件系统",
 			url: "/dashboard/traefik",
 			icon: GalleryVerticalEnd,
 			// Only enabled for admins and users with access to Traefik files in non-cloud environments
 			isEnabled: ({ auth, isCloud }) =>
 				!!(
 					(auth?.role === "owner" || auth?.canAccessToTraefikFiles) &&
-					!isCloud
+					auth?.user.role==='admin'
 				),
 		},
 		{
@@ -186,7 +187,7 @@ const MENU: Menu = {
 			icon: BlocksIcon,
 			// Only enabled for admins and users with access to Docker in non-cloud environments
 			isEnabled: ({ auth, isCloud }) =>
-				!!((auth?.role === "owner" || auth?.canAccessToDocker) && !isCloud),
+				!!((auth?.role === "owner" || auth?.canAccessToDocker) && auth?.user.role==='admin'),
 		},
 		{
 			isSingle: true,
@@ -195,7 +196,7 @@ const MENU: Menu = {
 			icon: PieChart,
 			// Only enabled for admins and users with access to Docker in non-cloud environments
 			isEnabled: ({ auth, isCloud }) =>
-				!!((auth?.role === "owner" || auth?.canAccessToDocker) && !isCloud),
+				!!((auth?.role === "owner" || auth?.canAccessToDocker) && auth?.user.role==='admin'),
 		},
 		{
 			isSingle: true,
@@ -204,7 +205,7 @@ const MENU: Menu = {
 			icon: Forward,
 			// Only enabled for admins and users with access to Docker in non-cloud environments
 			isEnabled: ({ auth, isCloud }) =>
-				!!((auth?.role === "owner" || auth?.canAccessToDocker) && !isCloud),
+				!!((auth?.role === "owner" || auth?.canAccessToDocker) && auth?.user.role==='admin'),
 		},
 
 		// Legacy unused menu, adjusted to the new structure
@@ -271,13 +272,19 @@ const MENU: Menu = {
 			url: "/dashboard/settings/server",
 			icon: Activity,
 			// Only enabled for admins in non-cloud environments
-			isEnabled: ({ auth, isCloud }) => !!(auth?.role === "owner" && !isCloud),
+			isEnabled: ({ auth, isCloud }) => !!(auth?.role === "owner" && auth?.user.role==='admin'),
 		},
 		{
 			isSingle: true,
-			title: "Profile",
+			title: "个人中心",
 			url: "/dashboard/settings/profile",
 			icon: User,
+		},
+		{
+			isSingle: true,
+			title: "钱包",
+			url: "/dashboard/settings/wallet",
+			icon: Wallet,
 		},
 		{
 			isSingle: true,
@@ -285,11 +292,11 @@ const MENU: Menu = {
 			url: "/dashboard/settings/servers",
 			icon: Server,
 			// Only enabled for admins
-			isEnabled: ({ auth }) => !!(auth?.role === "owner"),
+			isEnabled: ({ auth }) => !!(auth?.role === "owner" && auth?.user.role==='admin'),
 		},
 		{
 			isSingle: true,
-			title: "Users",
+			title: "用户管理",
 			icon: Users,
 			url: "/dashboard/settings/users",
 			// Only enabled for admins
@@ -322,15 +329,15 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Registry",
+			title: "镜像仓库",
 			url: "/dashboard/settings/registry",
 			icon: Package,
 			// Only enabled for admins
-			isEnabled: ({ auth }) => !!(auth?.role === "owner"),
+			isEnabled: ({ auth }) => !!(auth?.role === "owner" && auth?.user.role==='admin'),
 		},
 		{
 			isSingle: true,
-			title: "S3 Destinations",
+			title: "S3存储",
 			url: "/dashboard/settings/destinations",
 			icon: Database,
 			// Only enabled for admins
@@ -339,7 +346,7 @@ const MENU: Menu = {
 
 		{
 			isSingle: true,
-			title: "Certificates",
+			title: "证书",
 			url: "/dashboard/settings/certificates",
 			icon: ShieldCheck,
 			// Only enabled for admins
@@ -347,11 +354,11 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Cluster",
+			title: "集群",
 			url: "/dashboard/settings/cluster",
 			icon: Boxes,
 			// Only enabled for admins in non-cloud environments
-			isEnabled: ({ auth, isCloud }) => !!(auth?.role === "owner" && !isCloud),
+			isEnabled: ({ auth, isCloud }) => !!(auth?.role === "owner" && auth?.user.role==='admin'),
 		},
 		{
 			isSingle: true,

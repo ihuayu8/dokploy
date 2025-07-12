@@ -229,22 +229,22 @@ const Service = (
 														: "md:grid-cols-7",
 											)}
 										>
-											<TabsTrigger value="general">General</TabsTrigger>
-											<TabsTrigger value="environment">Environment</TabsTrigger>
-											<TabsTrigger value="domains">Domains</TabsTrigger>
+											<TabsTrigger value="general">通用</TabsTrigger>
+											<TabsTrigger value="environment">环境变量</TabsTrigger>
+											<TabsTrigger value="domains">域名</TabsTrigger>
 											<TabsTrigger value="preview-deployments">
-												Preview Deployments
+												部署预览
 											</TabsTrigger>
-											<TabsTrigger value="schedules">Schedules</TabsTrigger>
+											<TabsTrigger value="schedules">定时任务</TabsTrigger>
 											<TabsTrigger value="volume-backups">
-												Volume Backups
+												数据卷备份
 											</TabsTrigger>
-											<TabsTrigger value="deployments">Deployments</TabsTrigger>
-											<TabsTrigger value="logs">Logs</TabsTrigger>
+											<TabsTrigger value="deployments">部署列表</TabsTrigger>
+											<TabsTrigger value="logs">日志</TabsTrigger>
 											{((data?.serverId && isCloud) || !data?.server) && (
-												<TabsTrigger value="monitoring">Monitoring</TabsTrigger>
+												<TabsTrigger value="monitoring">监控</TabsTrigger>
 											)}
-											<TabsTrigger value="advanced">Advanced</TabsTrigger>
+											<TabsTrigger value="advanced">高级</TabsTrigger>
 										</TabsList>
 									</div>
 

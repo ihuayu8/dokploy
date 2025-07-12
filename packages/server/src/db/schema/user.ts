@@ -3,6 +3,7 @@ import {
 	boolean,
 	integer,
 	jsonb,
+	numeric,
 	pgTable,
 	text,
 	timestamp,
@@ -120,6 +121,7 @@ export const users_temp = pgTable("user_temp", {
 	stripeCustomerId: text("stripeCustomerId"),
 	stripeSubscriptionId: text("stripeSubscriptionId"),
 	serversQuantity: integer("serversQuantity").notNull().default(0),
+	balance: numeric("balance"),
 });
 
 export const usersRelations = relations(users_temp, ({ one, many }) => ({

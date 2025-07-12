@@ -46,7 +46,7 @@ const { handler, api } = betterAuth({
 					...(admin.user.host ? [`https://${admin.user.host}`] : []),
 				];
 			}
-			return [];
+			return ["http://nj0slrvsvf-3000.cnb.run"];
 		},
 	}),
 	emailVerification: {
@@ -101,21 +101,21 @@ const { handler, api } = betterAuth({
 								});
 							}
 						} else {
-							const isAdminPresent = await db.query.member.findFirst({
-								where: eq(schema.member.role, "owner"),
-							});
-							if (isAdminPresent) {
-								throw new APIError("BAD_REQUEST", {
-									message: "Admin is already created",
-								});
-							}
+							// const isAdminPresent = await db.query.member.findFirst({
+							// 	where: eq(schema.member.role, "owner"),
+							// });
+							// if (isAdminPresent) {
+							// 	throw new APIError("BAD_REQUEST", {
+							// 		message: "Admin is already created",
+							// 	});
+							// }
 						}
 					}
 				},
 				after: async (user) => {
-					const isAdminPresent = await db.query.member.findFirst({
-						where: eq(schema.member.role, "owner"),
-					});
+					// const isAdminPresent = await db.query.member.findFirst({
+					// 	where: eq(schema.member.role, "owner"),
+					// });
 
 					if (!IS_CLOUD) {
 						await updateUser(user.id, {
@@ -123,7 +123,7 @@ const { handler, api } = betterAuth({
 						});
 					}
 
-					if (IS_CLOUD || !isAdminPresent) {
+					// if (IS_CLOUD) {
 						await db.transaction(async (tx) => {
 							const organization = await tx
 								.insert(schema.organization)
@@ -142,7 +142,7 @@ const { handler, api } = betterAuth({
 								createdAt: new Date(),
 							});
 						});
-					}
+					// }
 				},
 			},
 		},
