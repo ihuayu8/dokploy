@@ -57,6 +57,7 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
+import {checkBalance} from "@/server/utils/billing";
 
 export const applicationRouter = createTRPCRouter({
 	create: protectedProcedure
@@ -173,6 +174,14 @@ export const applicationRouter = createTRPCRouter({
 		.mutation(async ({ input, ctx }) => {
 			const application = await findApplicationById(input.applicationId);
 
+			const canDeploy = await checkBalance(ctx.session.activeOrganizationId)
+			if(!canDeploy){
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "账户余额、代金券额度不足，如您有代金券，请检查是否符合使用范围！",
+				});
+			}
+
 			try {
 				if (
 					application.project.organizationId !==
@@ -281,6 +290,14 @@ export const applicationRouter = createTRPCRouter({
 				});
 			}
 
+			const canDeploy = await checkBalance(ctx.session.activeOrganizationId)
+			if(!canDeploy){
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "账户余额、代金券额度不足，如您有代金券，请检查是否符合使用范围！",
+				});
+			}
+
 			if (service.serverId) {
 				await startServiceRemote(service.serverId, service.appName);
 			} else {
@@ -312,6 +329,13 @@ export const applicationRouter = createTRPCRouter({
 				server: !!application.serverId,
 			};
 
+			const canDeploy = await checkBalance(ctx.session.activeOrganizationId)
+			if(!canDeploy){
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "账户余额、代金券额度不足，如您有代金券，请检查是否符合使用范围！",
+				});
+			}
 			if (IS_CLOUD && application.serverId) {
 				jobData.serverId = application.serverId;
 				await deploy(jobData);
@@ -661,6 +685,14 @@ export const applicationRouter = createTRPCRouter({
 				applicationType: "application",
 				server: !!application.serverId,
 			};
+			const canDeploy = await checkBalance(ctx.session.activeOrganizationId)
+			if(!canDeploy){
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "账户余额、代金券额度不足，如您有代金券，请检查是否符合使用范围！",
+				});
+			}
+
 			if (IS_CLOUD && application.serverId) {
 				jobData.serverId = application.serverId;
 				await deploy(jobData);

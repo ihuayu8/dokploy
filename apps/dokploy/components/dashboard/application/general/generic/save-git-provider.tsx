@@ -121,7 +121,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 								render={({ field }) => (
 									<FormItem>
 										<div className="flex items-center justify-between">
-											<FormLabel>Repository URL</FormLabel>
+											<FormLabel>仓库URL</FormLabel>
 											{field.value?.startsWith("https://") && (
 												<Link
 													href={field.value}
@@ -135,7 +135,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 											)}
 										</div>
 										<FormControl>
-											<Input placeholder="Repository URL" {...field} />
+											<Input placeholder="仓库URL" {...field} />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -149,7 +149,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 								render={({ field }) => (
 									<FormItem className="basis-40">
 										<FormLabel className="w-full inline-flex justify-between">
-											SSH Key
+											SSH密钥
 											<LockIcon className="size-4 text-muted-foreground" />
 										</FormLabel>
 										<FormControl>
@@ -160,7 +160,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 												value={field.value}
 											>
 												<SelectTrigger>
-													<SelectValue placeholder="Select a key" />
+													<SelectValue placeholder="选择一个密钥" />
 												</SelectTrigger>
 												<SelectContent>
 													<SelectGroup>
@@ -187,7 +187,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 								onClick={() => router.push("/dashboard/settings/ssh-keys")}
 								type="button"
 							>
-								<KeyRoundIcon className="size-4" /> Add SSH Key
+								<KeyRoundIcon className="size-4" /> 添加SSH密钥
 							</Button>
 						)}
 					</div>
@@ -197,9 +197,9 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 							name="branch"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Branch</FormLabel>
+									<FormLabel>分支</FormLabel>
 									<FormControl>
-										<Input placeholder="Branch" {...field} />
+										<Input placeholder="分支" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -212,7 +212,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 						name="buildPath"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Build Path</FormLabel>
+								<FormLabel>构建路径</FormLabel>
 								<FormControl>
 									<Input placeholder="/" {...field} />
 								</FormControl>
@@ -226,7 +226,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 						render={({ field }) => (
 							<FormItem className="md:col-span-2">
 								<div className="flex items-center gap-2">
-									<FormLabel>Watch Paths</FormLabel>
+									<FormLabel>监听路径</FormLabel>
 									<TooltipProvider>
 										<Tooltip>
 											<TooltipTrigger>
@@ -236,9 +236,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 											</TooltipTrigger>
 											<TooltipContent className="max-w-[300px]">
 												<p>
-													Add paths to watch for changes. When files in these
-													paths change, a new deployment will be triggered. This
-													will work only when manual webhook is setup.
+													添加要监控更改的路径。当这些路径中的文件发生更改时，将触发新的部署。此功能仅在设置了手动 Webhook 时有效。
 												</p>
 											</TooltipContent>
 										</Tooltip>
@@ -262,7 +260,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 								<FormControl>
 									<div className="flex gap-2">
 										<Input
-											placeholder="Enter a path to watch (e.g., src/**, dist/*.js)"
+											placeholder="输入需要监听的路径 (例如：src/**, dist/*.js)"
 											onKeyDown={(e) => {
 												if (e.key === "Enter") {
 													e.preventDefault();
@@ -281,7 +279,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 											variant="secondary"
 											onClick={() => {
 												const input = document.querySelector(
-													'input[placeholder="Enter a path to watch (e.g., src/**, dist/*.js)"]',
+													'input[placeholder="输入需要监听的路径 (例如：src/**, dist/*.js)"]',
 												) as HTMLInputElement;
 												const value = input.value.trim();
 												if (value) {
@@ -291,7 +289,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 												}
 											}}
 										>
-											Add
+											添加
 										</Button>
 									</div>
 								</FormControl>
@@ -311,7 +309,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 										onCheckedChange={field.onChange}
 									/>
 								</FormControl>
-								<FormLabel className="!mt-0">Enable Submodules</FormLabel>
+								<FormLabel className="!mt-0">启用子模块</FormLabel>
 							</FormItem>
 						)}
 					/>
@@ -319,7 +317,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 
 				<div className="flex flex-row justify-end">
 					<Button type="submit" className="w-fit" isLoading={isLoading}>
-						Save
+						保存
 					</Button>
 				</div>
 			</form>

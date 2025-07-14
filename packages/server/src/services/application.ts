@@ -61,6 +61,7 @@ import {
 } from "./preview-deployment";
 import { validUniqueServerAppName } from "./project";
 import { createRollback } from "./rollbacks";
+import {setRealStand} from "@dokploy/server/utils/billing";
 export type Application = typeof applications.$inferSelect;
 
 export const createApplication = async (
@@ -76,6 +77,9 @@ export const createApplication = async (
 		});
 	}
 
+	// 设置实际资源规
+	setRealStand(input)
+	
 	return await db.transaction(async (tx) => {
 		const newApplication = await tx
 			.insert(applications)

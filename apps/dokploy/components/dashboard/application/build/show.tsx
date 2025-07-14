@@ -196,9 +196,9 @@ export const ShowBuildChooseForm = ({ applicationId }: Props) => {
 			<CardHeader>
 				<CardTitle className="flex items-start justify-between">
 					<div className="flex flex-col gap-2">
-						<span className="flex flex-col space-y-0.5">Build Type</span>
+						<span className="flex flex-col space-y-0.5">构建方式</span>
 						<p className="flex items-center text-sm font-normal text-muted-foreground">
-							Select the way of building your code
+							选择构建代码的方式
 						</p>
 					</div>
 					<div className="hidden space-y-1 text-sm font-normal md:block">
@@ -209,9 +209,7 @@ export const ShowBuildChooseForm = ({ applicationId }: Props) => {
 			<CardContent>
 				<Form {...form}>
 					<AlertBlock>
-						Builders can consume significant memory and CPU resources
-						(recommended: 4+ GB RAM and 2+ CPU cores). For production
-						environments, please review our{" "}
+						构建器可能会消耗大量内存和 CPU 资源（建议：4GB 以上内存和 2 个以上 CPU 核心）。对于生产环境，请查阅我们的{" "}
 						<a
 							href="https://docs.dokploy.com/docs/core/applications/going-production"
 							target="_blank"
@@ -220,9 +218,7 @@ export const ShowBuildChooseForm = ({ applicationId }: Props) => {
 						>
 							Production Guide
 						</a>{" "}
-						for best practices and optimization recommendations. Builders are
-						suitable for development and prototyping purposes when you have
-						sufficient resources available.
+						以获取最佳实践和优化建议。当您拥有足够可用资源时，构建器适用于开发和原型设计场景。
 					</AlertBlock>
 					<form
 						onSubmit={form.handleSubmit(onSubmit)}
@@ -234,7 +230,7 @@ export const ShowBuildChooseForm = ({ applicationId }: Props) => {
 							defaultValue={form.control._defaultValues.buildType}
 							render={({ field }) => (
 								<FormItem className="space-y-3">
-									<FormLabel>Build Type</FormLabel>
+									<FormLabel>构建方式</FormLabel>
 									<FormControl>
 										<RadioGroup
 											onValueChange={field.onChange}
@@ -271,10 +267,10 @@ export const ShowBuildChooseForm = ({ applicationId }: Props) => {
 								name="herokuVersion"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Heroku Version (Optional)</FormLabel>
+										<FormLabel>Heroku版本(可选)</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="Heroku Version (Default: 24)"
+												placeholder="Heroku版本 (默认: 24)"
 												{...field}
 												value={field.value ?? ""}
 											/>
@@ -294,7 +290,7 @@ export const ShowBuildChooseForm = ({ applicationId }: Props) => {
 											<FormLabel>Docker File</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="Path of your docker file"
+													placeholder="Dockerfile的路径"
 													{...field}
 													value={field.value ?? ""}
 												/>
@@ -308,10 +304,10 @@ export const ShowBuildChooseForm = ({ applicationId }: Props) => {
 									name="dockerContextPath"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Docker Context Path</FormLabel>
+											<FormLabel>Docker context path</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="Path of your docker context (default: .)"
+													placeholder="docker上下文的路径(默认: .)"
 													{...field}
 													value={field.value ?? ""}
 												/>
@@ -328,9 +324,7 @@ export const ShowBuildChooseForm = ({ applicationId }: Props) => {
 											<div className="space-y-0.5">
 												<FormLabel>Docker Build Stage</FormLabel>
 												<FormDescription>
-													Allows you to target a specific stage in a Multi-stage
-													Dockerfile. If empty, Docker defaults to build the
-													last defined stage.
+													允许您使用多阶段 Dockerfile 中的特定阶段。如果为空，Docker 默认构建最后定义的阶段。
 												</FormDescription>
 											</div>
 											<FormControl>

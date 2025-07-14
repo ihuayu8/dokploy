@@ -92,7 +92,7 @@ export const ShowGeneralPostgres = ({ postgresId }: Props) => {
 										<TooltipTrigger asChild>
 											<div className="flex items-center">
 												<Rocket className="size-4 mr-1" />
-												Deploy
+												部署
 											</div>
 										</TooltipTrigger>
 										<TooltipPrimitive.Portal>

@@ -85,7 +85,7 @@ export const SaveDockerProvider = ({ applicationId }: Props) => {
 							name="dockerImage"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Docker Image</FormLabel>
+									<FormLabel>Docker镜像</FormLabel>
 									<FormControl>
 										<Input placeholder="node:16" {...field} />
 									</FormControl>
@@ -99,9 +99,9 @@ export const SaveDockerProvider = ({ applicationId }: Props) => {
 						name="registryURL"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Registry URL</FormLabel>
+								<FormLabel>仓库URL</FormLabel>
 								<FormControl>
-									<Input placeholder="Registry URL" {...field} />
+									<Input placeholder="仓库URL" {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -113,10 +113,10 @@ export const SaveDockerProvider = ({ applicationId }: Props) => {
 							name="username"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Username</FormLabel>
+									<FormLabel>用户名</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="Username"
+											placeholder="用户名"
 											autoComplete="username"
 											{...field}
 										/>
@@ -132,10 +132,10 @@ export const SaveDockerProvider = ({ applicationId }: Props) => {
 							name="password"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Password</FormLabel>
+									<FormLabel>密码</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="Password"
+											placeholder="密码"
 											autoComplete="one-time-code"
 											{...field}
 											type="password"
@@ -154,7 +154,7 @@ export const SaveDockerProvider = ({ applicationId }: Props) => {
 						className="w-fit"
 						isLoading={form.formState.isSubmitting}
 					>
-						Save{" "}
+						保存{" "}
 					</Button>
 				</div>
 			</form>

@@ -76,9 +76,9 @@ export const ShowProviderForm = ({ applicationId }: Props) => {
 				<CardHeader>
 					<CardTitle className="flex items-start justify-between">
 						<div className="flex flex-col gap-2">
-							<span className="flex flex-col space-y-0.5">Provider</span>
+							<span className="flex flex-col space-y-0.5">构建源</span>
 							<p className="flex items-center text-sm font-normal text-muted-foreground">
-								Select the source of your code
+								选择你的镜像或代码来源
 							</p>
 						</div>
 						<div className="hidden space-y-1 text-sm font-normal md:block">
@@ -135,9 +135,9 @@ export const ShowProviderForm = ({ applicationId }: Props) => {
 			<CardHeader>
 				<CardTitle className="flex items-start justify-between">
 					<div className="flex flex-col gap-2">
-						<span className="flex flex-col space-y-0.5">Provider</span>
+						<span className="flex flex-col space-y-0.5">构建源</span>
 						<p className="flex items-center text-sm font-normal text-muted-foreground">
-							Select the source of your code
+							选择你的镜像或代码来源
 						</p>
 					</div>
 					<div className="hidden space-y-1 text-sm font-normal md:block">
@@ -202,7 +202,7 @@ export const ShowProviderForm = ({ applicationId }: Props) => {
 								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
 							>
 								<UploadCloud className="size-5 text-current" />
-								Drop
+								上传
 							</TabsTrigger>
 						</TabsList>
 					</div>
@@ -214,15 +214,14 @@ export const ShowProviderForm = ({ applicationId }: Props) => {
 							<div className="flex flex-col items-center gap-3 min-h-[25vh] justify-center">
 								<GithubIcon className="size-8 text-muted-foreground" />
 								<span className="text-base text-muted-foreground">
-									To deploy using GitHub, you need to configure your account
-									first. Please, go to{" "}
+									要使用 GitHub 进行部署，请先配置你的账户。前往{" "}
 									<Link
 										href="/dashboard/settings/git-providers"
 										className="text-foreground"
 									>
-										Settings
+										设置
 									</Link>{" "}
-									to do so.
+									完成此步骤
 								</span>
 							</div>
 						)}
@@ -234,15 +233,14 @@ export const ShowProviderForm = ({ applicationId }: Props) => {
 							<div className="flex flex-col items-center gap-3 min-h-[25vh] justify-center">
 								<GitlabIcon className="size-8 text-muted-foreground" />
 								<span className="text-base text-muted-foreground">
-									To deploy using GitLab, you need to configure your account
-									first. Please, go to{" "}
+									要使用 GitLab 进行部署，请先配置你的账户。前往{" "}
 									<Link
 										href="/dashboard/settings/git-providers"
 										className="text-foreground"
 									>
-										Settings
+										设置
 									</Link>{" "}
-									to do so.
+									完成此步骤
 								</span>
 							</div>
 						)}
@@ -254,15 +252,14 @@ export const ShowProviderForm = ({ applicationId }: Props) => {
 							<div className="flex flex-col items-center gap-3 min-h-[25vh] justify-center">
 								<BitbucketIcon className="size-8 text-muted-foreground" />
 								<span className="text-base text-muted-foreground">
-									To deploy using Bitbucket, you need to configure your account
-									first. Please, go to{" "}
+									要使用 Bitbucket 进行部署，请先配置你的账户。前往{" "}
 									<Link
 										href="/dashboard/settings/git-providers"
 										className="text-foreground"
 									>
-										Settings
+										设置
 									</Link>{" "}
-									to do so.
+									完成此步骤
 								</span>
 							</div>
 						)}
@@ -274,15 +271,14 @@ export const ShowProviderForm = ({ applicationId }: Props) => {
 							<div className="flex flex-col items-center gap-3 min-h-[25vh] justify-center">
 								<GiteaIcon className="size-8 text-muted-foreground" />
 								<span className="text-base text-muted-foreground">
-									To deploy using Gitea, you need to configure your account
-									first. Please, go to{" "}
+									要使用 Gitea 进行部署，请先配置你的账户。前往{" "}
 									<Link
 										href="/dashboard/settings/git-providers"
 										className="text-foreground"
 									>
-										Settings
+										设置
 									</Link>{" "}
-									to do so.
+									完成此步骤
 								</span>
 							</div>
 						)}

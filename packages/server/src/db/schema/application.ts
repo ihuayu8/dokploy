@@ -231,6 +231,9 @@ export const applications = pgTable("application", {
 	serverId: text("serverId").references(() => server.serverId, {
 		onDelete: "cascade",
 	}),
+	stand: text("stand").references(() => bitbucket.bitbucketId, {
+		onDelete: "set null",
+	}),
 });
 
 export const applicationsRelations = relations(
@@ -430,6 +433,7 @@ const createSchema = createInsertSchema(applications, {
 	previewCertificateType: z.enum(["letsencrypt", "none", "custom"]).optional(),
 	watchPaths: z.array(z.string()).optional(),
 	cleanCache: z.boolean().optional(),
+	stand: z.string().optional()
 });
 
 export const apiCreateApplication = createSchema.pick({
@@ -438,6 +442,7 @@ export const apiCreateApplication = createSchema.pick({
 	description: true,
 	projectId: true,
 	serverId: true,
+	stand: true
 });
 
 export const apiFindOneApplication = createSchema

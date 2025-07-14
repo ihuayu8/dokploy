@@ -88,10 +88,10 @@ export const ShowEnvironment = ({ applicationId }: Props) => {
 				>
 					<Secrets
 						name="env"
-						title="Environment Settings"
+						title="环境变量设置"
 						description={
 							<span>
-								You can add environment variables to your resource.
+								你可以将环境变量添加到你的资源中
 								{hasChanges && (
 									<span className="text-yellow-500 ml-2">
 										(You have unsaved changes)
@@ -133,8 +133,7 @@ export const ShowEnvironment = ({ applicationId }: Props) => {
 							className="w-fit"
 							type="submit"
 							disabled={!hasChanges}
-						>
-							Save
+						>保存
 						</Button>
 					</div>
 				</form>

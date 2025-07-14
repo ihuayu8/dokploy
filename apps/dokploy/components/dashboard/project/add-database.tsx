@@ -280,12 +280,12 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 					onSelect={(e) => e.preventDefault()}
 				>
 					<Database className="size-4 text-muted-foreground" />
-					<span>Database</span>
+					<span>数据库</span>
 				</DropdownMenuItem>
 			</DialogTrigger>
 			<DialogContent className="max-h-screen md:max-h-[90vh]  overflow-y-auto sm:max-w-2xl">
 				<DialogHeader>
-					<DialogTitle>Databases</DialogTitle>
+					<DialogTitle>数据库</DialogTitle>
 				</DialogHeader>
 
 				<Form {...form}>
@@ -301,7 +301,7 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 							render={({ field }) => (
 								<FormItem className="space-y-3">
 									<FormLabel className="text-muted-foreground">
-										Select a database
+										选择一个数据库
 									</FormLabel>
 									<FormControl>
 										<RadioGroup
@@ -348,7 +348,7 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 						/>
 						<div className="flex flex-col gap-4">
 							<FormLabel className="text-lg font-semibold leading-none tracking-tight">
-								Fill the next fields.
+								填写以下字段
 							</FormLabel>
 							<div className="flex flex-col gap-2">
 								<FormField
@@ -356,10 +356,10 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 									name="name"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Name</FormLabel>
+											<FormLabel>名称</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="Name"
+													placeholder="名称"
 													{...field}
 													onChange={(e) => {
 														const val = e.target.value?.trim() || "";
@@ -379,13 +379,13 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 									name="serverId"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Select a Server</FormLabel>
+											<FormLabel>选择一个服务器</FormLabel>
 											<Select
 												onValueChange={field.onChange}
 												defaultValue={field.value || ""}
 											>
 												<SelectTrigger>
-													<SelectValue placeholder="Select a Server" />
+													<SelectValue placeholder="选择一个服务器" />
 												</SelectTrigger>
 												<SelectContent>
 													<SelectGroup>
@@ -412,7 +412,7 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 									name="appName"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>App Name</FormLabel>
+											<FormLabel>应用名称</FormLabel>
 											<FormControl>
 												<Input placeholder="my-app" {...field} />
 											</FormControl>
@@ -426,11 +426,11 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 									name="description"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Description</FormLabel>
+											<FormLabel>描述</FormLabel>
 											<FormControl>
 												<Textarea
 													className="h-24"
-													placeholder="Description"
+													placeholder="描述"
 													{...field}
 													value={field.value || ""}
 												/>
@@ -448,9 +448,9 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 										name="databaseName"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Database Name</FormLabel>
+												<FormLabel>数据库名称</FormLabel>
 												<FormControl>
-													<Input placeholder="Database Name" {...field} />
+													<Input placeholder="数据库名称" {...field} />
 												</FormControl>
 
 												<FormMessage />
@@ -467,7 +467,7 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 										name="databaseUser"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Database User</FormLabel>
+												<FormLabel>数据库用户名</FormLabel>
 												<FormControl>
 													<Input
 														placeholder={`Default ${databasesUserDefaultPlaceholder[type]}`}
@@ -487,7 +487,7 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 									name="databasePassword"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Database Password</FormLabel>
+											<FormLabel>数据库密码</FormLabel>
 											<FormControl>
 												<Input
 													type="password"
@@ -507,7 +507,7 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 										name="databaseRootPassword"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Database Root password</FormLabel>
+												<FormLabel>数据库ROOT密码</FormLabel>
 												<FormControl>
 													<Input
 														type="password"
@@ -529,10 +529,10 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 									render={({ field }) => {
 										return (
 											<FormItem>
-												<FormLabel>Docker image</FormLabel>
+												<FormLabel>应用镜像</FormLabel>
 												<FormControl>
 													<Input
-														placeholder={`Default ${dockerImageDefaultPlaceholder[type]}`}
+														placeholder={`默认 ${dockerImageDefaultPlaceholder[type]}`}
 														{...field}
 													/>
 												</FormControl>
@@ -551,7 +551,7 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 											return (
 												<FormItem className="flex flex-row items-center justify-between p-3 mt-4 border rounded-lg shadow-sm">
 													<div className="space-y-0.5">
-														<FormLabel>Use Replica Sets</FormLabel>
+														<FormLabel>使用副本集</FormLabel>
 													</div>
 													<FormControl>
 														<Switch
@@ -576,7 +576,7 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 							form="hook-form"
 							type="submit"
 						>
-							Create
+							创建
 						</Button>
 					</DialogFooter>
 				</Form>

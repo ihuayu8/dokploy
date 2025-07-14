@@ -23,6 +23,7 @@ import {
 import { useRouter } from "next/router";
 import { toast } from "sonner";
 import { DockerTerminalModal } from "../../settings/web-server/docker-terminal-modal";
+import {TRPCClientError} from "@trpc/client";
 interface Props {
 	applicationId: string;
 }
@@ -65,14 +66,14 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 									applicationId: applicationId,
 								})
 									.then(() => {
-										toast.success("Application deployed successfully");
+										toast.success("应用已开始进行部署！");
 										refetch();
 										router.push(
 											`/dashboard/project/${data?.projectId}/services/application/${applicationId}?tab=deployments`,
 										);
 									})
-									.catch(() => {
-										toast.error("Error deploying application");
+									.catch((err) => {
+										toast.error(err.shape.message);
 									});
 							}}
 						>
@@ -108,11 +109,11 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 									appName: data?.appName || "",
 								})
 									.then(() => {
-										toast.success("Application reloaded successfully");
+										toast.success("应用重载成功");
 										refetch();
 									})
-									.catch(() => {
-										toast.error("Error reloading application");
+									.catch((e) => {
+										toast.error(e.shape.message);
 									});
 							}}
 						>
@@ -145,11 +146,11 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 									applicationId: applicationId,
 								})
 									.then(() => {
-										toast.success("Application rebuilt successfully");
+										toast.success("应用重新构建成功");
 										refetch();
 									})
-									.catch(() => {
-										toast.error("Error rebuilding application");
+									.catch((e) => {
+										toast.error(e.shape.message);
 									});
 							}}
 						>
@@ -186,11 +187,11 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 										applicationId: applicationId,
 									})
 										.then(() => {
-											toast.success("Application started successfully");
+											toast.success("应用启动成功");
 											refetch();
 										})
-										.catch(() => {
-											toast.error("Error starting application");
+										.catch((e) => {
+											toast.error(e.shape.message);
 										});
 								}}
 							>
@@ -225,7 +226,7 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 										applicationId: applicationId,
 									})
 										.then(() => {
-											toast.success("Application stopped successfully");
+											toast.success("应用停止成功");
 											refetch();
 										})
 										.catch(() => {

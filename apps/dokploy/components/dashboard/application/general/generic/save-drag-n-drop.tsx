@@ -73,9 +73,9 @@ export const SaveDragNDrop = ({ applicationId }: Props) => {
 							name="dropBuildPath"
 							render={({ field }) => (
 								<FormItem className="w-full ">
-									<FormLabel>Build Path</FormLabel>
+									<FormLabel>构建路径</FormLabel>
 									<FormControl>
-										<Input {...field} placeholder="Build Path" />
+										<Input {...field} placeholder="构建路径" />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -86,11 +86,11 @@ export const SaveDragNDrop = ({ applicationId }: Props) => {
 							name="zip"
 							render={({ field }) => (
 								<FormItem className="w-full ">
-									<FormLabel>Zip file</FormLabel>
+									<FormLabel>Zip文件</FormLabel>
 									<FormControl>
 										<Dropzone
 											{...field}
-											dropMessage="Drop files or click here"
+											dropMessage="拖拽文件到此处或点击这里上传"
 											accept=".zip"
 											onChange={(e) => {
 												if (e instanceof FileList) {
@@ -132,7 +132,7 @@ export const SaveDragNDrop = ({ applicationId }: Props) => {
 						isLoading={isLoading}
 						disabled={!zip || isLoading}
 					>
-						Deploy{" "}
+						部署{" "}
 					</Button>
 				</div>
 			</form>

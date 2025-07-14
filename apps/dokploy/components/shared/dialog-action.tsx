@@ -40,13 +40,13 @@ export const DialogAction = ({
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogCancel>取消</AlertDialogCancel>
 					<AlertDialogAction
 						disabled={disabled}
 						onClick={onClick}
 						variant={type ?? "destructive"}
 					>
-						Confirm
+						确认
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

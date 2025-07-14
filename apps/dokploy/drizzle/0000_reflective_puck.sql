@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS "application" (
 	"buildType" "buildType" DEFAULT 'nixpacks' NOT NULL,
 	"createdAt" text NOT NULL,
 	"projectId" text NOT NULL,
+    "stand" text
 	CONSTRAINT "application_appName_unique" UNIQUE("appName")
 );
 --> statement-breakpoint

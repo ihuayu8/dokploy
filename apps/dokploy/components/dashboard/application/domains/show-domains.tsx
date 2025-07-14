@@ -142,9 +142,9 @@ export const ShowDomains = ({ id, type }: Props) => {
 			<Card className="bg-background">
 				<CardHeader className="flex flex-row items-center flex-wrap gap-4 justify-between">
 					<div className="flex flex-col gap-1">
-						<CardTitle className="text-xl">Domains</CardTitle>
+						<CardTitle className="text-xl">域名</CardTitle>
 						<CardDescription>
-							Domains are used to access to the application
+							管理用于访问应用程序的域名
 						</CardDescription>
 					</div>
 
