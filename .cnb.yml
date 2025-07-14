@@ -1,8 +1,6 @@
 # .cnb.yml
 $:
   vscode:
-    - runner:
-        cpus: 16
     - docker:
         build: .cnb_dockerfile
         # 指定开发环境镜像，可以是任意可访问的镜像。
