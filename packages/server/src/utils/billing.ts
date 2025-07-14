@@ -1,7 +1,29 @@
 import {TRPCError} from "@trpc/server";
+import {
+	type apiCreateApplication,
+} from "@dokploy/server/db/schema";
 
-export const setRealStand = (input) => {
-    const standard = standMap[input.stand];
+interface ContainerSize {
+    stand: string,
+    memoryReservation:string,
+    memoryLimit:string,
+    cpuReservation:string,
+    cpuLimit:string,
+}
+
+interface ResourceConfig {
+  [key: string]: {
+    cpu: string;
+    mem: string;
+  };
+}
+
+
+export const setRealStand = (input: typeof apiCreateApplication._type) => {
+    const standard = standMap[input.stand || ""] || {
+        cpu: null,
+        mem: null
+    };
     if(!standard.mem){
         throw new TRPCError({
             code: 'FORBIDDEN',
@@ -9,11 +31,14 @@ export const setRealStand = (input) => {
         })
     }
     try {
-
-        input.memoryReservation = standard.mem;
-        input.memoryLimit = standard.mem;
-        input.cpuReservation = standard.cpu;
-        input.cpuLimit = standard.cpu;
+        const size : ContainerSize = {
+            memoryReservation: standard.mem,
+            memoryLimit: standard.mem,
+            cpuReservation: standard.cpu,
+            cpuLimit: standard.cpu,
+            stand: input.stand || ""
+        }
+        return size
     }catch(error){
         console.error(error)
 
@@ -27,7 +52,7 @@ export const setRealStand = (input) => {
 
 // 1GB = 1073741824 bytes 1MB = 1048576
 // 1 CPUs = 1000000000
-const standMap = {
+const standMap : ResourceConfig = {
     "0":{
         "cpu": "200000000",
         "mem": "134217728"

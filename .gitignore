@@ -6,6 +6,7 @@ node_modules
 .pnp
 .pnp.js
 .docker
+/workspace/.pnpm-store
 
 # Local env files
 .env

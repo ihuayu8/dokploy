@@ -78,7 +78,8 @@ export const createApplication = async (
 	}
 
 	// 设置实际资源规
-	setRealStand(input)
+	
+	const cSize = setRealStand(input)
 	
 	return await db.transaction(async (tx) => {
 		const newApplication = await tx
@@ -86,6 +87,7 @@ export const createApplication = async (
 			.values({
 				...input,
 				appName,
+				...cSize
 			})
 			.returning()
 			.then((value) => value[0]);
