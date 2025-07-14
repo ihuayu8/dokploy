@@ -1,6 +1,8 @@
 # .cnb.yml
 $:
   vscode:
+    - runner:
+        cpus: 16
     - docker:
         build: .cnb_dockerfile
         # 指定开发环境镜像，可以是任意可访问的镜像。
@@ -28,6 +30,8 @@ $:
           script: cp apps/dokploy/.env.example apps/dokploy/.env
 canary:
   push:
+    - runner:
+        cpus: 64
     - services:
         - docker #声明后，流水线内可以直接使用docker命令
       stages:
