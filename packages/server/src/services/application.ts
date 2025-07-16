@@ -150,7 +150,7 @@ export const updateApplication = async (
 	const { appName, ...rest } = applicationData;
 
 	// 设置实际资源规格
-	const cSize = setRealStand(input)
+	const cSize = setRealStand(applicationData)
 
 	const application = await db
 		.update(applications)

@@ -2,6 +2,7 @@ import {TRPCError} from "@trpc/server";
 import {
 	type apiCreateApplication,
 } from "@dokploy/server/db/schema";
+import {Application} from "@dokploy/server/services/application";
 
 interface ContainerSize {
     stand: string,
@@ -19,7 +20,7 @@ interface ResourceConfig {
 }
 
 
-export const setRealStand = (input: typeof apiCreateApplication._type) => {
+export const setRealStand = (input: typeof apiCreateApplication._type | Partial<Application>) => {
     const standard = standMap[input.stand || ""] || {
         cpu: null,
         mem: null

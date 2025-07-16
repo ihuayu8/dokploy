@@ -221,7 +221,7 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                                                 side="top"
                                             >
 												<span>
-													如果未选择服务器，应用程序将部署在用户登录的服务器上
+													如果未选择服务器，应用程序将随机选择服务器进行部署
 												</span>
                                             </TooltipContent>
                                         </Tooltip>
