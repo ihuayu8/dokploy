@@ -247,13 +247,13 @@ export const DockerLogsId: React.FC<Props> = ({
 							<StatusLogsFilter
 								value={typeFilter}
 								setValue={setTypeFilter}
-								title="Log type"
+								title="日志级别"
 								options={priorities}
 							/>
 
 							<Input
 								type="search"
-								placeholder="Search logs..."
+								placeholder="搜索日志"
 								value={search}
 								onChange={handleSearch}
 								className="inline-flex h-9 text-sm placeholder-gray-400 w-full sm:w-auto"
@@ -268,7 +268,7 @@ export const DockerLogsId: React.FC<Props> = ({
 							disabled={filteredLogs.length === 0 || !data?.Name}
 						>
 							<DownloadIcon className="mr-2 h-4 w-4" />
-							Download logs
+							下载日志
 						</Button>
 					</div>
 					<div

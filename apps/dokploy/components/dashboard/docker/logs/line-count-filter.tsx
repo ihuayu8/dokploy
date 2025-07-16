@@ -13,11 +13,11 @@ import { CheckIcon, Hash } from "lucide-react";
 import React, { useCallback, useRef } from "react";
 
 const lineCountOptions = [
-	{ label: "100 lines", value: 100 },
-	{ label: "300 lines", value: 300 },
-	{ label: "500 lines", value: 500 },
-	{ label: "1000 lines", value: 1000 },
-	{ label: "5000 lines", value: 5000 },
+	{ label: "100 行", value: 100 },
+	{ label: "300 行", value: 300 },
+	{ label: "500 行", value: 500 },
+	{ label: "1000 行", value: 1000 },
+	{ label: "5000 行", value: 5000 },
 ] as const;
 
 interface LineCountFilterProps {
@@ -29,7 +29,7 @@ interface LineCountFilterProps {
 export function LineCountFilter({
 	value,
 	onValueChange,
-	title = "Limit to",
+	title = "限制",
 }: LineCountFilterProps) {
 	const [open, setOpen] = React.useState(false);
 	const [inputValue, setInputValue] = React.useState("");
@@ -116,7 +116,7 @@ export function LineCountFilter({
 					<div className="flex items-center border-b px-3">
 						<Hash className="mr-2 h-4 w-4 shrink-0 opacity-50" />
 						<CommandPrimitive.Input
-							placeholder="Number of lines"
+							placeholder="行数"
 							value={inputValue}
 							onValueChange={handleInputChange}
 							className="flex h-9 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"

@@ -231,9 +231,7 @@ export const applications = pgTable("application", {
 	serverId: text("serverId").references(() => server.serverId, {
 		onDelete: "cascade",
 	}),
-	stand: text("stand").references(() => bitbucket.bitbucketId, {
-		onDelete: "set null",
-	}),
+	stand: text("stand"),
 });
 
 export const applicationsRelations = relations(

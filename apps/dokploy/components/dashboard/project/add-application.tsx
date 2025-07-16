@@ -45,7 +45,7 @@ import {toast} from "sonner";
 import {z} from "zod";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Label} from "@/components/ui/label";
-import {standards} from "@/types/standard";
+import {standardsMap} from "@/types/standard";
 
 const AddTemplateSchema = z.object({
     name: z.string().min(1, {
@@ -173,9 +173,9 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                                             defaultValue={'0'}
                                             className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
                                         >
-                                            {standards.map((value) => (
+                                            {Object.entries(standardsMap).map(([key, value]) => (
                                                 <FormItem
-                                                    // key={key}
+                                                    key={key}
                                                     className="flex w-full items-center space-x-3 space-y-0"
                                                 >
                                                     <FormControl className="w-full">
@@ -292,6 +292,9 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                     </form>
 
                     <DialogFooter>
+                        <div className="gradient-text" style={{width: 'calc(100% - 72px)', fontSize: '13px', fontWeight: '700'}}>
+                            价格： {standardsMap[form.watch().stand].price}元/小时 约 {(standardsMap[form.watch().stand].price * 720).toFixed(2)}元/月
+                        </div>
                         <Button isLoading={isLoading} form="hook-form" type="submit">
                             创建
                         </Button>

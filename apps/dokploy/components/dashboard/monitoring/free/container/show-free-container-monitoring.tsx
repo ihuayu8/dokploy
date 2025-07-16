@@ -203,9 +203,9 @@ export const ContainerFreeMonitoring = ({
 		<div className="rounded-xl bg-background flex flex-col gap-4">
 			<header className="flex items-center justify-between">
 				<div className="space-y-1">
-					<h1 className="text-2xl font-semibold tracking-tight">Monitoring</h1>
+					<h1 className="text-2xl font-semibold tracking-tight">监控</h1>
 					<p className="text-sm text-muted-foreground">
-						Watch the usage of your server in the current app
+						查看应用的资源使用情况
 					</p>
 				</div>
 			</header>
@@ -213,7 +213,7 @@ export const ContainerFreeMonitoring = ({
 			<div className="grid gap-6 lg:grid-cols-2">
 				<Card className="bg-background">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">CPU Usage</CardTitle>
+						<CardTitle className="text-sm font-medium">CPU利用率</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="flex flex-col gap-2 w-full">
@@ -227,7 +227,7 @@ export const ContainerFreeMonitoring = ({
 				</Card>
 				<Card className="bg-background">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Memory Usage</CardTitle>
+						<CardTitle className="text-sm font-medium">内存利用率</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="flex flex-col gap-2 w-full">
@@ -258,7 +258,7 @@ export const ContainerFreeMonitoring = ({
 				{appName === "dokploy" && (
 					<Card className="bg-background">
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">Disk Space</CardTitle>
+							<CardTitle className="text-sm font-medium">磁盘空间</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="flex flex-col gap-2 w-full">
@@ -280,7 +280,7 @@ export const ContainerFreeMonitoring = ({
 
 				<Card className="bg-background">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Block I/O</CardTitle>
+						<CardTitle className="text-sm font-medium">块 I/O</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="flex flex-col gap-2 w-full">
@@ -293,7 +293,7 @@ export const ContainerFreeMonitoring = ({
 				</Card>
 				<Card className="bg-background">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Network I/O</CardTitle>
+						<CardTitle className="text-sm font-medium">网络 I/O</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="flex flex-col gap-2 w-full">

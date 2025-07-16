@@ -126,9 +126,9 @@ export const AddCompose = ({ projectId, projectName }: Props) => {
 			</DialogTrigger>
 			<DialogContent className="max-h-screen  overflow-y-auto sm:max-w-xl">
 				<DialogHeader>
-					<DialogTitle>Create Compose</DialogTitle>
+					<DialogTitle>创建Compose</DialogTitle>
 					<DialogDescription>
-						Assign a name and description to your compose
+						设置compose应用的相关信息
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
@@ -145,10 +145,10 @@ export const AddCompose = ({ projectId, projectName }: Props) => {
 								name="name"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Name</FormLabel>
+										<FormLabel>名称</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="Frontend"
+												placeholder="例如：Frontend"
 												{...field}
 												onChange={(e) => {
 													const val = e.target.value?.trim() || "";
@@ -172,7 +172,7 @@ export const AddCompose = ({ projectId, projectName }: Props) => {
 										<Tooltip>
 											<TooltipTrigger asChild>
 												<FormLabel className="break-all w-fit flex flex-row gap-1 items-center">
-													Select a Server {!isCloud ? "(Optional)" : ""}
+													选择一个服务器 {!isCloud ? "(可选)" : ""}
 													<HelpCircle className="size-4 text-muted-foreground" />
 												</FormLabel>
 											</TooltipTrigger>

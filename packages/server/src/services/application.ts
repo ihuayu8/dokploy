@@ -77,8 +77,7 @@ export const createApplication = async (
 		});
 	}
 
-	// 设置实际资源规
-	
+	// 设置实际资源规格
 	const cSize = setRealStand(input)
 	
 	return await db.transaction(async (tx) => {
@@ -149,10 +148,15 @@ export const updateApplication = async (
 	applicationData: Partial<Application>,
 ) => {
 	const { appName, ...rest } = applicationData;
+
+	// 设置实际资源规格
+	const cSize = setRealStand(input)
+
 	const application = await db
 		.update(applications)
 		.set({
 			...rest,
+			...cSize
 		})
 		.where(eq(applications.applicationId, applicationId))
 		.returning();

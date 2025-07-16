@@ -45,6 +45,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { standardsMap } from "@/types/standard";
 
 type DbType = typeof mySchema._type.type;
 
@@ -81,6 +82,7 @@ const baseDatabaseSchema = z.object({
 	dockerImage: z.string(),
 	description: z.string().nullable(),
 	serverId: z.string().nullable(),
+	stand: z.string().nullable(),
 });
 
 const mySchema = z.discriminatedUnion("type", [
@@ -174,6 +176,7 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 			databaseName: "",
 			databaseUser: "",
 			serverId: null,
+			stand: "0"
 		},
 		resolver: zodResolver(mySchema),
 	});
@@ -376,6 +379,47 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 								/>
 								<FormField
 									control={form.control}
+									name="stand"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>资源规格</FormLabel>
+											<FormControl>
+												<RadioGroup
+													onValueChange={field.onChange}
+													defaultValue={'0'}
+													className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
+												>
+													{Object.entries(standardsMap).map(([key, value]) => (
+														<FormItem
+															key={key}
+															className="flex w-full items-center space-x-3 space-y-0"
+														>
+															<FormControl className="w-full">
+																<div>
+																	<RadioGroupItem
+																		value={value.id}
+																		id={value.id}
+																		className="peer sr-only"
+																	/>
+																	<Label
+																		htmlFor={value.id}
+																		className="flex flex-col gap-2 items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+																	>
+																		<div style={{ fontSize: '12px' }}>{value.cpuLimit}</div>
+																		<div style={{ fontSize: '12px' }}>{value.memLimit}</div>
+																	</Label>
+																</div>
+															</FormControl>
+														</FormItem>
+													))}
+												</RadioGroup>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
 									name="serverId"
 									render={({ field }) => (
 										<FormItem>
@@ -443,44 +487,44 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 								{(type === "mysql" ||
 									type === "mariadb" ||
 									type === "postgres") && (
-									<FormField
-										control={form.control}
-										name="databaseName"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>数据库名称</FormLabel>
-												<FormControl>
-													<Input placeholder="数据库名称" {...field} />
-												</FormControl>
+										<FormField
+											control={form.control}
+											name="databaseName"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>数据库名称</FormLabel>
+													<FormControl>
+														<Input placeholder="数据库名称" {...field} />
+													</FormControl>
 
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								)}
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									)}
 								{(type === "mysql" ||
 									type === "mariadb" ||
 									type === "postgres" ||
 									type === "mongo") && (
-									<FormField
-										control={form.control}
-										name="databaseUser"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>数据库用户名</FormLabel>
-												<FormControl>
-													<Input
-														placeholder={`Default ${databasesUserDefaultPlaceholder[type]}`}
-														autoComplete="off"
-														{...field}
-													/>
-												</FormControl>
+										<FormField
+											control={form.control}
+											name="databaseUser"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>数据库用户名</FormLabel>
+													<FormControl>
+														<Input
+															placeholder={`Default ${databasesUserDefaultPlaceholder[type]}`}
+															autoComplete="off"
+															{...field}
+														/>
+													</FormControl>
 
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								)}
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									)}
 
 								<FormField
 									control={form.control}

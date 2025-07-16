@@ -96,15 +96,15 @@ export const ShowDockerLogs = ({ appName, serverId }: Props) => {
 	return (
 		<Card className="bg-background">
 			<CardHeader>
-				<CardTitle className="text-xl">Logs</CardTitle>
+				<CardTitle className="text-xl">日志</CardTitle>
 				<CardDescription>
-					Watch the logs of the application in real time
+					查看应用的实时日志
 				</CardDescription>
 			</CardHeader>
 
 			<CardContent className="flex flex-col gap-4">
 				<div className="flex flex-row justify-between items-center gap-2">
-					<Label>Select a container to view logs</Label>
+					<Label>选择一个容器以查看日志</Label>
 					<div className="flex flex-row gap-2 items-center">
 						<span className="text-sm text-muted-foreground">
 							{option === "native" ? "Native" : "Swarm"}
@@ -126,7 +126,7 @@ export const ShowDockerLogs = ({ appName, serverId }: Props) => {
 								<Loader2 className="animate-spin size-4" />
 							</div>
 						) : (
-							<SelectValue placeholder="Select a container" />
+							<SelectValue placeholder="选择一个容器" />
 						)}
 					</SelectTrigger>
 					<SelectContent>

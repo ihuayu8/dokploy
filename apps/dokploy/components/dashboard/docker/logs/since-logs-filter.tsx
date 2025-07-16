@@ -20,27 +20,27 @@ export type TimeFilter = "all" | "1h" | "6h" | "24h" | "168h" | "720h";
 
 const timeRanges: Array<{ label: string; value: TimeFilter }> = [
 	{
-		label: "All time",
+		label: "所有时间",
 		value: "all",
 	},
 	{
-		label: "Last hour",
+		label: "过去一小时",
 		value: "1h",
 	},
 	{
-		label: "Last 6 hours",
+		label: "过去6小时",
 		value: "6h",
 	},
 	{
-		label: "Last 24 hours",
+		label: "过去24小时",
 		value: "24h",
 	},
 	{
-		label: "Last 7 days",
+		label: "过去7天",
 		value: "168h",
 	},
 	{
-		label: "Last 30 days",
+		label: "过去30天",
 		value: "720h",
 	},
 ] as const;
@@ -58,11 +58,11 @@ export function SinceLogsFilter({
 	onValueChange,
 	showTimestamp,
 	onTimestampChange,
-	title = "Time range",
+	title = "时间范围",
 }: SinceLogsFilterProps) {
 	const selectedLabel =
 		timeRanges.find((range) => range.value === value)?.label ??
-		"Select time range";
+		"选择时间范围";
 
 	return (
 		<Popover>
@@ -115,7 +115,7 @@ export function SinceLogsFilter({
 				</Command>
 				<Separator className="my-2" />
 				<div className="p-2 flex items-center justify-between">
-					<span className="text-sm">Show timestamps</span>
+					<span className="text-sm">显示时间戳</span>
 					<Switch checked={showTimestamp} onCheckedChange={onTimestampChange} />
 				</div>
 			</PopoverContent>

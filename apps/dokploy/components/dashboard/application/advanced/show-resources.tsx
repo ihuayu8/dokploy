@@ -16,12 +16,15 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { standards, standardsMap } from "@/types/standard";
 import { api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InfoIcon } from "lucide-react";
@@ -35,6 +38,7 @@ const addResourcesSchema = z.object({
 	cpuLimit: z.string().optional(),
 	memoryLimit: z.string().optional(),
 	cpuReservation: z.string().optional(),
+	stand: z.string().optional()
 });
 
 export type ServiceType =
@@ -86,6 +90,7 @@ export const ShowResources = ({ id, type }: Props) => {
 			cpuReservation: "",
 			memoryLimit: "",
 			memoryReservation: "",
+      		stand: "0"
 		},
 		resolver: zodResolver(addResourcesSchema),
 	});
@@ -97,6 +102,7 @@ export const ShowResources = ({ id, type }: Props) => {
 				cpuReservation: data?.cpuReservation || undefined,
 				memoryLimit: data?.memoryLimit || undefined,
 				memoryReservation: data?.memoryReservation || undefined,
+				stand: data?.stand || undefined
 			});
 		}
 	}, [data, form, form.reset]);
@@ -113,9 +119,10 @@ export const ShowResources = ({ id, type }: Props) => {
 			cpuReservation: formData.cpuReservation || null,
 			memoryLimit: formData.memoryLimit || null,
 			memoryReservation: formData.memoryReservation || null,
+			stand: formData.stand || null,
 		})
 			.then(async () => {
-				toast.success("Resources Updated");
+				toast.success("更新容器规格成功,请重新部署以应用更改！");
 				await refetch();
 			})
 			.catch(() => {
@@ -126,16 +133,14 @@ export const ShowResources = ({ id, type }: Props) => {
 	return (
 		<Card className="bg-background">
 			<CardHeader>
-				<CardTitle className="text-xl">Resources</CardTitle>
+				<CardTitle className="text-xl">规格</CardTitle>
 				<CardDescription>
-					If you want to decrease or increase the resources to a specific.
-					application or database
+					动态调整应用容器规格，可滚动部署实现优雅更新
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-4">
 				<AlertBlock type="info">
-					Please remember to click Redeploy after modify the resources to apply
-					the changes.
+					修改容器规格后，需要点击[部署]按钮重新部署以生效
 				</AlertBlock>
 				<Form {...form}>
 					<form
@@ -143,140 +148,53 @@ export const ShowResources = ({ id, type }: Props) => {
 						onSubmit={form.handleSubmit(onSubmit)}
 						className="grid w-full gap-8 "
 					>
-						<div className="grid w-full md:grid-cols-2 gap-4">
+						
 							<FormField
 								control={form.control}
-								name="memoryLimit"
-								render={({ field }) => {
-									return (
-										<FormItem>
-											<div className="flex items-center gap-2">
-												<FormLabel>Memory Limit</FormLabel>
-												<TooltipProvider>
-													<Tooltip delayDuration={0}>
-														<TooltipTrigger>
-															<InfoIcon className="h-4 w-4 text-muted-foreground" />
-														</TooltipTrigger>
-														<TooltipContent>
-															<p>
-																Memory hard limit in bytes. Example: 1GB =
-																1073741824 bytes
-															</p>
-														</TooltipContent>
-													</Tooltip>
-												</TooltipProvider>
-											</div>
-											<FormControl>
-												<Input
-													placeholder="1073741824 (1GB in bytes)"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									);
-								}}
-							/>
-							<FormField
-								control={form.control}
-								name="memoryReservation"
+                				defaultValue={form.control._defaultValues.stand}
+								name="stand"
 								render={({ field }) => (
 									<FormItem>
-										<div className="flex items-center gap-2">
-											<FormLabel>Memory Reservation</FormLabel>
-											<TooltipProvider>
-												<Tooltip delayDuration={0}>
-													<TooltipTrigger>
-														<InfoIcon className="h-4 w-4 text-muted-foreground" />
-													</TooltipTrigger>
-													<TooltipContent>
-														<p>
-															Memory soft limit in bytes. Example: 256MB =
-															268435456 bytes
-														</p>
-													</TooltipContent>
-												</Tooltip>
-											</TooltipProvider>
-										</div>
+										<FormLabel>资源规格</FormLabel>
 										<FormControl>
-											<Input
-												placeholder="268435456 (256MB in bytes)"
-												{...field}
-											/>
+											<RadioGroup
+												onValueChange={field.onChange}
+												defaultValue={field.value}
+												value={field.value}
+												className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-8 gap-4"
+											>
+												{Object.entries(standardsMap).map(([key, value]) => (
+													<FormItem
+														key={key}
+														className="flex w-full items-center space-x-3 space-y-0"
+													>
+														<FormControl className="w-full">
+															<div>
+																<RadioGroupItem
+																	value={key}
+																	id={key}
+																	className="peer sr-only"
+																/>
+																<Label
+																	htmlFor={key}
+																	className="flex flex-col gap-2 items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+																>
+																	<div style={{ fontSize: '12px' }}>{value.cpuLimit}</div>
+																	<div style={{ fontSize: '12px' }}>{value.memLimit}</div>
+																</Label>
+															</div>
+														</FormControl>
+													</FormItem>
+												))}
+											</RadioGroup>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
 								)}
 							/>
-
-							<FormField
-								control={form.control}
-								name="cpuLimit"
-								render={({ field }) => {
-									return (
-										<FormItem>
-											<div className="flex items-center gap-2">
-												<FormLabel>CPU Limit</FormLabel>
-												<TooltipProvider>
-													<Tooltip delayDuration={0}>
-														<TooltipTrigger>
-															<InfoIcon className="h-4 w-4 text-muted-foreground" />
-														</TooltipTrigger>
-														<TooltipContent>
-															<p>
-																CPU quota in units of 10^-9 CPUs. Example: 2
-																CPUs = 2000000000
-															</p>
-														</TooltipContent>
-													</Tooltip>
-												</TooltipProvider>
-											</div>
-											<FormControl>
-												<Input
-													placeholder="2000000000 (2 CPUs)"
-													{...field}
-													value={field.value?.toString() || ""}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									);
-								}}
-							/>
-							<FormField
-								control={form.control}
-								name="cpuReservation"
-								render={({ field }) => {
-									return (
-										<FormItem>
-											<div className="flex items-center gap-2">
-												<FormLabel>CPU Reservation</FormLabel>
-												<TooltipProvider>
-													<Tooltip delayDuration={0}>
-														<TooltipTrigger>
-															<InfoIcon className="h-4 w-4 text-muted-foreground" />
-														</TooltipTrigger>
-														<TooltipContent>
-															<p>
-																CPU shares (relative weight). Example: 1 CPU =
-																1000000000
-															</p>
-														</TooltipContent>
-													</Tooltip>
-												</TooltipProvider>
-											</div>
-											<FormControl>
-												<Input placeholder="1000000000 (1 CPU)" {...field} />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									);
-								}}
-							/>
-						</div>
 						<div className="flex w-full justify-end">
 							<Button isLoading={isLoading} type="submit">
-								Save
+								保存
 							</Button>
 						</div>
 					</form>

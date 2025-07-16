@@ -247,3 +247,10 @@
 .cm-lineWrapping {
 	@apply font-mono;
 }
+.gradient-text {
+  background: linear-gradient(90deg, #0099ff, #83049a, #fb039c,#f80511);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
