@@ -53,7 +53,7 @@ interface Props {
 
 export const ShowDockerLogs = ({ appName, serverId }: Props) => {
 	const [containerId, setContainerId] = useState<string | undefined>();
-	const [option, setOption] = useState<"swarm" | "native">("native");
+	const [option, setOption] = useState<"swarm" | "native">("swarm");
 
 	const { data: services, isLoading: servicesLoading } =
 		api.docker.getServiceContainersByAppName.useQuery(

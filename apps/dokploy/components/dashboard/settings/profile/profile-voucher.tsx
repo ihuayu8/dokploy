@@ -9,10 +9,15 @@ import {Cable, ReceiptJapaneseYen} from "lucide-react";
 import { api } from "@/utils/api";
 import {Button} from "@/components/ui/button";
 import {Progress} from "@/components/ui/progress";
+import {useEffect, useState} from "react";
 
 export const ProfileVoucher = () => {
-    const { data, refetch, isLoading } = api.user.getBalance.useQuery()
-    let balance = data?.balance
+    const [ voucherList, setVoucherList] = useState([])
+    const { data, refetch, isLoading } = api.user.getVouchers.useQuery()
+    useEffect(()=>{
+        setVoucherList(data || [])
+        console.log(data)
+    }, [isLoading])
 
     // @ts-ignore
     return (
@@ -35,14 +40,19 @@ export const ProfileVoucher = () => {
                         </Button>
                     </CardHeader>
                     <CardContent className="space-y-2 py-8 border-t">
-                        <div style={{display: "flex", flexDirection: "column"}}>
-                            <div style={{marginBottom: "5px", display:"flex"}}>
-                                <span className="text-xs" style={{fontWeight: "700"}}>新人代金券 </span>
-                                <span className="text-xs text-gray-600" style={{marginLeft: "8px"}}>￥9.21 / ￥10 (已使用1.32%)</span>
-                                <span className="text-xs" style={{marginLeft:'auto'}}>2025-08-12到期</span>
+                        {voucherList.map((item)=>(
+                            <div style={{display: "flex", flexDirection: "column", marginBottom: "1rem"}}>
+                                <div style={{marginBottom: "5px", display:"flex"}}>
+                                    <span className="text-xs" style={{fontWeight: "700"}}>{item.vName} </span>
+                                    <span className="text-xs text-gray-600" style={{marginLeft: "8px"}}>
+                                        ￥{item.balance} / ￥{item.amount}
+                                        (已使用{parseFloat(((item.amount - item.balance)/item.amount).toFixed(4)) * 100}%)
+                                    </span>
+                                    <span className="text-xs" style={{marginLeft:'auto'}}>{item.expiry}到期</span>
+                                </div>
+                                <Progress value={parseFloat(((item.amount - item.balance)/item.amount).toFixed(4)) * 100} />
                             </div>
-                            <Progress value={1.32} />
-                        </div>
+                        ))}
                     </CardContent>
                 </div>
             </Card>

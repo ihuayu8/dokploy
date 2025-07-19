@@ -238,6 +238,33 @@
 	}
 }
 
+@layer utilities {
+	.coupon-line {
+		background-image: linear-gradient(to bottom, transparent 25%, #E5E7EB 25%, #E5E7EB 75%, transparent 75%);
+		background-size: 1px 12px;
+	}
+	.coupon-dot {
+		position: relative;
+	}
+	.coupon-dot::before, .coupon-dot::after {
+		content: '';
+		position: absolute;
+		width: 16px;
+		height: 16px;
+		border-radius: 50%;
+		background: white;
+		top: 50%;
+		transform: translateY(-50%);
+		box-shadow: 0 0 0 1px #E5E7EB inset;
+	}
+	.coupon-dot::before {
+		left: -8px;
+	}
+	.coupon-dot::after {
+		right: -8px;
+	}
+}
+
 .xterm-bg-257.xterm-fg-257 {
 	background-color: var(--terminal-paste) !important;
 	color: currentColor !important;

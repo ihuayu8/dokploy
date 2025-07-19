@@ -1,7 +1,7 @@
 import { docker } from "@dokploy/server/constants";
 import { db } from "@dokploy/server/db";
 import {
-	type apiCreateApplication,
+	type apiCreateApplication, apiFindMonitoringStats,
 	applications,
 	buildAppName,
 } from "@dokploy/server/db/schema";
@@ -61,7 +61,9 @@ import {
 } from "./preview-deployment";
 import { validUniqueServerAppName } from "./project";
 import { createRollback } from "./rollbacks";
-import {setRealStand} from "@dokploy/server/utils/billing";
+import {setRealStand, allocateCluster} from "@dokploy/server/utils/billing";
+import {z} from "zod";
+import {getContainerState} from "@dokploy/server/monitoring/service";
 export type Application = typeof applications.$inferSelect;
 
 export const createApplication = async (
@@ -79,6 +81,19 @@ export const createApplication = async (
 
 	// 设置实际资源规格
 	const cSize = setRealStand(input)
+
+	// 分配serverId
+	if(!input.serverId){
+		const serverId = await allocateCluster();
+		if (!serverId) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "无可用集群",
+			});
+		}else{
+			input.serverId = serverId;
+		}
+	}
 	
 	return await db.transaction(async (tx) => {
 		const newApplication = await tx
@@ -150,8 +165,11 @@ export const updateApplication = async (
 	const { appName, ...rest } = applicationData;
 
 	// 设置实际资源规格
-	const cSize = setRealStand(applicationData)
+	let cSize = null;
+	if(applicationData.stand){
+		cSize = setRealStand(applicationData)
 
+	}
 	const application = await db
 		.update(applications)
 		.set({
@@ -679,22 +697,10 @@ export const rebuildRemoteApplication = async ({
 	return true;
 };
 
-export const getApplicationStats = async (appName: string) => {
-	const filter = {
-		status: ["running"],
-		label: [`com.docker.swarm.service.name=${appName}`],
-	};
+export const getApplicationStats = async (
+	containerId:string, containerName:string, serverId:string, appName:string, node:string) => {
 
-	const containers = await docker.listContainers({
-		filters: JSON.stringify(filter),
-	});
-
-	const container = containers[0];
-	if (!container || container?.State !== "running") {
-		return null;
-	}
-
-	const data = await getAdvancedStats(appName);
+	const data = await getContainerState(containerId, containerName, serverId, node, appName);
 
 	return data;
 };

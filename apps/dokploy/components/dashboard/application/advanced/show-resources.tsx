@@ -24,11 +24,11 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { standards, standardsMap } from "@/types/standard";
+import { standardsMap } from "@/types/standard";
 import { api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InfoIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -55,7 +55,28 @@ interface Props {
 }
 
 type AddResources = z.infer<typeof addResourcesSchema>;
-export const ShowResources = ({ id, type }: Props) => {
+export const ShowResources = ({ id, type, serverId }: Props) => {
+	const {data: standList} = api.server.getServerStands.useQuery(
+		{
+			serverId: serverId || "-"
+		},
+		{enabled: true}
+	);
+	const {data: serverInfo} = api.server.getServerInfo.useQuery(
+		{
+			serverId: serverId|| "-"
+		},
+		{enabled: true}
+	);
+
+	const [price, setPrice] = useState<number>(0)
+
+
+	const getPrice = () => {
+		const price = standList?.find(item=>item.id === (form.watch().stand))?.price;
+		let rate = serverInfo?.rate;
+		return parseFloat((parseFloat(price) * parseFloat(rate)).toFixed(4));
+	}
 	const queryMap = {
 		postgres: () =>
 			api.postgres.one.useQuery({ postgresId: id }, { enabled: !!id }),
@@ -93,7 +114,11 @@ export const ShowResources = ({ id, type }: Props) => {
       		stand: "0"
 		},
 		resolver: zodResolver(addResourcesSchema),
-	});
+	})
+
+	useEffect(() => {
+		setPrice(getPrice())
+	}, [standList, serverInfo, form.watch().stand]);
 
 	useEffect(() => {
 		if (data) {
@@ -163,24 +188,24 @@ export const ShowResources = ({ id, type }: Props) => {
 												value={field.value}
 												className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-8 gap-4"
 											>
-												{Object.entries(standardsMap).map(([key, value]) => (
+												{standList?.map((value) => (
 													<FormItem
-														key={key}
+														key={value.id}
 														className="flex w-full items-center space-x-3 space-y-0"
 													>
 														<FormControl className="w-full">
 															<div>
 																<RadioGroupItem
-																	value={key}
-																	id={key}
+																	value={value.id}
+																	id={value.id}
 																	className="peer sr-only"
 																/>
 																<Label
-																	htmlFor={key}
+																	htmlFor={value.id}
 																	className="flex flex-col gap-2 items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
 																>
-																	<div style={{ fontSize: '12px' }}>{value.cpuLimit}</div>
-																	<div style={{ fontSize: '12px' }}>{value.memLimit}</div>
+																	<div style={{ fontSize: '12px' }}>{value.cpulabel}</div>
+																	<div style={{ fontSize: '12px' }}>{value.memlabel}</div>
 																</Label>
 															</div>
 														</FormControl>
@@ -193,6 +218,9 @@ export const ShowResources = ({ id, type }: Props) => {
 								)}
 							/>
 						<div className="flex w-full justify-end">
+							<div className="gradient-text" style={{width: 'calc(100% - 72px)', fontSize: '13px', fontWeight: '700'}}>
+								价格： {price}元/小时 约 {(price * 720).toFixed(2)}元/月
+							</div>
 							<Button isLoading={isLoading} type="submit">
 								保存
 							</Button>

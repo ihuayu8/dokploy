@@ -52,7 +52,7 @@ export const SaveDragNDrop = ({ applicationId }: Props) => {
 
 		await mutateAsync(formData)
 			.then(async () => {
-				toast.success("Deployment saved");
+				toast.success("保存成功");
 				await refetch();
 			})
 			.catch(() => {

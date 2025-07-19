@@ -39,13 +39,12 @@ import {slugify} from "@/lib/slug";
 import {api} from "@/utils/api";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Folder, HelpCircle} from "lucide-react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useForm} from "react-hook-form";
 import {toast} from "sonner";
 import {z} from "zod";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Label} from "@/components/ui/label";
-import {standardsMap} from "@/types/standard";
 
 const AddTemplateSchema = z.object({
     name: z.string().min(1, {
@@ -74,10 +73,11 @@ interface Props {
 
 export const AddApplication = ({projectId, projectName}: Props) => {
     const utils = api.useUtils();
-    const {data: isCloud} = api.settings.isCloud.useQuery();
     const [visible, setVisible] = useState(false);
     const slug = slugify(projectName);
     const {data: servers} = api.server.withSSHKey.useQuery();
+
+    const [ showTip, setShowTip ] = useState(false);
 
     const {mutateAsync, isLoading, error, isError} =
         api.application.create.useMutation();
@@ -87,10 +87,44 @@ export const AddApplication = ({projectId, projectName}: Props) => {
             name: "",
             appName: `${slug}-`,
             description: "",
+            serverId: " ",
             stand: "0"
         },
         resolver: zodResolver(AddTemplateSchema),
     });
+
+    const {data: standList} = api.server.getServerStands.useQuery(
+        {
+            serverId: form.watch().serverId,
+        },
+        {enabled: true}
+    );
+
+    useEffect(() => {
+        form.setValue("serverId", servers?.[0].serverId || " ")
+    }, [servers]);
+
+    useEffect(() => {
+        form.setValue("stand", standList?.[0].id || "1")
+    }, [standList]);
+
+
+    // 当选择服务节点的时候
+    useEffect(() => {
+        // 检查servers是否存在并包含符合条件的项
+        const hasMatchingServer = servers?.some(item =>
+            item.serverId === form.getValues().serverId && item.type === '1'
+        );
+
+        setShowTip(!!hasMatchingServer);
+
+    }, [form.watch().serverId])
+
+    const getPrice = () => {
+        const price = standList?.find(item=>item.id === (form.watch().stand))?.price;
+        let rate = servers?.find(item=>item.serverId === form.watch().serverId)?.rate;
+        return parseFloat((parseFloat(price) * parseFloat(rate)).toFixed(4));
+    }
 
     const onSubmit = async (data: AddTemplate) => {
         await mutateAsync({
@@ -163,6 +197,74 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                         />
                         <FormField
                             control={form.control}
+                            name="serverId"
+                            render={({field}) => (
+                                <FormItem>
+                                    <TooltipProvider delayDuration={0}>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <FormLabel className="break-all w-fit flex flex-row gap-1 items-center">
+                                                    选择服务集群
+                                                    <HelpCircle className="size-4 text-muted-foreground"/>
+                                                </FormLabel>
+                                            </TooltipTrigger>
+                                            <TooltipContent
+                                                className="z-[999] w-[400px]"
+                                                align="start"
+                                                side="top"
+                                            >
+												<span>
+													通用节点：可做任何用途，无SLA及数据保障<br />
+													建站节点：仅允许web应用、数据库，提供SLA及数据保障
+												</span>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="选择一个服务集群"/>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                {servers?.map((server) => (
+                                                    <SelectItem
+                                                        key={server.serverId}
+                                                        value={server.serverId}
+                                                    >
+                                                        <span
+                                                            className="flex items-center gap-2 justify-between w-full">
+                                                            {server.type==='1' ?
+                                                                <span
+                                                                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                                                  建站
+                                                                </span>:
+                                                                <span
+                                                                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                                                  通用
+                                                                </span>
+                                                            }
+															<span>{server.name}</span>
+															<span className="text-muted-foreground text-xs self-center">
+																{server.ipAddress}
+															</span>
+														</span>
+                                                    </SelectItem>
+                                                ))}
+                                                <SelectLabel>可用服务集群 ({servers?.length})</SelectLabel>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        {showTip && <AlertBlock type="warning">建站型节点不允许部署代理等持续高带宽占用应用，违者封禁账户且不退款</AlertBlock>}
+                        <FormField
+                            control={form.control}
                             name="stand"
                             render={({field}) => (
                                 <FormItem>
@@ -171,11 +273,12 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                                         <RadioGroup
                                             onValueChange={field.onChange}
                                             defaultValue={'0'}
-                                            className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
+                                            value={field.value}
+                                            className="grid w-full grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4"
                                         >
-                                            {Object.entries(standardsMap).map(([key, value]) => (
+                                            {standList?.map((value) => (
                                                 <FormItem
-                                                    key={key}
+                                                    key={value.id}
                                                     className="flex w-full items-center space-x-3 space-y-0"
                                                 >
                                                     <FormControl className="w-full">
@@ -189,8 +292,8 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                                                                 htmlFor={value.id}
                                                                 className="flex flex-col gap-2 items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
                                                             >
-                                                                <div style={{fontSize:'12px'}}>{value.cpuLimit}</div>
-                                                                <div style={{fontSize:'12px'}}>{value.memLimit}</div>
+                                                                <div style={{fontSize: '12px'}}>{value.cpulabel}</div>
+                                                                <div style={{fontSize: '12px'}}>{value.memlabel}</div>
                                                             </Label>
                                                         </div>
                                                     </FormControl>
@@ -198,62 +301,6 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                                             ))}
                                         </RadioGroup>
                                     </FormControl>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="serverId"
-                            render={({field}) => (
-                                <FormItem>
-                                    <TooltipProvider delayDuration={0}>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <FormLabel className="break-all w-fit flex flex-row gap-1 items-center">
-                                                    选择一个服务器 {!isCloud ? "(可选)" : ""}
-                                                    <HelpCircle className="size-4 text-muted-foreground"/>
-                                                </FormLabel>
-                                            </TooltipTrigger>
-                                            <TooltipContent
-                                                className="z-[999] w-[300px]"
-                                                align="start"
-                                                side="top"
-                                            >
-												<span>
-													如果未选择服务器，应用程序将随机选择服务器进行部署
-												</span>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="选择一个服务器"/>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                {servers?.map((server) => (
-                                                    <SelectItem
-                                                        key={server.serverId}
-                                                        value={server.serverId}
-                                                    >
-														<span
-                                                            className="flex items-center gap-2 justify-between w-full">
-															<span>{server.name}</span>
-															<span className="text-muted-foreground text-xs self-center">
-																{server.ipAddress}
-															</span>
-														</span>
-                                                    </SelectItem>
-                                                ))}
-                                                <SelectLabel>Servers ({servers?.length})</SelectLabel>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
                                     <FormMessage/>
                                 </FormItem>
                             )}
@@ -292,8 +339,11 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                     </form>
 
                     <DialogFooter>
-                        <div className="gradient-text" style={{width: 'calc(100% - 72px)', fontSize: '13px', fontWeight: '700'}}>
-                            价格： {standardsMap[form.watch().stand].price}元/小时 约 {(standardsMap[form.watch().stand].price * 720).toFixed(2)}元/月
+                        <div className="gradient-text"
+                             style={{width: 'calc(100% - 72px)', fontSize: '13px', fontWeight: '700'}}>
+                            价格：
+                            {getPrice()} 元/小时
+                            约 {(getPrice() * 720).toFixed(2)}元/月
                         </div>
                         <Button isLoading={isLoading} form="hook-form" type="submit">
                             创建

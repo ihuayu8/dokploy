@@ -61,10 +61,10 @@ export const ShowSchedules = ({ id, scheduleType = "application" }: Props) => {
 				<div className="flex justify-between items-center">
 					<div className="flex flex-col gap-2">
 						<CardTitle className="text-xl font-bold flex items-center gap-2">
-							Scheduled Tasks
+							定时任务
 						</CardTitle>
 						<CardDescription>
-							Schedule tasks to run automatically at specified intervals.
+							定时执行指定任务或命令
 						</CardDescription>
 					</div>
 
@@ -78,7 +78,7 @@ export const ShowSchedules = ({ id, scheduleType = "application" }: Props) => {
 					<div className="flex gap-4   w-full items-center justify-center text-center mx-auto min-h-[45vh]">
 						<Loader2 className="size-4 text-muted-foreground/70 transition-colors animate-spin self-center" />
 						<span className="text-sm text-muted-foreground/70">
-							Loading scheduled tasks...
+							加载定时任务中...
 						</span>
 					</div>
 				) : schedules && schedules.length > 0 ? (
@@ -181,7 +181,7 @@ export const ShowSchedules = ({ id, scheduleType = "application" }: Props) => {
 														<Play className="size-4  transition-colors" />
 													</Button>
 												</TooltipTrigger>
-												<TooltipContent>Run Manual Schedule</TooltipContent>
+												<TooltipContent>手动执行</TooltipContent>
 											</Tooltip>
 										</TooltipProvider>
 
@@ -229,10 +229,10 @@ export const ShowSchedules = ({ id, scheduleType = "application" }: Props) => {
 					<div className="flex flex-col gap-2 items-center justify-center py-12  rounded-lg">
 						<Clock className="size-8 mb-4 text-muted-foreground" />
 						<p className="text-lg font-medium text-muted-foreground">
-							No scheduled tasks
+							没有定时任务
 						</p>
 						<p className="text-sm text-muted-foreground mt-1">
-							Create your first scheduled task to automate your workflows
+							创建您的第一个定时任务，以实现工作流程的自动化。
 						</p>
 						<HandleSchedules id={id} scheduleType={scheduleType} />
 					</div>

@@ -8,6 +8,7 @@ import {
 import {BadgeJapaneseYen, Wallet} from "lucide-react";
 import { api } from "@/utils/api";
 import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
 
 export const ProfileBalance = () => {
     const { data, refetch, isLoading } = api.user.getBalance.useQuery()
@@ -28,13 +29,19 @@ export const ProfileBalance = () => {
                                 管理您的账户余额
                             </CardDescription>
                         </div>
-                        <Button variant="ghost">
-                            <BadgeJapaneseYen className="size-4 text-muted-foreground" />
-                            立即充值
-                        </Button>
+                        <span style={{fontWeight: 700}}>￥{ balance }</span>
                     </CardHeader>
                     <CardContent className="space-y-2 py-8 border-t">
-                        <span>￥{ balance }</span>
+                        <Input
+                            placeholder="请输入充值金额"
+
+                        />
+                        <div className="flex items-center justify-end gap-2" style={{marginTop: "1rem"}}>
+                            <Button type="submit">
+                                <BadgeJapaneseYen className="size-4 text-muted" />
+                                立即充值
+                            </Button>
+                        </div>
                     </CardContent>
                 </div>
             </Card>

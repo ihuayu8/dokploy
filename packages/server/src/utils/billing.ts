@@ -1,8 +1,10 @@
 import {TRPCError} from "@trpc/server";
 import {
-	type apiCreateApplication,
+    type apiCreateApplication, server,
 } from "@dokploy/server/db/schema";
 import {Application} from "@dokploy/server/services/application";
+import {db} from "@dokploy/server/db";
+import {and, eq} from "drizzle-orm";
 
 interface ContainerSize {
     stand: string,
@@ -19,7 +21,38 @@ interface ResourceConfig {
   };
 }
 
+export const allocateCluster = async () => {
+    // 获取默认主机列表
+    let defaultList = await db.query.server.findMany({
+        where: and(
+            eq(server.isDefault, true),
+            eq(server.allowCreate, true)
+        ),
+    })
 
+    // 如果没有可用的默认主机
+    if(defaultList.length === 0){
+        defaultList = await db.query.server.findMany({
+            where: and(
+                eq(server.allowCreate, true)
+            ),
+        })
+    }
+
+    // 如果还为空
+    if(defaultList.length === 0){
+        return null;
+    }
+
+    if(defaultList.length === 1){
+        return defaultList[0]?.serverId;
+    }
+
+    const randomInt = Math.floor(Math.random() * defaultList.length);
+    return defaultList[randomInt]?.serverId;
+}
+
+// 根据规格计算cpu和内存限制
 export const setRealStand = (input: typeof apiCreateApplication._type | Partial<Application>) => {
     const standard = standMap[input.stand || ""] || {
         cpu: null,

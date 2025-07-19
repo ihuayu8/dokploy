@@ -563,6 +563,12 @@ export const apiFindMonitoringStats = createSchema
 	.pick({
 		appName: true,
 	})
+	.extend({
+		containerId: z.string(),
+		containerName: z.string(),
+		serverId: z.string(),
+		node: z.string(),
+	})
 	.required();
 
 export const apiUpdateApplication = createSchema

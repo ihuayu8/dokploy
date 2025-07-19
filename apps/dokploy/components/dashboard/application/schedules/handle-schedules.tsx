@@ -226,7 +226,7 @@ export const HandleSchedules = ({ id, scheduleId, scheduleType }: Props) => {
 				) : (
 					<Button>
 						<PlusCircle className="w-4 h-4 mr-2" />
-						Add Schedule
+						添加定时任务
 					</Button>
 				)}
 			</DialogTrigger>
@@ -258,7 +258,7 @@ export const HandleSchedules = ({ id, scheduleId, scheduleType }: Props) => {
 									name="serviceName"
 									render={({ field }) => (
 										<FormItem className="w-full">
-											<FormLabel>Service Name</FormLabel>
+											<FormLabel>服务名称</FormLabel>
 											<div className="flex gap-2">
 												<Select
 													onValueChange={field.onChange}
@@ -266,7 +266,7 @@ export const HandleSchedules = ({ id, scheduleId, scheduleType }: Props) => {
 												>
 													<FormControl>
 														<SelectTrigger>
-															<SelectValue placeholder="Select a service name" />
+															<SelectValue placeholder="选择一个服务名称" />
 														</SelectTrigger>
 													</FormControl>
 

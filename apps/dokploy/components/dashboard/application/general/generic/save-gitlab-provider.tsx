@@ -157,7 +157,7 @@ export const SaveGitlabProvider = ({ applicationId }: Props) => {
 			enableSubmodules: data.enableSubmodules,
 		})
 			.then(async () => {
-				toast.success("Service Provided Saved");
+				toast.success("保存成功");
 				await refetch();
 			})
 			.catch(() => {

@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm";
 import {
 	boolean,
 	integer,
-	jsonb,
+	jsonb, numeric,
 	pgEnum,
 	pgTable,
 	text,
@@ -94,6 +94,13 @@ export const server = pgTable("server", {
 				},
 			},
 		}),
+	allowCreate:boolean("allowCreate").notNull(),
+	isDefault:boolean("isDefault").notNull(),
+	standList:text("standList").array(),
+	rate: numeric("rate"),
+	type: text("type"),
+	num: integer("num")
+
 });
 
 export const serverRelations = relations(server, ({ one, many }) => ({

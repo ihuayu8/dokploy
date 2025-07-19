@@ -172,7 +172,7 @@ export const SaveGiteaProvider = ({ applicationId }: Props) => {
 			enableSubmodules: data.enableSubmodules || false,
 		})
 			.then(async () => {
-				toast.success("Service Provider Saved");
+				toast.success("保存成功");
 				await refetch();
 			})
 			.catch(() => {

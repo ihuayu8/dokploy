@@ -1,6 +1,6 @@
-import { updateServersBasedOnQuantity } from "@/pages/api/stripe/webhook";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { db } from "@/server/db";
+import {updateServersBasedOnQuantity} from "@/pages/api/stripe/webhook";
+import {createTRPCRouter, protectedProcedure} from "@/server/api/trpc";
+import {db} from "@/server/db";
 import {
 	apiCreateServer,
 	apiFindOneServer,
@@ -16,9 +16,9 @@ import {
 	postgres,
 	redis,
 	server,
+	stand,
 } from "@/server/db/schema";
 import {
-	IS_CLOUD,
 	createServer,
 	defaultCommand,
 	deleteServer,
@@ -27,6 +27,7 @@ import {
 	findUserById,
 	getPublicIpWithFallback,
 	haveActiveServices,
+	IS_CLOUD,
 	removeDeploymentsByServerId,
 	serverAudit,
 	serverSetup,
@@ -34,10 +35,10 @@ import {
 	setupMonitoring,
 	updateServerById,
 } from "@dokploy/server";
-import { TRPCError } from "@trpc/server";
-import { observable } from "@trpc/server/observable";
-import { and, desc, eq, getTableColumns, isNotNull, sql } from "drizzle-orm";
-import { z } from "zod";
+import {TRPCError} from "@trpc/server";
+import {observable} from "@trpc/server/observable";
+import {and, asc, desc, eq, getTableColumns, inArray, isNotNull, sql} from "drizzle-orm";
+import {z} from "zod";
 
 export const serverRouter = createTRPCRouter({
 	create: protectedProcedure
@@ -69,6 +70,7 @@ export const serverRouter = createTRPCRouter({
 	one: protectedProcedure
 		.input(apiFindOneServer)
 		.query(async ({ input, ctx }) => {
+			console.log(input)
 			const server = await findServerById(input.serverId);
 			if (server.organizationId !== ctx.session.activeOrganizationId) {
 				throw new TRPCError({
@@ -117,21 +119,37 @@ export const serverRouter = createTRPCRouter({
 		return servers.length ?? 0;
 	}),
 	withSSHKey: protectedProcedure.query(async ({ ctx }) => {
-		const result = await db.query.server.findMany({
-			orderBy: desc(server.createdAt),
-			where: IS_CLOUD
-				? and(
-						isNotNull(server.sshKeyId),
-						eq(server.organizationId, ctx.session.activeOrganizationId),
-						eq(server.serverStatus, "active"),
-					)
-				: and(
-						isNotNull(server.sshKeyId),
-						eq(server.organizationId, ctx.session.activeOrganizationId),
-					),
+		return db.query.server.findMany({
+			orderBy: asc(server.num),
+			where: and(
+				isNotNull(server.sshKeyId),
+				eq(server.allowCreate, true),
+				eq(server.serverStatus, "active"),
+			),
 		});
-		return result;
 	}),
+	getServerStands: protectedProcedure.input(apiFindOneServer)
+		.query(async ({ input, ctx }) => {
+		const serverInfo = await db.query.server.findFirst({
+			where: eq(server.serverId, input.serverId),
+		});
+		if(!!serverInfo && !!serverInfo.standList && serverInfo.standList.length > 0){
+			return db.query.stand.findMany({
+				orderBy: asc(stand.num),
+				where: inArray(stand.id, serverInfo.standList),
+			});
+		}else{
+			return db.query.stand.findMany({
+				orderBy: asc(stand.num),
+			});
+		}
+	}),
+	getServerInfo: protectedProcedure.input(apiFindOneServer)
+		.query(async ({ input, ctx }) => {
+			return await db.query.server.findFirst({
+				where: eq(server.serverId, input.serverId),
+			});
+		}),
 	setup: protectedProcedure
 		.input(apiFindOneServer)
 		.mutation(async ({ input, ctx }) => {

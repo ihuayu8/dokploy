@@ -64,7 +64,7 @@ export const SaveDockerProvider = ({ applicationId }: Props) => {
 			registryUrl: values.registryURL || null,
 		})
 			.then(async () => {
-				toast.success("Docker Provider Saved");
+				toast.success("Docker构建源保存成功");
 				await refetch();
 			})
 			.catch(() => {

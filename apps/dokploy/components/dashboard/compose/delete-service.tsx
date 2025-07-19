@@ -101,7 +101,7 @@ export const DeleteService = ({ id, type }: Props) => {
 			})
 				.then((result) => {
 					push(`/dashboard/project/${result?.projectId}`);
-					toast.success("deleted successfully");
+					toast.success("应用删除成功");
 					setIsOpen(false);
 				})
 				.catch(() => {
@@ -109,7 +109,7 @@ export const DeleteService = ({ id, type }: Props) => {
 				});
 		} else {
 			form.setError("projectName", {
-				message: `Project name must match "${expectedName}"`,
+				message: `应用的名称是 "${expectedName}"`,
 			});
 		}
 	};
@@ -128,11 +128,9 @@ export const DeleteService = ({ id, type }: Props) => {
 			</DialogTrigger>
 			<DialogContent className="max-h-screen overflow-y-auto sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Are you absolutely sure?</DialogTitle>
+					<DialogTitle>确认要删除此应用吗?</DialogTitle>
 					<DialogDescription>
-						This action cannot be undone. This will permanently delete the
-						service. If you are sure please enter the service name to delete
-						this service.
+						此操作无法撤销，它将永久删除该服务。如果您确定要删除，请输入服务名称以执行删除操作
 					</DialogDescription>
 				</DialogHeader>
 				<div className="grid gap-4">
@@ -149,7 +147,7 @@ export const DeleteService = ({ id, type }: Props) => {
 									<FormItem>
 										<FormLabel className="flex items-center gap-2">
 											<span>
-												To confirm, type{" "}
+												如确认删除, 请将服务名{" "}
 												<Badge
 													className="p-2 rounded-md ml-1 mr-1 hover:border-primary hover:text-primary-foreground hover:bg-primary hover:cursor-pointer"
 													variant="outline"
@@ -163,7 +161,7 @@ export const DeleteService = ({ id, type }: Props) => {
 													{data?.name}/{data?.appName}&nbsp;
 													<Copy className="h-4 w-4 ml-1 text-muted-foreground" />
 												</Badge>{" "}
-												in the box below:
+												输入到下方文本框中
 											</span>
 										</FormLabel>
 										<FormControl>
@@ -209,7 +207,7 @@ export const DeleteService = ({ id, type }: Props) => {
 							setIsOpen(false);
 						}}
 					>
-						Cancel
+						取消
 					</Button>
 					<Button
 						isLoading={isLoading}
@@ -217,7 +215,7 @@ export const DeleteService = ({ id, type }: Props) => {
 						type="submit"
 						variant="destructive"
 					>
-						Confirm
+						确认
 					</Button>
 				</DialogFooter>
 			</DialogContent>

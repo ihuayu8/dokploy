@@ -150,7 +150,7 @@ export const SaveBitbucketProvider = ({ applicationId }: Props) => {
 			enableSubmodules: data.enableSubmodules || false,
 		})
 			.then(async () => {
-				toast.success("Service Provided Saved");
+				toast.success("服务构建源保存成功");
 				await refetch();
 			})
 			.catch(() => {

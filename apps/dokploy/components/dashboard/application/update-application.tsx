@@ -76,7 +76,7 @@ export const UpdateApplication = ({ applicationId }: Props) => {
 			description: formData.description || "",
 		})
 			.then(() => {
-				toast.success("Application updated successfully");
+				toast.success("应用更新成功");
 				utils.application.one.invalidate({
 					applicationId: applicationId,
 				});
@@ -101,8 +101,8 @@ export const UpdateApplication = ({ applicationId }: Props) => {
 			</DialogTrigger>
 			<DialogContent className="max-h-screen overflow-y-auto sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Modify Application</DialogTitle>
-					<DialogDescription>Update the application data</DialogDescription>
+					<DialogTitle>修改应用</DialogTitle>
+					<DialogDescription>更新应用数据</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 
@@ -119,9 +119,9 @@ export const UpdateApplication = ({ applicationId }: Props) => {
 									name="name"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Name</FormLabel>
+											<FormLabel>名称</FormLabel>
 											<FormControl>
-												<Input placeholder="Vandelay Industries" {...field} />
+												<Input placeholder="例如：mysql" {...field} />
 											</FormControl>
 
 											<FormMessage />
@@ -133,10 +133,10 @@ export const UpdateApplication = ({ applicationId }: Props) => {
 									name="description"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Description</FormLabel>
+											<FormLabel>描述</FormLabel>
 											<FormControl>
 												<Textarea
-													placeholder="Description about your project..."
+													placeholder="关于此应用的一些描述"
 													className="resize-none"
 													{...field}
 												/>
@@ -152,7 +152,7 @@ export const UpdateApplication = ({ applicationId }: Props) => {
 										form="hook-form-update-application"
 										type="submit"
 									>
-										Update
+										更新
 									</Button>
 								</DialogFooter>
 							</form>

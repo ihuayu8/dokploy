@@ -107,7 +107,7 @@ const Service = (
 			/>
 			<Head>
 				<title>
-					Application: {data?.name} - {data?.project.name} | Dokploy
+					应用: {data?.name} - {data?.project.name} | Dokploy
 				</title>
 			</Head>
 			<div className="w-full">
@@ -232,18 +232,16 @@ const Service = (
 											<TabsTrigger value="general">通用</TabsTrigger>
 											<TabsTrigger value="environment">环境变量</TabsTrigger>
 											<TabsTrigger value="domains">域名</TabsTrigger>
-											<TabsTrigger value="preview-deployments">
-												部署预览
-											</TabsTrigger>
+											{/*<TabsTrigger value="preview-deployments">*/}
+											{/*	部署预览*/}
+											{/*</TabsTrigger>*/}
 											<TabsTrigger value="schedules">定时任务</TabsTrigger>
 											<TabsTrigger value="volume-backups">
 												数据卷备份
 											</TabsTrigger>
 											<TabsTrigger value="deployments">部署列表</TabsTrigger>
 											<TabsTrigger value="logs">日志</TabsTrigger>
-											{((data?.serverId && isCloud) || !data?.server) && (
-												<TabsTrigger value="monitoring">监控</TabsTrigger>
-											)}
+											<TabsTrigger value="monitoring">监控</TabsTrigger>
 											<TabsTrigger value="advanced">高级</TabsTrigger>
 										</TabsList>
 									</div>
@@ -262,47 +260,14 @@ const Service = (
 									<TabsContent value="monitoring">
 										<div className="pt-2.5">
 											<div className="flex flex-col gap-4 border rounded-lg p-6">
-												{data?.serverId && isCloud ? (
-													<ContainerPaidMonitoring
-														appName={data?.appName || ""}
-														baseUrl={`${data?.serverId ? `http://${data?.server?.ipAddress}:${data?.server?.metricsConfig?.server?.port}` : "http://localhost:4500"}`}
-														token={
-															data?.server?.metricsConfig?.server?.token || ""
-														}
-													/>
-												) : (
 													<>
-														{/* {monitoring?.enabledFeatures &&
-															isCloud &&
-															data?.serverId && (
-																<div className="flex flex-row border w-fit p-4 rounded-lg items-center gap-2">
-																	<Label className="text-muted-foreground">
-																		Change Monitoring
-																	</Label>
-																	<Switch
-																		checked={toggleMonitoring}
-																		onCheckedChange={setToggleMonitoring}
-																	/>
-																</div>
-															)} */}
-
-														{/* {toggleMonitoring ? (
-															<ContainerPaidMonitoring
-																appName={data?.appName || ""}
-																baseUrl={`http://${monitoring?.serverIp}:${monitoring?.metricsConfig?.server?.port}`}
-																token={
-																	monitoring?.metricsConfig?.server?.token || ""
-																}
-															/>
-														) : ( */}
 														<div>
 															<ContainerFreeMonitoring
 																appName={data?.appName || ""}
+																serverId={data?.serverId || ""}
 															/>
 														</div>
-														{/* )} */}
 													</>
-												)}
 											</div>
 										</div>
 									</TabsContent>
@@ -357,7 +322,7 @@ const Service = (
 											<AddCommand applicationId={applicationId} />
 											<ShowClusterSettings applicationId={applicationId} />
 
-											<ShowResources id={applicationId} type="application" />
+											<ShowResources id={applicationId} serverId={data?.serverId} type="application" />
 											<ShowVolumes id={applicationId} type="application" />
 											<ShowRedirects applicationId={applicationId} />
 											<ShowSecurity applicationId={applicationId} />

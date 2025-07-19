@@ -8,7 +8,7 @@ import {
 	Tooltip,
 	YAxis,
 } from "recharts";
-import type { DockerStatsJSON } from "./show-free-container-monitoring";
+import {convertMemoryToBytes, DockerStatsJSON} from "./show-free-container-monitoring";
 
 interface Props {
 	acummulativeData: DockerStatsJSON["block"];
@@ -19,8 +19,9 @@ export const DockerBlockChart = ({ acummulativeData }: Props) => {
 		return {
 			time: item.time,
 			name: `Point ${index + 1}`,
-			readMb: item.value.readMb,
-			writeMb: item.value.writeMb,
+
+			readMb: parseInt(item.value.readMb.toString().replaceAll("MB", "")),
+			writeMb: parseInt(item.value.writeMb.toString().replaceAll("MB", "")),
 		};
 	});
 
@@ -93,8 +94,8 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 				{payload[0].payload.time && (
 					<p>{`Date: ${format(new Date(payload[0].payload.time), "PPpp")}`}</p>
 				)}
-				<p>{`Read ${payload[0].payload.readMb} `}</p>
-				<p>{`Write: ${payload[0].payload.writeMb} `}</p>
+				<p>{`Read ${payload[0].payload.readMb} MB`}</p>
+				<p>{`Write: ${payload[0].payload.writeMb} MB`}</p>
 			</div>
 		);
 	}

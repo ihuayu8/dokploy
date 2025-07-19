@@ -7,6 +7,20 @@ import { DockerCpuChart } from "./docker-cpu-chart";
 import { DockerDiskChart } from "./docker-disk-chart";
 import { DockerMemoryChart } from "./docker-memory-chart";
 import { DockerNetworkChart } from "./docker-network-chart";
+import {Label} from "@/components/ui/label";
+import {Switch} from "@/components/ui/switch";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue
+} from "@/components/ui/select";
+import {Loader2} from "lucide-react";
+import {Badge} from "@/components/ui/badge";
+import {badgeStateColor} from "@/components/dashboard/application/logs/show";
 
 const defaultData = {
 	cpu: {
@@ -117,11 +131,28 @@ export const convertMemoryToBytes = (
 export const ContainerFreeMonitoring = ({
 	appName,
 	appType = "application",
+	serverId
 }: Props) => {
+	const { data: services, isLoading: servicesLoading } =
+		api.docker.getServiceContainersByAppName.useQuery(
+			{
+				appName,
+				serverId,
+			},
+			{
+				enabled: !!appName,
+			},
+		);
+	const [containerId, setContainerId] = useState<string | undefined>();
+	const [containerName, setContainerName] = useState<string | undefined>();
+	const [node, setNode] = useState<string | undefined>();
+
 	const { data } = api.application.readAppMonitoring.useQuery(
-		{ appName },
+		{ appName, containerId, containerName, serverId, node },
 		{
 			refetchOnWindowFocus: false,
+			enabled: !!containerId,
+			refetchInterval: 5000,
 		},
 	);
 	const [acummulativeData, setAcummulativeData] = useState<DockerStatsJSON>({
@@ -132,6 +163,28 @@ export const ContainerFreeMonitoring = ({
 		disk: [],
 	});
 	const [currentData, setCurrentData] = useState<DockerStats>(defaultData);
+
+	useEffect(() => {
+		const service = services?.find(item=>item.containerId === containerId)
+		setContainerName(service?.name);
+		setNode(service?.node);
+		setCurrentData(defaultData);
+		setAcummulativeData({
+			block: [],
+			cpu: [],
+			disk: [],
+			memory: [],
+			network: [],
+		});
+	}, [containerId]);
+
+	useEffect(() => {
+		if (services && services?.length > 0) {
+			setContainerId(services[0]?.containerId);
+			setContainerName(services[0]?.name);
+			setNode(services[0]?.node);
+		}
+	}, [services]);
 
 	useEffect(() => {
 		setCurrentData(defaultData);
@@ -164,40 +217,40 @@ export const ContainerFreeMonitoring = ({
 		});
 	}, [data]);
 
-	useEffect(() => {
-		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-		const wsUrl = `${protocol}//${window.location.host}/listen-docker-stats-monitoring?appName=${appName}&appType=${appType}`;
-		const ws = new WebSocket(wsUrl);
-
-		ws.onmessage = (e) => {
-			const value = JSON.parse(e.data);
-			if (!value) return;
-
-			const data = {
-				cpu: value.data.cpu ?? currentData.cpu,
-				memory: value.data.memory ?? currentData.memory,
-				block: value.data.block ?? currentData.block,
-				disk: value.data.disk ?? currentData.disk,
-				network: value.data.network ?? currentData.network,
-			};
-
-			setCurrentData(data);
-
-			setAcummulativeData((prevData) => ({
-				cpu: [...prevData.cpu, data.cpu],
-				memory: [...prevData.memory, data.memory],
-				block: [...prevData.block, data.block],
-				network: [...prevData.network, data.network],
-				disk: [...prevData.disk, data.disk],
-			}));
-		};
-
-		ws.onclose = (e) => {
-			console.log(e.reason);
-		};
-
-		return () => ws.close();
-	}, [appName]);
+	// useEffect(() => {
+	// 	const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+	// 	const wsUrl = `${protocol}//${window.location.host}/listen-docker-stats-monitoring?appName=${appName}&appType=${appType}`;
+	// 	const ws = new WebSocket(wsUrl);
+	//
+	// 	ws.onmessage = (e) => {
+	// 		const value = JSON.parse(e.data);
+	// 		if (!value) return;
+	//
+	// 		const data = {
+	// 			cpu: value.data.cpu ?? currentData.cpu,
+	// 			memory: value.data.memory ?? currentData.memory,
+	// 			block: value.data.block ?? currentData.block,
+	// 			disk: value.data.disk ?? currentData.disk,
+	// 			network: value.data.network ?? currentData.network,
+	// 		};
+	//
+	// 		setCurrentData(data);
+	//
+	// 		setAcummulativeData((prevData) => ({
+	// 			cpu: [...prevData.cpu, data.cpu],
+	// 			memory: [...prevData.memory, data.memory],
+	// 			block: [...prevData.block, data.block],
+	// 			network: [...prevData.network, data.network],
+	// 			disk: [...prevData.disk, data.disk],
+	// 		}));
+	// 	};
+	//
+	// 	ws.onclose = (e) => {
+	// 		console.log(e.reason);
+	// 	};
+	//
+	// 	return () => ws.close();
+	// }, [appName]);
 
 	return (
 		<div className="rounded-xl bg-background flex flex-col gap-4">
@@ -209,6 +262,40 @@ export const ContainerFreeMonitoring = ({
 					</p>
 				</div>
 			</header>
+			<div className="flex flex-row justify-between items-center gap-2">
+				<Label>选择一个容器以查看监控</Label>
+			</div>
+			<Select onValueChange={setContainerId} value={containerId}>
+				<SelectTrigger>
+					{servicesLoading ? (
+						<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground">
+							<span>Loading...</span>
+							<Loader2 className="animate-spin size-4" />
+						</div>
+					) : (
+						<SelectValue placeholder="选择一个容器" />
+					)}
+				</SelectTrigger>
+				<SelectContent>
+					<SelectGroup>
+							<>
+								{services?.map((container) => (
+									<SelectItem
+										key={container.containerId}
+										value={container.containerId}
+									>
+										{container.name} ({container.containerId}@{container.node}
+										)
+										<Badge variant={badgeStateColor(container.state)}>
+											{container.state}
+										</Badge>
+									</SelectItem>
+								))}
+							</>
+						<SelectLabel>Containers ({services?.length})</SelectLabel>
+					</SelectGroup>
+				</SelectContent>
+			</Select>
 
 			<div className="grid gap-6 lg:grid-cols-2">
 				<Card className="bg-background">
@@ -220,7 +307,7 @@ export const ContainerFreeMonitoring = ({
 							<span className="text-sm text-muted-foreground">
 								Used: {currentData.cpu.value}
 							</span>
-							<Progress value={currentData.cpu.value} className="w-[100%]" />
+							<Progress value={parseFloat(currentData.cpu.value.toString().replaceAll("%", ""))} className="w-[100%]" />
 							<DockerCpuChart acummulativeData={acummulativeData.cpu} />
 						</div>
 					</CardContent>
@@ -255,28 +342,27 @@ export const ContainerFreeMonitoring = ({
 						</div>
 					</CardContent>
 				</Card>
-				{appName === "dokploy" && (
-					<Card className="bg-background">
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">磁盘空间</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="flex flex-col gap-2 w-full">
-								<span className="text-sm text-muted-foreground">
-									{`Used:  ${currentData.disk.value.diskUsage} GB / Limit: ${currentData.disk.value.diskTotal} GB`}
-								</span>
-								<Progress
-									value={currentData.disk.value.diskUsedPercentage}
-									className="w-[100%]"
-								/>
-								<DockerDiskChart
-									acummulativeData={acummulativeData.disk}
-									diskTotal={currentData.disk.value.diskTotal}
-								/>
-							</div>
-						</CardContent>
-					</Card>
-				)}
+
+				<Card className="bg-background">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+						<CardTitle className="text-sm font-medium">磁盘空间</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="flex flex-col gap-2 w-full">
+							<span className="text-sm text-muted-foreground">
+								{`Used:  ${currentData.disk.value.diskUsage} GB / Limit: ${currentData.disk.value.diskTotal} GB`}
+							</span>
+							<Progress
+								value={currentData.disk.value.diskUsedPercentage}
+								className="w-[100%]"
+							/>
+							<DockerDiskChart
+								acummulativeData={acummulativeData.disk}
+								diskTotal={currentData.disk.value.diskTotal}
+							/>
+						</div>
+					</CardContent>
+				</Card>
 
 				<Card className="bg-background">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

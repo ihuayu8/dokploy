@@ -18,7 +18,7 @@ import {
 	apiUpdateUser,
 	apikey,
 	invitation,
-	member, users_temp,
+	member, users_temp, voucher
 } from "@dokploy/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import * as bcrypt from "bcrypt";
@@ -112,6 +112,7 @@ export const userRouter = createTRPCRouter({
 
 		return memberResult;
 	}),
+	// 获取用户余额
 	getBalance: protectedProcedure.query(async ({ ctx }) => {
 		const userInfo = await db.query.users_temp.findFirst({
 			where: eq(users_temp.id, ctx.user.id),
@@ -122,6 +123,17 @@ export const userRouter = createTRPCRouter({
 		})
 
 		return userInfo;
+	}),
+	// 获取用户代金券列表
+	getVouchers: protectedProcedure.query(async ({ ctx }) => {
+		const voucherList = await db.query.voucher.findMany({
+			where: and(
+				eq(voucher.userId, ctx.user.id),
+				eq(voucher.status, "0"),
+			)
+		})
+
+		return voucherList;
 	}),
 	haveRootAccess: protectedProcedure.query(async ({ ctx }) => {
 		if (!IS_CLOUD) {

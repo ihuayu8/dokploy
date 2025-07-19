@@ -98,7 +98,7 @@ export const SaveGitProvider = ({ applicationId }: Props) => {
 			enableSubmodules: values.enableSubmodules,
 		})
 			.then(async () => {
-				toast.success("Git Provider Saved");
+				toast.success("Git构建源保存成功");
 				await refetch();
 			})
 			.catch(() => {
