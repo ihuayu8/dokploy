@@ -80,7 +80,7 @@ export const createApplication = async (
 	}
 
 	// 设置实际资源规格
-	const cSize = setRealStand(input)
+	const cSize = await setRealStand(input)
 
 	// 分配serverId
 	if(!input.serverId){
@@ -167,7 +167,7 @@ export const updateApplication = async (
 	// 设置实际资源规格
 	let cSize = null;
 	if(applicationData.stand){
-		cSize = setRealStand(applicationData)
+		cSize = await setRealStand(applicationData)
 
 	}
 	const application = await db
