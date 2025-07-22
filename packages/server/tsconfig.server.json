@@ -14,11 +14,7 @@
 		"jsx": "react-jsx",
 		"paths": {
 			"@dokploy/server/*": ["./src/*"]
-		},
-		"strict": false,
-		"noUncheckedIndexedAccess": false,
-		"noImplicitAny": false,
-		"checkJs": false
+		}
 	},
 	"include": ["next-env.d.ts", "./src/**/*"],
 	"exclude": ["**/dist", "tsup.ts"],
