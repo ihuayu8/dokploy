@@ -96,7 +96,6 @@ export const createApplication = async (
 	}
 	
 	return await db.transaction(async (tx) => {
-		// @ts-ignore
 		const newApplication = await tx
 			.insert(applications)
 			.values({
@@ -187,7 +186,6 @@ export const updateApplicationStatus = async (
 	applicationId: string,
 	applicationStatus: Application["applicationStatus"],
 ) => {
-	// @ts-ignore
 	const application = await db
 		.update(applications)
 		.set({
