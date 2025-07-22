@@ -40,6 +40,7 @@ export const mariadbRouter = createTRPCRouter({
 	create: protectedProcedure
 		.input(apiCreateMariaDB)
 		.mutation(async ({ input, ctx }) => {
+			return
 			try {
 				if (ctx.user.role === "member") {
 					await checkServiceAccess(

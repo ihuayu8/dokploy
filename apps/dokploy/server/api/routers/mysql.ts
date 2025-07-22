@@ -43,6 +43,7 @@ export const mysqlRouter = createTRPCRouter({
 	create: protectedProcedure
 		.input(apiCreateMySql)
 		.mutation(async ({ input, ctx }) => {
+			return
 			try {
 				if (ctx.user.role === "member") {
 					await checkServiceAccess(

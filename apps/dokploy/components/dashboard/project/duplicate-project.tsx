@@ -111,14 +111,14 @@ export const DuplicateProject = ({
 			<DialogTrigger asChild>
 				<Button variant="ghost" className="w-full justify-start">
 					<Copy className="mr-2 h-4 w-4" />
-					Duplicate
+					复制
 				</Button>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Duplicate Services</DialogTitle>
+					<DialogTitle>复制应用</DialogTitle>
 					<DialogDescription>
-						Choose where to duplicate the selected services
+						将所选应用复制到何处
 					</DialogDescription>
 				</DialogHeader>
 
@@ -185,7 +185,7 @@ export const DuplicateProject = ({
 						onClick={() => setOpen(false)}
 						disabled={isLoading}
 					>
-						Cancel
+						取消
 					</Button>
 					<Button onClick={handleDuplicate} disabled={isLoading}>
 						{isLoading ? (

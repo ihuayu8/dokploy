@@ -52,6 +52,7 @@ export type ServiceType =
 interface Props {
 	id: string;
 	type: ServiceType | "application";
+	serverId: string;
 }
 
 type AddResources = z.infer<typeof addResourcesSchema>;

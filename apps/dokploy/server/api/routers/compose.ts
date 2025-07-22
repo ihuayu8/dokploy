@@ -63,6 +63,7 @@ export const composeRouter = createTRPCRouter({
 	create: protectedProcedure
 		.input(apiCreateCompose)
 		.mutation(async ({ ctx, input }) => {
+			return
 			try {
 				if (ctx.user.role === "member") {
 					await checkServiceAccess(

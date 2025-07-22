@@ -47,13 +47,13 @@ export const initCronJobs = async () => {
 	for (const server of servers) {
 		const { serverId, enableDockerCleanup, name } = server;
 		if (enableDockerCleanup) {
-			scheduleJob(serverId, "0 0 * * *", async () => {
+			scheduleJob(serverId.toString(), "0 0 * * *", async () => {
 				console.log(
 					`SERVER-BACKUP[${new Date().toLocaleString()}] Running Cleanup ${name}`,
 				);
-				await cleanUpUnusedImages(serverId);
-				await cleanUpDockerBuilder(serverId);
-				await cleanUpSystemPrune(serverId);
+				await cleanUpUnusedImages(serverId.toString());
+				await cleanUpDockerBuilder(serverId.toString());
+				await cleanUpSystemPrune(serverId.toString());
 				await sendDockerCleanupNotifications(
 					admin.user.id,
 					`Docker cleanup for Server ${name} (${serverId})`,

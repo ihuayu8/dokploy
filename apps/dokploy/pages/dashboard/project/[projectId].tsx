@@ -1,6 +1,7 @@
 import { AddApplication } from "@/components/dashboard/project/add-application";
 import { AddCompose } from "@/components/dashboard/project/add-compose";
 import { AddDatabase } from "@/components/dashboard/project/add-database";
+import { AddShop } from "@/components/dashboard/project/add-shop";
 import { AddTemplate } from "@/components/dashboard/project/add-template";
 import { ProjectEnvironment } from "@/components/dashboard/projects/project-environment";
 import {
@@ -645,19 +646,21 @@ const Project = (
 												projectId={projectId}
 												projectName={data?.name}
 											/>
-											<AddDatabase
-												projectId={projectId}
-												projectName={data?.name}
-											/>
-											<AddCompose
-												projectId={projectId}
-												projectName={data?.name}
-											/>
+											{/*<AddDatabase*/}
+											{/*	projectId={projectId}*/}
+											{/*	projectName={data?.name}*/}
+											{/*/>*/}
+											{/*<AddCompose*/}
+											{/*	projectId={projectId}*/}
+											{/*	projectName={data?.name}*/}
+											{/*/>*/}
 											<AddTemplate projectId={projectId} />
-											<AddAiAssistant
-												projectId={projectId}
-												projectName={data?.name}
-											/>
+											<AddShop projectId={projectId} />
+
+											{/*<AddAiAssistant*/}
+											{/*	projectId={projectId}*/}
+											{/*	projectName={data?.name}*/}
+											{/*/>*/}
 										</DropdownMenuContent>
 									</DropdownMenu>
 								</div>
@@ -702,7 +705,7 @@ const Project = (
 														disabled={selectedServices.length === 0}
 														isLoading={isBulkActionLoading}
 													>
-														Bulk Actions
+														批量操作
 													</Button>
 												</DropdownMenuTrigger>
 												<DropdownMenuContent align="end">
@@ -719,7 +722,7 @@ const Project = (
 															className="w-full justify-start"
 														>
 															<CheckCircle2 className="mr-2 h-4 w-4" />
-															Start
+															启动
 														</Button>
 													</DialogAction>
 													<DialogAction
@@ -733,7 +736,7 @@ const Project = (
 															className="w-full justify-start text-destructive"
 														>
 															<Ban className="mr-2 h-4 w-4" />
-															Stop
+															停止
 														</Button>
 													</DialogAction>
 													{(auth?.role === "owner" ||
@@ -750,7 +753,7 @@ const Project = (
 																	className="w-full justify-start text-destructive"
 																>
 																	<Trash2 className="mr-2 h-4 w-4" />
-																	Delete
+																	删除
 																</Button>
 															</DialogAction>
 															<DuplicateProject
@@ -771,7 +774,7 @@ const Project = (
 																className="w-full justify-start"
 															>
 																<FolderInput className="mr-2 h-4 w-4" />
-																Move
+																移动
 															</Button>
 														</DialogTrigger>
 														<DialogContent>
@@ -846,7 +849,7 @@ const Project = (
 										<div className="flex flex-col gap-2 lg:flex-row lg:gap-4 lg:items-center">
 											<div className="w-full relative">
 												<Input
-													placeholder="Filter services..."
+													placeholder="过滤应用"
 													value={searchQuery}
 													onChange={(e) => setSearchQuery(e.target.value)}
 													className="pr-10"
@@ -855,86 +858,86 @@ const Project = (
 											</div>
 											<Select value={sortBy} onValueChange={setSortBy}>
 												<SelectTrigger className="lg:w-[280px]">
-													<SelectValue placeholder="Sort by..." />
+													<SelectValue placeholder="排序规则..." />
 												</SelectTrigger>
 												<SelectContent>
 													<SelectItem value="createdAt-desc">
-														Newest first
+														最新优先
 													</SelectItem>
 													<SelectItem value="createdAt-asc">
-														Oldest first
+														最早优先
 													</SelectItem>
-													<SelectItem value="name-asc">Name (A-Z)</SelectItem>
-													<SelectItem value="name-desc">Name (Z-A)</SelectItem>
-													<SelectItem value="type-asc">Type (A-Z)</SelectItem>
-													<SelectItem value="type-desc">Type (Z-A)</SelectItem>
+													<SelectItem value="name-asc">名称 (A-Z)</SelectItem>
+													<SelectItem value="name-desc">名称 (Z-A)</SelectItem>
+													<SelectItem value="type-asc">类型 (A-Z)</SelectItem>
+													<SelectItem value="type-desc">类型 (Z-A)</SelectItem>
 												</SelectContent>
 											</Select>
-											<Popover
-												open={openCombobox}
-												onOpenChange={setOpenCombobox}
-											>
-												<PopoverTrigger asChild>
-													<Button
-														variant="outline"
-														aria-expanded={openCombobox}
-														className="min-w-[200px] justify-between"
-													>
-														{selectedTypes.length === 0
-															? "Select types..."
-															: `${selectedTypes.length} selected`}
-														<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-													</Button>
-												</PopoverTrigger>
-												<PopoverContent className="w-[200px] p-0">
-													<Command>
-														<CommandInput placeholder="Search type..." />
-														<CommandEmpty>No type found.</CommandEmpty>
-														<CommandGroup>
-															{serviceTypes.map((type) => (
-																<CommandItem
-																	key={type.value}
-																	onSelect={() => {
-																		setSelectedTypes((prev) =>
-																			prev.includes(type.value)
-																				? prev.filter((t) => t !== type.value)
-																				: [...prev, type.value],
-																		);
-																		setOpenCombobox(false);
-																	}}
-																>
-																	<div className="flex flex-row">
-																		<Check
-																			className={cn(
-																				"mr-2 h-4 w-4",
-																				selectedTypes.includes(type.value)
-																					? "opacity-100"
-																					: "opacity-0",
-																			)}
-																		/>
-																		{type.icon && (
-																			<type.icon className="mr-2 h-4 w-4" />
-																		)}
-																		{type.label}
-																	</div>
-																</CommandItem>
-															))}
-															<CommandItem
-																onSelect={() => {
-																	setSelectedTypes([]);
-																	setOpenCombobox(false);
-																}}
-																className="border-t"
-															>
-																<div className="flex flex-row items-center">
-																	<X className="mr-2 h-4 w-4" />
-																	Clear filters
-																</div>
-															</CommandItem>
-														</CommandGroup>
-													</Command>
-												</PopoverContent>
-											</Popover>
+											{/*<Popover*/}
+											{/*	open={openCombobox}*/}
+											{/*	onOpenChange={setOpenCombobox}*/}
+											{/*>*/}
+											{/*	<PopoverTrigger asChild>*/}
+											{/*		<Button*/}
+											{/*			variant="outline"*/}
+											{/*			aria-expanded={openCombobox}*/}
+											{/*			className="min-w-[200px] justify-between"*/}
+											{/*		>*/}
+											{/*			{selectedTypes.length === 0*/}
+											{/*				? "Select types..."*/}
+											{/*				: `${selectedTypes.length} selected`}*/}
+											{/*			<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />*/}
+											{/*		</Button>*/}
+											{/*	</PopoverTrigger>*/}
+											{/*	<PopoverContent className="w-[200px] p-0">*/}
+											{/*		<Command>*/}
+											{/*			<CommandInput placeholder="Search type..." />*/}
+											{/*			<CommandEmpty>No type found.</CommandEmpty>*/}
+											{/*			<CommandGroup>*/}
+											{/*				{serviceTypes.map((type) => (*/}
+											{/*					<CommandItem*/}
+											{/*						key={type.value}*/}
+											{/*						onSelect={() => {*/}
+											{/*							setSelectedTypes((prev) =>*/}
+											{/*								prev.includes(type.value)*/}
+											{/*									? prev.filter((t) => t !== type.value)*/}
+											{/*									: [...prev, type.value],*/}
+											{/*							);*/}
+											{/*							setOpenCombobox(false);*/}
+											{/*						}}*/}
+											{/*					>*/}
+											{/*						<div className="flex flex-row">*/}
+											{/*							<Check*/}
+											{/*								className={cn(*/}
+											{/*									"mr-2 h-4 w-4",*/}
+											{/*									selectedTypes.includes(type.value)*/}
+											{/*										? "opacity-100"*/}
+											{/*										: "opacity-0",*/}
+											{/*								)}*/}
+											{/*							/>*/}
+											{/*							{type.icon && (*/}
+											{/*								<type.icon className="mr-2 h-4 w-4" />*/}
+											{/*							)}*/}
+											{/*							{type.label}*/}
+											{/*						</div>*/}
+											{/*					</CommandItem>*/}
+											{/*				))}*/}
+											{/*				<CommandItem*/}
+											{/*					onSelect={() => {*/}
+											{/*						setSelectedTypes([]);*/}
+											{/*						setOpenCombobox(false);*/}
+											{/*					}}*/}
+											{/*					className="border-t"*/}
+											{/*				>*/}
+											{/*					<div className="flex flex-row items-center">*/}
+											{/*						<X className="mr-2 h-4 w-4" />*/}
+											{/*						Clear filters*/}
+											{/*					</div>*/}
+											{/*				</CommandItem>*/}
+											{/*			</CommandGroup>*/}
+											{/*		</Command>*/}
+											{/*	</PopoverContent>*/}
+											{/*</Popover>*/}
 										</div>
 									</div>
 

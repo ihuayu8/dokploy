@@ -8,6 +8,7 @@ export type Backup = typeof backups.$inferSelect;
 export type BackupSchedule = Awaited<ReturnType<typeof findBackupById>>;
 export type BackupScheduleList = Awaited<ReturnType<typeof findBackupsByDbId>>;
 export const createBackup = async (input: typeof apiCreateBackup._type) => {
+	// @ts-ignore
 	const newBackup = await db
 		.insert(backups)
 		.values({

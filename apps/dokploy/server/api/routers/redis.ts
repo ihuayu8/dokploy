@@ -40,6 +40,7 @@ export const redisRouter = createTRPCRouter({
 	create: protectedProcedure
 		.input(apiCreateRedis)
 		.mutation(async ({ input, ctx }) => {
+			return
 			try {
 				if (ctx.user.role === "member") {
 					await checkServiceAccess(
