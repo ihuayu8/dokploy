@@ -15,6 +15,7 @@ export const createServer = async (
 ) => {
 	const newServer = await db
 		.insert(server)
+		// @ts-ignore
 		.values({
 			...input,
 			organizationId: organizationId,
