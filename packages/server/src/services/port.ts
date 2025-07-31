@@ -1,18 +1,51 @@
 import { db } from "@dokploy/server/db";
-import { type apiCreatePort, ports } from "@dokploy/server/db/schema";
+import {type apiCreatePort, applications, ports} from "@dokploy/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import {and, eq} from "drizzle-orm";
+import {getRandomPort} from "@dokploy/server/utils/billing";
 
 export type Port = typeof ports.$inferSelect;
 
-export const createPort = async (input: typeof apiCreatePort._type) => {
-	const newPort = await db
-		.insert(ports)
-		.values({
-			...input,
-		})
-		.returning()
-		.then((value) => value[0]);
+export const createPort = async (input: typeof apiCreatePort._type, txo:any) => {
+	const app = await (txo?txo:db).query.applications.findFirst({
+		where: eq(applications.applicationId, input.applicationId),
+		columns: {
+			serverId: true
+		}
+	})
+
+	const portList = await (txo?txo:db).query.ports.findMany({
+		where: eq(applications.applicationId, input.applicationId),
+	})
+	if(portList.length >= 20){
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "映射端口数不能超过20个",
+		});
+	}
+
+	let insertLoop = true;
+	let num = 0;
+	let newPort;
+	while (insertLoop && num < 10) {
+		try {
+			const port = getRandomPort()
+			newPort = await (txo?txo:db)
+				.insert(ports)
+				.values({
+					...input,
+					serverId: app?.serverId || "",
+					publishedPort: port
+				})
+				.returning()
+				.then((value:any) => value[0]);
+			if(newPort){
+				insertLoop = false;
+			}
+		}catch (error){
+
+		}
+	}
 
 	if (!newPort) {
 		throw new TRPCError({
@@ -50,6 +83,7 @@ export const updatePortById = async (
 	portId: string,
 	portData: Partial<Port>,
 ) => {
+	delete portData.publishedPort;
 	const result = await db
 		.update(ports)
 		.set({

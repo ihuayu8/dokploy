@@ -99,88 +99,88 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 								</Tooltip>
 							</Button>
 						</DialogAction>
-						<DialogAction
-							title="Reload Application"
-							description="Are you sure you want to reload this application?"
-							type="default"
-							onClick={async () => {
-								await reload({
-									applicationId: applicationId,
-									appName: data?.appName || "",
-								})
-									.then(() => {
-										toast.success("应用重载成功");
-										refetch();
-									})
-									.catch((e) => {
-										toast.error(e.shape.message);
-									});
-							}}
-						>
-							<Button
-								variant="secondary"
-								isLoading={isReloading}
-								className="flex items-center gap-1.5 group focus-visible:ring-2 focus-visible:ring-offset-2"
-							>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<div className="flex items-center">
-											<RefreshCcw className="size-4 mr-1" />
-											重载
-										</div>
-									</TooltipTrigger>
-									<TooltipPrimitive.Portal>
-										<TooltipContent sideOffset={5} className="z-[60]">
-											<p>重载应用但不进行重新构建</p>
-										</TooltipContent>
-									</TooltipPrimitive.Portal>
-								</Tooltip>
-							</Button>
-						</DialogAction>
-						<DialogAction
-							title="Rebuild Application"
-							description="Are you sure you want to rebuild this application?"
-							type="default"
-							onClick={async () => {
-								await redeploy({
-									applicationId: applicationId,
-								})
-									.then(() => {
-										toast.success("应用重新构建成功");
-										refetch();
-									})
-									.catch((e) => {
-										toast.error(e.shape.message);
-									});
-							}}
-						>
-							<Button
-								variant="secondary"
-								isLoading={data?.applicationStatus === "running"}
-								className="flex items-center gap-1.5 group focus-visible:ring-2 focus-visible:ring-offset-2"
-							>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<div className="flex items-center">
-											<Hammer className="size-4 mr-1" />
-											重新构建
-										</div>
-									</TooltipTrigger>
-									<TooltipPrimitive.Portal>
-										<TooltipContent sideOffset={5} className="z-[60]">
-											<p>
-												重新构建但不下载最新的源代码
-											</p>
-										</TooltipContent>
-									</TooltipPrimitive.Portal>
-								</Tooltip>
-							</Button>
-						</DialogAction>
+						{/*<DialogAction*/}
+						{/*	title="Reload Application"*/}
+						{/*	description="Are you sure you want to reload this application?"*/}
+						{/*	type="default"*/}
+						{/*	onClick={async () => {*/}
+						{/*		await reload({*/}
+						{/*			applicationId: applicationId,*/}
+						{/*			appName: data?.appName || "",*/}
+						{/*		})*/}
+						{/*			.then(() => {*/}
+						{/*				toast.success("应用重载成功");*/}
+						{/*				refetch();*/}
+						{/*			})*/}
+						{/*			.catch((e) => {*/}
+						{/*				toast.error(e.shape.message);*/}
+						{/*			});*/}
+						{/*	}}*/}
+						{/*>*/}
+						{/*	<Button*/}
+						{/*		variant="secondary"*/}
+						{/*		isLoading={isReloading}*/}
+						{/*		className="flex items-center gap-1.5 group focus-visible:ring-2 focus-visible:ring-offset-2"*/}
+						{/*	>*/}
+						{/*		<Tooltip>*/}
+						{/*			<TooltipTrigger asChild>*/}
+						{/*				<div className="flex items-center">*/}
+						{/*					<RefreshCcw className="size-4 mr-1" />*/}
+						{/*					重载*/}
+						{/*				</div>*/}
+						{/*			</TooltipTrigger>*/}
+						{/*			<TooltipPrimitive.Portal>*/}
+						{/*				<TooltipContent sideOffset={5} className="z-[60]">*/}
+						{/*					<p>重载应用但不进行重新构建</p>*/}
+						{/*				</TooltipContent>*/}
+						{/*			</TooltipPrimitive.Portal>*/}
+						{/*		</Tooltip>*/}
+						{/*	</Button>*/}
+						{/*</DialogAction>*/}
+						{/*<DialogAction*/}
+						{/*	title="Rebuild Application"*/}
+						{/*	description="Are you sure you want to rebuild this application?"*/}
+						{/*	type="default"*/}
+						{/*	onClick={async () => {*/}
+						{/*		await redeploy({*/}
+						{/*			applicationId: applicationId,*/}
+						{/*		})*/}
+						{/*			.then(() => {*/}
+						{/*				toast.success("应用重新构建成功");*/}
+						{/*				refetch();*/}
+						{/*			})*/}
+						{/*			.catch((e) => {*/}
+						{/*				toast.error(e.shape.message);*/}
+						{/*			});*/}
+						{/*	}}*/}
+						{/*>*/}
+						{/*	<Button*/}
+						{/*		variant="secondary"*/}
+						{/*		isLoading={data?.applicationStatus === "running"}*/}
+						{/*		className="flex items-center gap-1.5 group focus-visible:ring-2 focus-visible:ring-offset-2"*/}
+						{/*	>*/}
+						{/*		<Tooltip>*/}
+						{/*			<TooltipTrigger asChild>*/}
+						{/*				<div className="flex items-center">*/}
+						{/*					<Hammer className="size-4 mr-1" />*/}
+						{/*					重新构建*/}
+						{/*				</div>*/}
+						{/*			</TooltipTrigger>*/}
+						{/*			<TooltipPrimitive.Portal>*/}
+						{/*				<TooltipContent sideOffset={5} className="z-[60]">*/}
+						{/*					<p>*/}
+						{/*						重新构建但不下载最新的源代码*/}
+						{/*					</p>*/}
+						{/*				</TooltipContent>*/}
+						{/*			</TooltipPrimitive.Portal>*/}
+						{/*		</Tooltip>*/}
+						{/*	</Button>*/}
+						{/*</DialogAction>*/}
 
 						{data?.applicationStatus === "idle" ? (
 							<DialogAction
-								title="Start Application"
-								description="Are you sure you want to start this application?"
+								title="启动应用"
+								description="确认启动此应用吗?"
 								type="default"
 								onClick={async () => {
 									await start({
@@ -219,8 +219,8 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 							</DialogAction>
 						) : (
 							<DialogAction
-								title="Stop Application"
-								description="Are you sure you want to stop this application?"
+								title="停止应用"
+								description="确认停止此应用吗?停止后将不再计费，但数据卷也可能会不定时被删除。"
 								onClick={async () => {
 									await stop({
 										applicationId: applicationId,
@@ -314,7 +314,7 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 				</CardContent>
 			</Card>
 			<ShowProviderForm applicationId={applicationId} />
-			<ShowBuildChooseForm applicationId={applicationId} />
+			{/*<ShowBuildChooseForm applicationId={applicationId} />*/}
 		</>
 	);
 };

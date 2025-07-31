@@ -294,7 +294,7 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 			</DialogTrigger>
 			<DialogContent className="max-h-screen overflow-y-auto sm:max-w-2xl">
 				<DialogHeader>
-					<DialogTitle>Domain</DialogTitle>
+					<DialogTitle>域名</DialogTitle>
 					<DialogDescription>{dictionary.dialogDescription}</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
@@ -323,7 +323,7 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 												name="serviceName"
 												render={({ field }) => (
 													<FormItem className="w-full">
-														<FormLabel>Service Name</FormLabel>
+														<FormLabel>服务名</FormLabel>
 														<div className="flex gap-2">
 															<Select
 																onValueChange={field.onChange}
@@ -331,7 +331,7 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 															>
 																<FormControl>
 																	<SelectTrigger>
-																		<SelectValue placeholder="Select a service name" />
+																		<SelectValue placeholder="选择一个服务" />
 																	</SelectTrigger>
 																</FormControl>
 
@@ -345,7 +345,7 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 																		</SelectItem>
 																	))}
 																	<SelectItem value="none" disabled>
-																		Empty
+																		空
 																	</SelectItem>
 																</SelectContent>
 															</Select>
@@ -440,10 +440,10 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 														to make your traefik.me domain work.
 													</AlertBlock>
 												)}
-											<FormLabel>Host</FormLabel>
+											<FormLabel>域名</FormLabel>
 											<div className="flex gap-2">
 												<FormControl>
-													<Input placeholder="api.dokploy.com" {...field} />
+													<Input placeholder="example.com" {...field} />
 												</FormControl>
 												<TooltipProvider delayDuration={0}>
 													<Tooltip>

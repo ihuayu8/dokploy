@@ -232,6 +232,8 @@ export const applications = pgTable("application", {
 		onDelete: "cascade",
 	}),
 	stand: text("stand"),
+	currentReplicas: integer("current_replicas").default(0),
+	currentStand: text("current_stand").default("0"),
 });
 
 export const applicationsRelations = relations(
@@ -431,7 +433,7 @@ const createSchema = createInsertSchema(applications, {
 	previewCertificateType: z.enum(["letsencrypt", "none", "custom"]).optional(),
 	watchPaths: z.array(z.string()).optional(),
 	cleanCache: z.boolean().optional(),
-	stand: z.string().optional()
+	stand: z.string().optional(),
 });
 
 export const apiCreateApplication = createSchema.pick({
@@ -441,6 +443,10 @@ export const apiCreateApplication = createSchema.pick({
 	projectId: true,
 	serverId: true,
 	stand: true
+}).extend({
+	useTemplate: z.boolean().optional(),
+	appShopId: z.number().optional(),
+	versionId: z.string().optional(),
 });
 
 export const apiFindOneApplication = createSchema

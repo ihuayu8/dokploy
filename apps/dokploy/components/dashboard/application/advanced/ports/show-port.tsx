@@ -31,14 +31,14 @@ export const ShowPorts = ({ applicationId }: Props) => {
 		<Card className="bg-background">
 			<CardHeader className="flex flex-row justify-between flex-wrap gap-4">
 				<div>
-					<CardTitle className="text-xl">Ports</CardTitle>
+					<CardTitle className="text-xl">端口</CardTitle>
 					<CardDescription>
-						the ports allows you to expose your application to the internet
+						开放端口允许你将应用程序暴露在互联网上
 					</CardDescription>
 				</div>
 
 				{data && data?.ports.length > 0 && (
-					<HandlePorts applicationId={applicationId}>Add Port</HandlePorts>
+					<HandlePorts applicationId={applicationId}>添加端口</HandlePorts>
 				)}
 			</CardHeader>
 			<CardContent className="flex flex-col gap-4">
@@ -53,8 +53,7 @@ export const ShowPorts = ({ applicationId }: Props) => {
 				) : (
 					<div className="flex flex-col pt-2 gap-4">
 						<AlertBlock type="info">
-							Please remember to click Redeploy after adding, editing, or
-							deleting the ports to apply the changes.
+							在添加、编辑或删除端口后，点击 “部署” 以应用所做的更改
 						</AlertBlock>
 						<div className="flex flex-col gap-6">
 							{data?.ports.map((port) => (
@@ -62,25 +61,19 @@ export const ShowPorts = ({ applicationId }: Props) => {
 									<div className="flex w-full flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-10 border rounded-lg p-4">
 										<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 flex-col gap-4 sm:gap-8">
 											<div className="flex flex-col gap-1">
-												<span className="font-medium">Published Port</span>
+												<span className="font-medium">外部端口</span>
 												<span className="text-sm text-muted-foreground">
 													{port.publishedPort}
 												</span>
 											</div>
 											<div className="flex flex-col gap-1">
-												<span className="font-medium">Published Port Mode</span>
-												<span className="text-sm text-muted-foreground">
-													{port?.publishMode?.toUpperCase()}
-												</span>
-											</div>
-											<div className="flex flex-col gap-1">
-												<span className="font-medium">Target Port</span>
+												<span className="font-medium">容器端口</span>
 												<span className="text-sm text-muted-foreground">
 													{port.targetPort}
 												</span>
 											</div>
 											<div className="flex flex-col gap-1">
-												<span className="font-medium">Protocol</span>
+												<span className="font-medium">协议</span>
 												<span className="text-sm text-muted-foreground">
 													{port.protocol.toUpperCase()}
 												</span>
@@ -92,8 +85,8 @@ export const ShowPorts = ({ applicationId }: Props) => {
 												portId={port.portId}
 											/>
 											<DialogAction
-												title="Delete Port"
-												description="Are you sure you want to delete this port?"
+												title="删除端口"
+												description="确认要删除此端口吗？"
 												type="destructive"
 												onClick={async () => {
 													await deletePort({
@@ -101,10 +94,10 @@ export const ShowPorts = ({ applicationId }: Props) => {
 													})
 														.then(() => {
 															refetch();
-															toast.success("Port deleted successfully");
+															toast.success("端口删除成功");
 														})
 														.catch(() => {
-															toast.error("Error deleting port");
+															toast.error("系统异常，请联系管理员");
 														});
 												}}
 											>

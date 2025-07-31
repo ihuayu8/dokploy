@@ -55,6 +55,36 @@ export const domains = pgTable("domain", {
 	stripPath: boolean("stripPath").notNull().default(false),
 });
 
+export const applicationShopDomains = pgTable("application_shop_domain", {
+	domainId: text("domainId")
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => nanoid()),
+	host: text("host").notNull(),
+	https: boolean("https").notNull().default(false),
+	port: integer("port").default(3000),
+	path: text("path").default("/"),
+	serviceName: text("serviceName"),
+	domainType: domainType("domainType").default("application"),
+	uniqueConfigKey: serial("uniqueConfigKey"),
+	createdAt: text("createdAt")
+		.notNull()
+		.$defaultFn(() => new Date().toISOString()),
+	composeId: text("composeId").references(() => compose.composeId, {
+		onDelete: "cascade",
+	}),
+	customCertResolver: text("customCertResolver"),
+	versionId: text("versionId"),
+	previewDeploymentId: text("previewDeploymentId").references(
+		(): AnyPgColumn => previewDeployments.previewDeploymentId,
+		{ onDelete: "cascade" },
+	),
+	certificateType: certificateType("certificateType").notNull().default("none"),
+	internalPath: text("internalPath").default("/"),
+	stripPath: boolean("stripPath").notNull().default(false),
+})
+export const createSchemaShop = createInsertSchema(applicationShopDomains);
+
 export const domainsRelations = relations(domains, ({ one }) => ({
 	application: one(applications, {
 		fields: [domains.applicationId],

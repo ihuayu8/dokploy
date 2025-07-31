@@ -39,7 +39,7 @@ import {slugify} from "@/lib/slug";
 import {api} from "@/utils/api";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Folder, HelpCircle} from "lucide-react";
-import {useEffect, useState} from "react";
+import {Dispatch, SetStateAction, useEffect, useState} from "react";
 import {useForm} from "react-hook-form";
 import {toast} from "sonner";
 import {z} from "zod";
@@ -48,7 +48,7 @@ import {Label} from "@/components/ui/label";
 
 const AddTemplateSchema = z.object({
     name: z.string().min(1, {
-        message: "Name is required",
+        message: "请输入应用名称",
     }),
     appName: z
         .string()
@@ -61,7 +61,10 @@ const AddTemplateSchema = z.object({
         }),
     description: z.string().optional(),
     serverId: z.string().optional(),
-    stand: z.string().optional()
+    stand: z.string().optional(),
+    versionId: z.string().optional(),
+    useTemplate: z.boolean().optional(),
+    appShopId: z.number().optional(),
 });
 
 type AddTemplate = z.infer<typeof AddTemplateSchema>;
@@ -69,15 +72,35 @@ type AddTemplate = z.infer<typeof AddTemplateSchema>;
 interface Props {
     projectId: string;
     projectName?: string;
+    useTemplate?: boolean;
+    visibleOut?: boolean;
+    setVisibleOut?: Dispatch<SetStateAction<boolean>>;
+    appShopId?: string;
+    appShopName?: string;
+    setTempVisible?: Dispatch<SetStateAction<boolean>>;
 }
 
-export const AddApplication = ({projectId, projectName}: Props) => {
+export const AddApplication = ({
+                                   projectId, projectName, useTemplate = false,
+                                   visibleOut, setVisibleOut, appShopId, appShopName,
+                                   setTempVisible
+                               }: Props) => {
     const utils = api.useUtils();
-    const [visible, setVisible] = useState(false);
+    let [visible, setVisible] = useState(false);
+    if (setVisibleOut) {
+        visible = visibleOut
+        setVisible = setVisibleOut
+    }
     const slug = slugify(projectName);
     const {data: servers} = api.server.withSSHKey.useQuery();
 
-    const [ showTip, setShowTip ] = useState(false);
+    const {data: versions} = api.applicationShop.getTempUpVersions.useQuery({
+        appShopId: appShopId
+    }, {
+        enabled: useTemplate && !!appShopId
+    });
+
+    const [showTip, setShowTip] = useState(false);
 
     const {mutateAsync, isLoading, error, isError} =
         api.application.create.useMutation();
@@ -88,10 +111,25 @@ export const AddApplication = ({projectId, projectName}: Props) => {
             appName: `${slug}-`,
             description: "",
             serverId: " ",
-            stand: "0"
+            useTemplate: false,
+            appShopId: "",
+            stand: "0",
+            versionId: ""
         },
         resolver: zodResolver(AddTemplateSchema),
     });
+
+    useEffect(() => {
+        if(versions?.length > 0){
+            console.log("setVersion")
+            form.setValue("versionId", versions[0].versionId)
+        }
+
+    }, [versions]);
+
+    useEffect(() => {
+        form.setValue("appShopId", appShopId)
+    }, [appShopId]);
 
     const {data: standList} = api.server.getServerStands.useQuery(
         {
@@ -121,8 +159,8 @@ export const AddApplication = ({projectId, projectName}: Props) => {
     }, [form.watch().serverId])
 
     const getPrice = () => {
-        const price = standList?.find(item=>item.id === (form.watch().stand))?.price;
-        let rate = servers?.find(item=>item.serverId === form.watch().serverId)?.rate;
+        const price = standList?.find(item => item.id === (form.watch().stand))?.price;
+        let rate = servers?.find(item => item.serverId === form.watch().serverId)?.rate;
         return parseFloat((parseFloat(price) * parseFloat(rate)).toFixed(4));
     }
 
@@ -133,12 +171,18 @@ export const AddApplication = ({projectId, projectName}: Props) => {
             description: data.description,
             projectId,
             serverId: data.serverId,
-            stand: data.stand
+            stand: data.stand,
+            useTemplate: useTemplate,
+            appShopId: data.appShopId,
+            versionId: data.versionId,
         })
             .then(async () => {
                 toast.success("服务创建成功");
                 form.reset();
                 setVisible(false);
+                if(!!setTempVisible){
+                    setTempVisible(false)
+                }
                 await utils.project.one.invalidate({
                     projectId,
                 });
@@ -150,7 +194,7 @@ export const AddApplication = ({projectId, projectName}: Props) => {
 
     return (
         <Dialog open={visible} onOpenChange={setVisible}>
-            <DialogTrigger className="w-full">
+            {useTemplate ? '' : <DialogTrigger className="w-full">
                 <DropdownMenuItem
                     className="w-full cursor-pointer space-x-3"
                     onSelect={(e) => e.preventDefault()}
@@ -158,12 +202,12 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                     <Folder className="size-4 text-muted-foreground"/>
                     <span>应用</span>
                 </DropdownMenuItem>
-            </DialogTrigger>
+            </DialogTrigger>}
             <DialogContent className="max-h-screen  overflow-y-auto sm:max-w-3xl">
                 <DialogHeader>
-                    <DialogTitle>创建</DialogTitle>
+                    <DialogTitle>{useTemplate ? '使用模板创建应用' : '创建'}</DialogTitle>
                     <DialogDescription>
-                        为你的应用程序分配一个名称和描述
+                        {useTemplate ? '使用模板[' + appShopName + ']快速创建应用' : '为你的应用程序分配一个名称和描述'}
                     </DialogDescription>
                 </DialogHeader>
                 {isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
@@ -173,6 +217,41 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="grid w-full gap-4"
                     >
+                        {useTemplate ?
+                            <FormField
+                                control={form.control}
+                                name="versionId"
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel
+                                            className="break-all w-fit flex flex-row gap-1 items-center">
+                                            选择应用版本
+                                        </FormLabel>
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="选择一个版本"/>
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    {versions?.map((version) => (
+                                                        <SelectItem
+                                                            key={version.versionId}
+                                                            value={version.versionId}
+                                                        >
+                                                            <span>{version.versionNum}</span>
+                                                        </SelectItem>
+                                                    ))}
+                                                    <SelectLabel>镜像[{appShopName}]可用版本有({versions?.length})个</SelectLabel>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage/>
+                                    </FormItem>
+                                )}
+                            /> : ''}
                         <FormField
                             control={form.control}
                             name="name"
@@ -214,7 +293,7 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                                                 side="top"
                                             >
 												<span>
-													通用节点：可做任何用途，无SLA及数据保障<br />
+													通用节点：可做任何用途，无SLA及数据保障<br/>
 													建站节点：仅允许web应用、数据库，提供SLA及数据保障
 												</span>
                                             </TooltipContent>
@@ -237,20 +316,40 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                                                     >
                                                         <span
                                                             className="flex items-center gap-2 justify-between w-full">
-                                                            {server.type==='1' ?
+                                                            {server.type === '1' ?
                                                                 <span
                                                                     className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                                                                   建站
-                                                                </span>:
+                                                                </span> :
                                                                 <span
                                                                     className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
                                                                   通用
                                                                 </span>
                                                             }
-															<span>{server.name}</span>
-															<span className="text-muted-foreground text-xs self-center">
-																{server.ipAddress}
+                                                            <span>{server.name}</span>
+															<span className="text-muted-foreground text-xs self-center" style={{maxWidth:'60%'}}>
+																{server.description}
 															</span>
+                                                            <span>
+                                                                {(server.resourceUsed/server.resourceLimit) < 0.6 ? (
+                                                                    <span
+                                                                        className="inline-flex items-center px-2 py-1 text-sm font-medium bg-green-800 text-white">
+                                                                      正常
+                                                                    </span>
+                                                                ):''}
+                                                                {(server.resourceUsed/server.resourceLimit) >= 0.6 && (server.resourceUsed/server.resourceLimit) < 1 ? (
+                                                                    <span
+                                                                        className="inline-flex items-center px-2 py-1 text-sm font-medium bg-orange-400 text-white">
+                                                                      拥挤
+                                                                    </span>
+                                                                ):''}
+                                                                {(server.resourceUsed/server.resourceLimit) >= 1 ? (
+                                                                    <span
+                                                                        className="inline-flex items-center px-2 py-1 text-sm font-medium bg-red-800 text-white">
+                                                                      满载
+                                                                    </span>
+                                                                ):''}
+                                                            </span>
 														</span>
                                                     </SelectItem>
                                                 ))}
@@ -262,7 +361,8 @@ export const AddApplication = ({projectId, projectName}: Props) => {
                                 </FormItem>
                             )}
                         />
-                        {showTip && <AlertBlock type="warning">建站型节点不允许部署代理等持续高带宽占用应用，违者封禁账户且不退款</AlertBlock>}
+                        {showTip && <AlertBlock
+                            type="warning">建站型节点不允许部署代理等持续高带宽占用应用，违者封禁账户且不退款</AlertBlock>}
                         <FormField
                             control={form.control}
                             name="stand"

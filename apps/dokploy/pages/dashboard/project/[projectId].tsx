@@ -655,7 +655,7 @@ const Project = (
 											{/*	projectName={data?.name}*/}
 											{/*/>*/}
 											<AddTemplate projectId={projectId} />
-											<AddShop projectId={projectId} />
+											<AddShop projectId={projectId} projectName={data?.name} />
 
 											{/*<AddAiAssistant*/}
 											{/*	projectId={projectId}*/}
@@ -1017,26 +1017,8 @@ const Project = (
 																		</div>
 
 																		<span className="text-sm font-medium text-muted-foreground self-start">
-																			{service.type === "postgres" && (
-																				<PostgresqlIcon className="h-7 w-7" />
-																			)}
-																			{service.type === "redis" && (
-																				<RedisIcon className="h-7 w-7" />
-																			)}
-																			{service.type === "mariadb" && (
-																				<MariadbIcon className="h-7 w-7" />
-																			)}
-																			{service.type === "mongo" && (
-																				<MongodbIcon className="h-7 w-7" />
-																			)}
-																			{service.type === "mysql" && (
-																				<MysqlIcon className="h-7 w-7" />
-																			)}
 																			{service.type === "application" && (
 																				<GlobeIcon className="h-6 w-6" />
-																			)}
-																			{service.type === "compose" && (
-																				<CircuitBoard className="h-6 w-6" />
 																			)}
 																		</span>
 																	</div>

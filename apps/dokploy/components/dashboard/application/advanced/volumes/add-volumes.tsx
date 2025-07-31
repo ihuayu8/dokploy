@@ -51,12 +51,6 @@ const mountSchema = z.object({
 const mySchema = z.discriminatedUnion("type", [
 	z
 		.object({
-			type: z.literal("bind"),
-			hostPath: z.string().min(1, "Host path required"),
-		})
-		.merge(mountSchema),
-	z
-		.object({
 			type: z.literal("volume"),
 			volumeName: z.string().min(1, "Volume name required"),
 		})
@@ -82,8 +76,7 @@ export const AddVolumes = ({
 	const { mutateAsync } = api.mounts.create.useMutation();
 	const form = useForm<AddMount>({
 		defaultValues: {
-			type: serviceType === "compose" ? "file" : "bind",
-			hostPath: "",
+			type: "volume",
 			mountPath: serviceType === "compose" ? "/" : "",
 		},
 		resolver: zodResolver(mySchema),
@@ -95,22 +88,23 @@ export const AddVolumes = ({
 	}, [form, form.reset, form.formState.isSubmitSuccessful]);
 
 	const onSubmit = async (data: AddMount) => {
-		if (data.type === "bind") {
-			await mutateAsync({
-				serviceId,
-				hostPath: data.hostPath,
-				mountPath: data.mountPath,
-				type: data.type,
-				serviceType,
-			})
-				.then(() => {
-					toast.success("Mount Created");
-					setIsOpen(false);
-				})
-				.catch(() => {
-					toast.error("Error creating the Bind mount");
-				});
-		} else if (data.type === "volume") {
+		// if (data.type === "bind") {
+		// 	await mutateAsync({
+		// 		serviceId,
+		// 		hostPath: data.hostPath,
+		// 		mountPath: data.mountPath,
+		// 		type: data.type,
+		// 		serviceType,
+		// 	})
+		// 		.then(() => {
+		// 			toast.success("Mount Created");
+		// 			setIsOpen(false);
+		// 		})
+		// 		.catch(() => {
+		// 			toast.error("Error creating the Bind mount");
+		// 		});
+		// } else if (data.type === "volume") {
+		if (data.type === "volume") {
 			await mutateAsync({
 				serviceId,
 				volumeName: data.volumeName,
@@ -153,7 +147,7 @@ export const AddVolumes = ({
 			</DialogTrigger>
 			<DialogContent className="max-h-screen  overflow-y-auto sm:max-w-3xl">
 				<DialogHeader>
-					<DialogTitle>Volumes / Mounts</DialogTitle>
+					<DialogTitle>数据卷挂载</DialogTitle>
 				</DialogHeader>
 				{/* {isError && (
         <div className="flex items-center flex-row gap-4 rounded-lg bg-red-50 p-2 dark:bg-red-950">
@@ -170,23 +164,23 @@ export const AddVolumes = ({
 						onSubmit={form.handleSubmit(onSubmit)}
 						className="grid w-full gap-8 "
 					>
-						{type === "bind" && (
-							<AlertBlock>
-								<div className="space-y-2">
-									<p>
-										Make sure the host path is a valid path and exists in the
-										host machine.
-									</p>
-									<p className="text-sm text-muted-foreground">
-										<strong>Cluster Warning:</strong> If you're using cluster
-										features, bind mounts may cause deployment failures since
-										the path must exist on all worker/manager nodes. Consider
-										using external tools to distribute the folder across nodes
-										or use named volumes instead.
-									</p>
-								</div>
-							</AlertBlock>
-						)}
+						{/*{type === "bind" && (*/}
+						{/*	<AlertBlock>*/}
+						{/*		<div className="space-y-2">*/}
+						{/*			<p>*/}
+						{/*				Make sure the host path is a valid path and exists in the*/}
+						{/*				host machine.*/}
+						{/*			</p>*/}
+						{/*			<p className="text-sm text-muted-foreground">*/}
+						{/*				<strong>Cluster Warning:</strong> If you're using cluster*/}
+						{/*				features, bind mounts may cause deployment failures since*/}
+						{/*				the path must exist on all worker/manager nodes. Consider*/}
+						{/*				using external tools to distribute the folder across nodes*/}
+						{/*				or use named volumes instead.*/}
+						{/*			</p>*/}
+						{/*		</div>*/}
+						{/*	</AlertBlock>*/}
+						{/*)}*/}
 						<FormField
 							control={form.control}
 							defaultValue={form.control._defaultValues.type}
@@ -202,25 +196,25 @@ export const AddVolumes = ({
 											defaultValue={field.value}
 											className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
 										>
-											{serviceType !== "compose" && (
-												<FormItem className="flex items-center space-x-3 space-y-0">
-													<FormControl className="w-full">
-														<div>
-															<RadioGroupItem
-																value="bind"
-																id="bind"
-																className="peer sr-only"
-															/>
-															<Label
-																htmlFor="bind"
-																className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-															>
-																Bind Mount
-															</Label>
-														</div>
-													</FormControl>
-												</FormItem>
-											)}
+											{/*{serviceType !== "compose" && (*/}
+											{/*	<FormItem className="flex items-center space-x-3 space-y-0">*/}
+											{/*		<FormControl className="w-full">*/}
+											{/*			<div>*/}
+											{/*				<RadioGroupItem*/}
+											{/*					value="bind"*/}
+											{/*					id="bind"*/}
+											{/*					className="peer sr-only"*/}
+											{/*				/>*/}
+											{/*				<Label*/}
+											{/*					htmlFor="bind"*/}
+											{/*					className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"*/}
+											{/*				>*/}
+											{/*					Bind Mount*/}
+											{/*				</Label>*/}
+											{/*			</div>*/}
+											{/*		</FormControl>*/}
+											{/*	</FormItem>*/}
+											{/*)}*/}
 
 											{serviceType !== "compose" && (
 												<FormItem className="flex items-center space-x-3 space-y-0">
@@ -235,7 +229,7 @@ export const AddVolumes = ({
 																htmlFor="volume"
 																className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
 															>
-																Volume Mount
+																数据卷挂载
 															</Label>
 														</div>
 													</FormControl>
@@ -259,7 +253,7 @@ export const AddVolumes = ({
 															htmlFor="file"
 															className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
 														>
-															File Mount
+															文件挂载
 														</Label>
 													</div>
 												</FormControl>

@@ -18,7 +18,7 @@ import {
 	apiSaveGithubProvider,
 	apiSaveGitlabProvider,
 	apiUpdateApplication,
-	applications,
+	applications, server,
 } from "@/server/db/schema";
 import type { DeploymentJob } from "@/server/queues/queue-types";
 import { cleanQueuesByApplication, myQueue } from "@/server/queues/queueSetup";
@@ -54,7 +54,7 @@ import {
 	// uploadFileSchema
 } from "@dokploy/server";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import {eq, sql} from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import {checkBalance} from "@/server/utils/billing";
@@ -98,6 +98,7 @@ export const applicationRouter = createTRPCRouter({
 				}
 				return newApplication;
 			} catch (error: unknown) {
+				console.error(error)
 				if (error instanceof TRPCError) {
 					throw error;
 				}
@@ -256,6 +257,22 @@ export const applicationRouter = createTRPCRouter({
 				} catch (_) {}
 			}
 
+			// 删除应用后恢复资源数
+			if(application.currentReplicas != 0 ){
+				await db.transaction(async (tx) => {
+					// 计算归还资源量
+					const standList = await tx.query.stand.findMany()
+					const currentRsc = standList.find(item=>item.id === application.currentStand)?.resource || 0
+					const previewResource = application.currentReplicas * currentRsc
+
+					// @ts-ignore
+					await tx.update(server).set({
+						resourceUsed: sql`${server.resourceUsed} - ${previewResource}`
+					}).where(eq(server.serverId, application.serverId))
+						.returning()
+				})
+			}
+
 			return result[0];
 		}),
 
@@ -270,7 +287,7 @@ export const applicationRouter = createTRPCRouter({
 				});
 			}
 			if (service.serverId) {
-				await stopServiceRemote(service.serverId, service.appName);
+				await stopServiceRemote(service.serverId, service.appName, service);
 			} else {
 				await stopService(service.appName);
 			}
@@ -299,7 +316,23 @@ export const applicationRouter = createTRPCRouter({
 			}
 
 			if (service.serverId) {
-				await startServiceRemote(service.serverId, service.appName);
+				await startServiceRemote(service.serverId, service.appName, service);
+				// 部署成功后扣减资源
+				await db.transaction(async (tx) => {
+					// 计算预扣减资源量
+					const standList = await tx.query.stand.findMany()
+					const currentRsc = standList.find(item=>item.id === service.currentStand)?.resource || 0
+					const previewResource = service.replicas * currentRsc
+
+					// @ts-ignore
+					await tx.update(server).set({
+						resourceUsed: sql`${server.resourceUsed} + ${previewResource}`
+					}).where(eq(server.serverId, service.serverId))
+						.returning()
+					await tx.update(applications).set({
+						currentReplicas: service.replicas
+					}).where(eq(applications.applicationId, service.applicationId)).returning()
+				})
 			} else {
 				await startService(service.appName);
 			}

@@ -78,7 +78,7 @@ export const ShowProviderForm = ({ applicationId }: Props) => {
 						<div className="flex flex-col gap-2">
 							<span className="flex flex-col space-y-0.5">构建源</span>
 							<p className="flex items-center text-sm font-normal text-muted-foreground">
-								选择你的镜像或代码来源
+								选择你的镜像来源
 							</p>
 						</div>
 						<div className="hidden space-y-1 text-sm font-normal md:block">
@@ -135,9 +135,9 @@ export const ShowProviderForm = ({ applicationId }: Props) => {
 			<CardHeader>
 				<CardTitle className="flex items-start justify-between">
 					<div className="flex flex-col gap-2">
-						<span className="flex flex-col space-y-0.5">构建源</span>
+						<span className="flex flex-col space-y-0.5">镜像源</span>
 						<p className="flex items-center text-sm font-normal text-muted-foreground">
-							选择你的镜像或代码来源
+							配置镜像相关信息
 						</p>
 					</div>
 					<div className="hidden space-y-1 text-sm font-normal md:block">
@@ -155,34 +155,34 @@ export const ShowProviderForm = ({ applicationId }: Props) => {
 				>
 					<div className="flex flex-row items-center justify-between w-full gap-4">
 						<TabsList className="md:grid md:w-fit md:grid-cols-7 max-md:overflow-x-scroll justify-start bg-transparent overflow-y-hidden">
-							<TabsTrigger
-								value="github"
-								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
-							>
-								<GithubIcon className="size-4 text-current fill-current" />
-								Github
-							</TabsTrigger>
-							<TabsTrigger
-								value="gitlab"
-								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
-							>
-								<GitlabIcon className="size-4 text-current fill-current" />
-								Gitlab
-							</TabsTrigger>
-							<TabsTrigger
-								value="bitbucket"
-								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
-							>
-								<BitbucketIcon className="size-4 text-current fill-current" />
-								Bitbucket
-							</TabsTrigger>
-							<TabsTrigger
-								value="gitea"
-								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
-							>
-								<GiteaIcon className="size-4 text-current fill-current" />
-								Gitea
-							</TabsTrigger>
+							{/*<TabsTrigger*/}
+							{/*	value="github"*/}
+							{/*	className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"*/}
+							{/*>*/}
+							{/*	<GithubIcon className="size-4 text-current fill-current" />*/}
+							{/*	Github*/}
+							{/*</TabsTrigger>*/}
+							{/*<TabsTrigger*/}
+							{/*	value="gitlab"*/}
+							{/*	className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"*/}
+							{/*>*/}
+							{/*	<GitlabIcon className="size-4 text-current fill-current" />*/}
+							{/*	Gitlab*/}
+							{/*</TabsTrigger>*/}
+							{/*<TabsTrigger*/}
+							{/*	value="bitbucket"*/}
+							{/*	className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"*/}
+							{/*>*/}
+							{/*	<BitbucketIcon className="size-4 text-current fill-current" />*/}
+							{/*	Bitbucket*/}
+							{/*</TabsTrigger>*/}
+							{/*<TabsTrigger*/}
+							{/*	value="gitea"*/}
+							{/*	className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"*/}
+							{/*>*/}
+							{/*	<GiteaIcon className="size-4 text-current fill-current" />*/}
+							{/*	Gitea*/}
+							{/*</TabsTrigger>*/}
 							<TabsTrigger
 								value="docker"
 								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
@@ -190,20 +190,20 @@ export const ShowProviderForm = ({ applicationId }: Props) => {
 								<DockerIcon className="size-5 text-current" />
 								Docker
 							</TabsTrigger>
-							<TabsTrigger
-								value="git"
-								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
-							>
-								<GitIcon />
-								Git
-							</TabsTrigger>
-							<TabsTrigger
-								value="drop"
-								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
-							>
-								<UploadCloud className="size-5 text-current" />
-								上传
-							</TabsTrigger>
+							{/*<TabsTrigger*/}
+							{/*	value="git"*/}
+							{/*	className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"*/}
+							{/*>*/}
+							{/*	<GitIcon />*/}
+							{/*	Git*/}
+							{/*</TabsTrigger>*/}
+							{/*<TabsTrigger*/}
+							{/*	value="drop"*/}
+							{/*	className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"*/}
+							{/*>*/}
+							{/*	<UploadCloud className="size-5 text-current" />*/}
+							{/*	上传*/}
+							{/*</TabsTrigger>*/}
 						</TabsList>
 					</div>
 

@@ -34,7 +34,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const AddPortSchema = z.object({
-	publishedPort: z.number().int().min(1).max(65535),
+	publishedPort: z.number().int(),
 	publishMode: z.enum(["ingress", "host"], {
 		required_error: "Publish mode is required",
 	}),
@@ -96,7 +96,7 @@ export const HandlePorts = ({
 			portId: portId || "",
 		})
 			.then(async () => {
-				toast.success(portId ? "Port Updated" : "Port Created");
+				toast.success(portId ? "端口更新成功" : "端口创建成功");
 				await utils.application.one.invalidate({
 					applicationId,
 				});
@@ -104,7 +104,7 @@ export const HandlePorts = ({
 			})
 			.catch(() => {
 				toast.error(
-					portId ? "Error updating the port" : "Error creating the port",
+					portId ? "更新失败" : "创建失败",
 				);
 			});
 	};
@@ -126,9 +126,9 @@ export const HandlePorts = ({
 			</DialogTrigger>
 			<DialogContent className="max-h-screen  overflow-y-auto sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Ports</DialogTitle>
+					<DialogTitle>端口</DialogTitle>
 					<DialogDescription>
-						Ports are used to expose your application to the internet.
+						开放端口允许你将应用程序暴露在互联网上
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
@@ -142,65 +142,10 @@ export const HandlePorts = ({
 						<div className="flex flex-col gap-4">
 							<FormField
 								control={form.control}
-								name="publishedPort"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Published Port</FormLabel>
-										<FormControl>
-											<Input
-												placeholder="1-65535"
-												{...field}
-												value={field.value?.toString() || ""}
-												onChange={(e) => {
-													const value = e.target.value;
-													if (value === "") {
-														field.onChange(0);
-													} else {
-														const number = Number.parseInt(value, 10);
-														if (!Number.isNaN(number)) {
-															field.onChange(number);
-														}
-													}
-												}}
-											/>
-										</FormControl>
-
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="publishMode"
-								render={({ field }) => {
-									return (
-										<FormItem className="md:col-span-2">
-											<FormLabel>Published Port Mode</FormLabel>
-											<Select
-												onValueChange={field.onChange}
-												value={field.value}
-											>
-												<FormControl>
-													<SelectTrigger>
-														<SelectValue placeholder="Select a publish mode for the port" />
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													<SelectItem value={"ingress"}>Ingress</SelectItem>
-													<SelectItem value={"host"}>Host</SelectItem>
-												</SelectContent>
-											</Select>
-											<FormMessage />
-										</FormItem>
-									);
-								}}
-							/>
-							<FormField
-								control={form.control}
 								name="targetPort"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Target Port</FormLabel>
+										<FormLabel>目标端口</FormLabel>
 										<FormControl>
 											<Input
 												placeholder="1-65535"
@@ -230,7 +175,7 @@ export const HandlePorts = ({
 								render={({ field }) => {
 									return (
 										<FormItem className="md:col-span-2">
-											<FormLabel>Protocol</FormLabel>
+											<FormLabel>协议</FormLabel>
 											<Select
 												onValueChange={field.onChange}
 												value={field.value}
@@ -259,7 +204,7 @@ export const HandlePorts = ({
 							form="hook-form-add-port"
 							type="submit"
 						>
-							{portId ? "Update" : "Create"}
+							{portId ? "更新" : "创建"}
 						</Button>
 					</DialogFooter>
 				</Form>

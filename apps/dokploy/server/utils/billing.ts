@@ -26,5 +26,5 @@ export const checkBalance = async (organId : string) => {
 
     // 检查账户余额是否足够
     return user.balance > 0;
-
 }
+

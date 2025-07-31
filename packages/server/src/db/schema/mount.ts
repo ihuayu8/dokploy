@@ -21,7 +21,7 @@ export const serviceType = pgEnum("serviceType", [
 	"compose",
 ]);
 
-export const mountType = pgEnum("mountType", ["bind", "volume", "file"]);
+export const mountType = pgEnum("mountType", ["volume", "file"]);
 
 export const mounts = pgTable("mount", {
 	mountId: text("mountId")
@@ -59,6 +59,21 @@ export const mounts = pgTable("mount", {
 	}),
 });
 
+export const appliationShopMounts = pgTable("application_shop_mount", {
+	mountId: text("mountId")
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => nanoid()),
+	type: mountType("type").notNull(),
+	hostPath: text("hostPath"),
+	volumeName: text("volumeName"),
+	filePath: text("filePath"),
+	content: text("content"),
+	serviceType: serviceType("serviceType").notNull().default("application"),
+	mountPath: text("mountPath").notNull(),
+	versionId: text("versionId"),
+});
+
 export const MountssRelations = relations(mounts, ({ one }) => ({
 	application: one(applications, {
 		fields: [mounts.applicationId],
@@ -92,7 +107,7 @@ export const MountssRelations = relations(mounts, ({ one }) => ({
 
 const createSchema = createInsertSchema(mounts, {
 	applicationId: z.string(),
-	type: z.enum(["bind", "volume", "file"]),
+	type: z.enum(["volume", "file"]),
 	hostPath: z.string().optional(),
 	volumeName: z.string().optional(),
 	content: z.string().optional(),

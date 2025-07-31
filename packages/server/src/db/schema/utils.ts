@@ -19,7 +19,7 @@ export const cleanAppName = (appName?: string) => {
 	if (!appName) {
 		return appName?.toLowerCase();
 	}
-	return appName.trim().replace(/ /g, "-").toLowerCase();
+	return appName.trim().replace(/ /g, "-").replace(/[^a-zA-Z]/g, '').toLowerCase();
 };
 
 export const buildAppName = (type: string, baseAppName?: string) => {
@@ -27,4 +27,11 @@ export const buildAppName = (type: string, baseAppName?: string) => {
 		return `${cleanAppName(baseAppName)}-${generatePassword(6)}`;
 	}
 	return generateAppName(type);
+};
+
+export const buildVolumeName = (volumeName?: string) => {
+	if (volumeName && cleanAppName(volumeName) !== "") {
+		return `${cleanAppName(volumeName)}-${generatePassword(8)}`;
+	}
+	return "volume-" + generatePassword(8);
 };

@@ -153,7 +153,7 @@ export const findPreviewDeploymentsByApplicationId = async (
 export const createPreviewDeployment = async (
 	schema: typeof apiCreatePreviewDeployment._type,
 ) => {
-	const application = await findApplicationById(schema.applicationId);
+	const application = await findApplicationById(schema.applicationId, null);
 	const appName = `preview-${application.appName}-${generatePassword(6)}`;
 
 	const org = await db.query.organization.findFirst({
@@ -207,7 +207,7 @@ export const createPreviewDeployment = async (
 		customCertResolver: application.previewCustomCertResolver,
 		domainType: "preview",
 		previewDeploymentId: previewDeployment.previewDeploymentId,
-	});
+	}, null);
 
 	application.appName = appName;
 

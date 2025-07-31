@@ -17,10 +17,22 @@ export const ports = pgTable("port", {
 	publishMode: publishModeType("publishMode").notNull().default("host"),
 	targetPort: integer("targetPort").notNull(),
 	protocol: protocolType("protocol").notNull(),
-
+	serverId: text("serverId").notNull(),
 	applicationId: text("applicationId")
 		.notNull()
 		.references(() => applications.applicationId, { onDelete: "cascade" }),
+});
+
+export const applicationShopports = pgTable("application_shop_port", {
+	portId: text("portId")
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => nanoid()),
+	publishedPort: integer("publishedPort").notNull(),
+	publishMode: publishModeType("publishMode").notNull().default("host"),
+	targetPort: integer("targetPort").notNull(),
+	protocol: protocolType("protocol").notNull(),
+	versionId: text("versionId"),
 });
 
 export const portsRelations = relations(ports, ({ one }) => ({

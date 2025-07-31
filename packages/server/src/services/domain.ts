@@ -13,15 +13,15 @@ import { findServerById } from "./server";
 
 export type Domain = typeof domains.$inferSelect;
 
-export const createDomain = async (input: typeof apiCreateDomain._type) => {
+export const createDomain = async (input: typeof apiCreateDomain._type, txo:any) => {
 	const result = await db.transaction(async (tx) => {
-		const domain = await tx
+		const domain = await (txo? txo : tx)
 			.insert(domains)
 			.values({
 				...input,
 			})
 			.returning()
-			.then((response) => response[0]);
+			.then((response:any) => response[0]);
 
 		if (!domain) {
 			throw new TRPCError({
@@ -31,7 +31,7 @@ export const createDomain = async (input: typeof apiCreateDomain._type) => {
 		}
 
 		if (domain.applicationId) {
-			const application = await findApplicationById(domain.applicationId);
+			const application = await findApplicationById(domain.applicationId, txo);
 			await manageDomain(application, domain);
 		}
 

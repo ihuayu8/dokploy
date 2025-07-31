@@ -87,13 +87,13 @@ export const ShowClusterSettings = ({ applicationId }: Props) => {
 			replicas: data?.replicas,
 		})
 			.then(async () => {
-				toast.success("Command Updated");
+				toast.success("保存成功");
 				await utils.application.one.invalidate({
 					applicationId,
 				});
 			})
 			.catch(() => {
-				toast.error("Error updating the command");
+				toast.error("系统异常");
 			});
 	};
 
@@ -101,17 +101,16 @@ export const ShowClusterSettings = ({ applicationId }: Props) => {
 		<Card className="bg-background">
 			<CardHeader className="flex flex-row justify-between">
 				<div>
-					<CardTitle className="text-xl">Cluster Settings</CardTitle>
+					<CardTitle className="text-xl">集群设置</CardTitle>
 					<CardDescription>
-						Add the registry and the replicas of the application
+						管理应用在集群中的副本设置
 					</CardDescription>
 				</div>
-				<AddSwarmSettings applicationId={applicationId} />
+				{/*<AddSwarmSettings applicationId={applicationId} />*/}
 			</CardHeader>
 			<CardContent className="flex flex-col gap-4">
 				<AlertBlock type="info">
-					Please remember to click Redeploy after modify the cluster settings to
-					apply the changes.
+					修改集群设置后要点击 “重新部署” 以应用这些更改
 				</AlertBlock>
 				<Form {...form}>
 					<form
@@ -124,7 +123,7 @@ export const ShowClusterSettings = ({ applicationId }: Props) => {
 								name="replicas"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Replicas</FormLabel>
+										<FormLabel>副本数</FormLabel>
 										<FormControl>
 											<Input
 												placeholder="1"
@@ -144,64 +143,64 @@ export const ShowClusterSettings = ({ applicationId }: Props) => {
 							/>
 						</div>
 
-						{registries && registries?.length === 0 ? (
-							<div className="pt-10">
-								<div className="flex flex-col items-center gap-3">
-									<Server className="size-8 text-muted-foreground" />
-									<span className="text-base text-muted-foreground">
-										To use a cluster feature, you need to configure at least a
-										registry first. Please, go to{" "}
-										<Link
-											href="/dashboard/settings/cluster"
-											className="text-foreground"
-										>
-											Settings
-										</Link>{" "}
-										to do so.
-									</span>
-								</div>
-							</div>
-						) : (
-							<>
-								<FormField
-									control={form.control}
-									name="registryId"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Select a registry</FormLabel>
-											<Select
-												onValueChange={field.onChange}
-												defaultValue={field.value}
-											>
-												<SelectTrigger>
-													<SelectValue placeholder="Select a registry" />
-												</SelectTrigger>
-												<SelectContent>
-													<SelectGroup>
-														{registries?.map((registry) => (
-															<SelectItem
-																key={registry.registryId}
-																value={registry.registryId}
-															>
-																{registry.registryName}
-															</SelectItem>
-														))}
-														<SelectItem value={"none"}>None</SelectItem>
-														<SelectLabel>
-															Registries ({registries?.length})
-														</SelectLabel>
-													</SelectGroup>
-												</SelectContent>
-											</Select>
-										</FormItem>
-									)}
-								/>
-							</>
-						)}
+						{/*{registries && registries?.length === 0 ? (*/}
+						{/*	<div className="pt-10">*/}
+						{/*		<div className="flex flex-col items-center gap-3">*/}
+						{/*			<Server className="size-8 text-muted-foreground" />*/}
+						{/*			<span className="text-base text-muted-foreground">*/}
+						{/*				To use a cluster feature, you need to configure at least a*/}
+						{/*				registry first. Please, go to{" "}*/}
+						{/*				<Link*/}
+						{/*					href="/dashboard/settings/cluster"*/}
+						{/*					className="text-foreground"*/}
+						{/*				>*/}
+						{/*					Settings*/}
+						{/*				</Link>{" "}*/}
+						{/*				to do so.*/}
+						{/*			</span>*/}
+						{/*		</div>*/}
+						{/*	</div>*/}
+						{/*) : (*/}
+						{/*	<>*/}
+						{/*		<FormField*/}
+						{/*			control={form.control}*/}
+						{/*			name="registryId"*/}
+						{/*			render={({ field }) => (*/}
+						{/*				<FormItem>*/}
+						{/*					<FormLabel>Select a registry</FormLabel>*/}
+						{/*					<Select*/}
+						{/*						onValueChange={field.onChange}*/}
+						{/*						defaultValue={field.value}*/}
+						{/*					>*/}
+						{/*						<SelectTrigger>*/}
+						{/*							<SelectValue placeholder="Select a registry" />*/}
+						{/*						</SelectTrigger>*/}
+						{/*						<SelectContent>*/}
+						{/*							<SelectGroup>*/}
+						{/*								{registries?.map((registry) => (*/}
+						{/*									<SelectItem*/}
+						{/*										key={registry.registryId}*/}
+						{/*										value={registry.registryId}*/}
+						{/*									>*/}
+						{/*										{registry.registryName}*/}
+						{/*									</SelectItem>*/}
+						{/*								))}*/}
+						{/*								<SelectItem value={"none"}>None</SelectItem>*/}
+						{/*								<SelectLabel>*/}
+						{/*									Registries ({registries?.length})*/}
+						{/*								</SelectLabel>*/}
+						{/*							</SelectGroup>*/}
+						{/*						</SelectContent>*/}
+						{/*					</Select>*/}
+						{/*				</FormItem>*/}
+						{/*			)}*/}
+						{/*		/>*/}
+						{/*	</>*/}
+						{/*)}*/}
 
 						<div className="flex justify-end">
 							<Button isLoading={isLoading} type="submit" className="w-fit">
-								Save
+								保存
 							</Button>
 						</div>
 					</form>

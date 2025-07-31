@@ -2,8 +2,9 @@ import { docker } from "@dokploy/server/constants";
 import { db } from "@dokploy/server/db";
 import {
 	type apiCreateApplication, apiFindMonitoringStats,
-	applications,
-	buildAppName,
+	applications, applicationShopVersion, applicationShopDomains,
+	buildAppName, buildVolumeName, appliationShopMounts, mounts,
+	applicationShopports, server
 } from "@dokploy/server/db/schema";
 import { getAdvancedStats } from "@dokploy/server/monitoring/utils";
 import {
@@ -40,7 +41,7 @@ import {
 } from "@dokploy/server/utils/providers/gitlab";
 import { createTraefikConfig } from "@dokploy/server/utils/traefik/application";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import {and, eq, sql} from "drizzle-orm";
 import { encodeBase64 } from "../utils/docker/utils";
 import { getDokployUrl } from "./admin";
 import {
@@ -48,7 +49,7 @@ import {
 	createDeploymentPreview,
 	updateDeploymentStatus,
 } from "./deployment";
-import { type Domain, getDomainHost } from "./domain";
+import {createDomain, type Domain, getDomainHost} from "./domain";
 import {
 	createPreviewDeploymentComment,
 	getIssueComment,
@@ -61,9 +62,12 @@ import {
 } from "./preview-deployment";
 import { validUniqueServerAppName } from "./project";
 import { createRollback } from "./rollbacks";
-import {setRealStand, allocateCluster} from "@dokploy/server/utils/billing";
+import {setRealStand} from "@dokploy/server/utils/billing";
 import {z} from "zod";
 import {getContainerState} from "@dokploy/server/monitoring/service";
+import {generateRandomDomain} from "@dokploy/server/templates";
+import {findServerById} from "@dokploy/server/services/server";
+import {createPort} from "@dokploy/server/services/port";
 export type Application = typeof applications.$inferSelect;
 
 export const createApplication = async (
@@ -80,31 +84,83 @@ export const createApplication = async (
 	}
 
 	// 设置实际资源规格
-	const cSize = setRealStand(input)
+	const cSize = await setRealStand(input)
 
-	// 分配serverId
-	if(!input.serverId){
-		const serverId = await allocateCluster();
-		if (!serverId) {
-			throw new TRPCError({
-				code: "FORBIDDEN",
-				message: "无可用集群",
-			});
-		}else{
-			input.serverId = serverId;
-		}
+	//如果使用模板
+	let templateInfo : any;
+	if(input.useTemplate){
+		templateInfo = await db.query.applicationShopVersion.findFirst({
+			where: and(
+				eq(applicationShopVersion.appShopId, input.appShopId || 0),
+				eq(applicationShopVersion.versionId, input.versionId || "")
+			)
+		})
 	}
+
 	
 	return await db.transaction(async (tx) => {
+		// 创建应用
 		const newApplication = await tx
 			.insert(applications)
 			.values({
+				...templateInfo,
 				...input,
 				appName,
 				...cSize
 			})
 			.returning()
 			.then((value) => value[0]);
+
+		if(input.useTemplate){
+			// 创建域名
+			const domainList = await tx.query.applicationShopDomains.findMany({
+				where:eq(applicationShopDomains.versionId, input.versionId || "")
+			})
+			if(domainList.length > 0){
+				const server = await findServerById(newApplication?.serverId || "");
+				for (const item of domainList){
+					let tmp:any = {...item};
+					delete tmp.domainId;
+					tmp.host = generateRandomDomain({
+						serverIp: server.ipAddress,
+						projectName: newApplication?.appName || "",
+					})
+					tmp.applicationId= newApplication?.applicationId
+					await createDomain(tmp, tx)
+				}
+			}
+
+			// 创建数据卷
+			const mountList = await tx.query.appliationShopMounts.findMany({
+				where:eq(appliationShopMounts.versionId, input.versionId || "")
+			})
+			if(mountList.length > 0){
+				const shopMountList : any = []
+				mountList.forEach(item => {
+					let tmp:any = {...item};
+					delete tmp.mountId;
+					shopMountList.push({
+						...tmp,
+						volumeName: buildVolumeName(),
+						applicationId: newApplication?.applicationId
+					})
+				})
+				await tx.insert(mounts).values(shopMountList)
+			}
+
+			// 创建端口
+			const portList = await tx.query.applicationShopports.findMany({
+				where:eq(applicationShopports.versionId, input.versionId || "")
+			})
+			if(portList.length > 0){
+				for(const item of portList){
+					let tmp:any = {...item};
+					delete tmp.portId;
+					tmp.applicationId = newApplication?.applicationId
+					await createPort(tmp, tx)
+				}
+			}
+		}
 
 		if (!newApplication) {
 			throw new TRPCError({
@@ -121,8 +177,8 @@ export const createApplication = async (
 	});
 };
 
-export const findApplicationById = async (applicationId: string) => {
-	const application = await db.query.applications.findFirst({
+export const findApplicationById = async (applicationId: string, txo : any) => {
+	const application = await (txo?txo:db).query.applications.findFirst({
 		where: eq(applications.applicationId, applicationId),
 		with: {
 			project: true,
@@ -162,13 +218,18 @@ export const updateApplication = async (
 	applicationId: string,
 	applicationData: Partial<Application>,
 ) => {
+	const serverInfo = await db.query.applications.findFirst({
+		where:eq(applications.applicationId, applicationId),
+		columns:{
+			serverId: true
+		}
+	})
 	const { appName, ...rest } = applicationData;
-
+	applicationData.serverId = serverInfo?.serverId
 	// 设置实际资源规格
 	let cSize = null;
 	if(applicationData.stand){
-		cSize = setRealStand(applicationData)
-
+		cSize = await setRealStand(applicationData)
 	}
 	const application = await db
 		.update(applications)
@@ -206,7 +267,7 @@ export const deployApplication = async ({
 	titleLog: string;
 	descriptionLog: string;
 }) => {
-	const application = await findApplicationById(applicationId);
+	const application = await findApplicationById(applicationId, null);
 
 	const buildLink = `${await getDokployUrl()}/dashboard/project/${application.projectId}/services/application/${application.applicationId}?tab=deployments`;
 	const deployment = await createDeployment({
@@ -290,7 +351,7 @@ export const rebuildApplication = async ({
 	titleLog: string;
 	descriptionLog: string;
 }) => {
-	const application = await findApplicationById(applicationId);
+	const application = await findApplicationById(applicationId, null);
 
 	const deployment = await createDeployment({
 		applicationId: applicationId,
@@ -332,7 +393,7 @@ export const deployRemoteApplication = async ({
 	titleLog: string;
 	descriptionLog: string;
 }) => {
-	const application = await findApplicationById(applicationId);
+	const application = await findApplicationById(applicationId, null);
 
 	const buildLink = `${await getDokployUrl()}/dashboard/project/${application.projectId}/services/application/${application.applicationId}?tab=deployments`;
 	const deployment = await createDeployment({
@@ -377,6 +438,27 @@ export const deployRemoteApplication = async ({
 
 		await updateDeploymentStatus(deployment.deploymentId, "done");
 		await updateApplicationStatus(applicationId, "done");
+
+		// 部署成功后扣减资源
+		if(application.currentReplicas !== application.replicas || application.currentStand !== application.stand){
+			await db.transaction(async (tx) => {
+				// 计算预扣减资源量
+				const standList = await tx.query.stand.findMany()
+				const currentRsc = standList.find(item=>item.id === application.currentStand)?.resource || 0
+				const rsc = standList.find(item=>item.id === application.stand)?.resource || 0
+				const previewResource = (application.replicas * rsc) - (application.currentReplicas * currentRsc)
+
+				// @ts-ignore
+				await tx.update(server).set({
+					resourceUsed: sql`${server.resourceUsed} + ${previewResource}`
+				}).where(eq(server.serverId, application.serverId))
+					.returning()
+				await tx.update(applications).set({
+					currentStand: application.stand,
+					currentReplicas: application.replicas
+				}).where(eq(applications.applicationId, application.applicationId)).returning()
+			})
+		}
 
 		if (application.rollbackActive) {
 			const tagImage =
@@ -438,7 +520,7 @@ export const deployPreviewApplication = async ({
 	descriptionLog: string;
 	previewDeploymentId: string;
 }) => {
-	const application = await findApplicationById(applicationId);
+	const application = await findApplicationById(applicationId, null);
 
 	const deployment = await createDeploymentPreview({
 		title: titleLog,
@@ -545,7 +627,7 @@ export const deployRemotePreviewApplication = async ({
 	descriptionLog: string;
 	previewDeploymentId: string;
 }) => {
-	const application = await findApplicationById(applicationId);
+	const application = await findApplicationById(applicationId, null);
 
 	const deployment = await createDeploymentPreview({
 		title: titleLog,
@@ -658,7 +740,7 @@ export const rebuildRemoteApplication = async ({
 	titleLog: string;
 	descriptionLog: string;
 }) => {
-	const application = await findApplicationById(applicationId);
+	const application = await findApplicationById(applicationId, null);
 
 	const deployment = await createDeployment({
 		applicationId: applicationId,
@@ -677,6 +759,20 @@ export const rebuildRemoteApplication = async ({
 		}
 		await updateDeploymentStatus(deployment.deploymentId, "done");
 		await updateApplicationStatus(applicationId, "done");
+
+		// 部署成功后扣减资源
+		// if(application.previewResource != 0 ){
+		// 	await db.transaction(async (tx) => {
+		// 		// @ts-ignore
+		// 		await tx.update(server).set({
+		// 			resourceUsed: sql`${server.resourceUsed} + ${application.previewResource}`
+		// 		}).where(eq(server.serverId, application.serverId))
+		// 			.returning()
+		// 		await tx.update(applications).set({
+		// 			previewResource: 0
+		// 		}).where(eq(applications.applicationId, application.applicationId)).returning()
+		// 	})
+		// }
 	} catch (error) {
 		// @ts-ignore
 		const encodedContent = encodeBase64(error?.message);

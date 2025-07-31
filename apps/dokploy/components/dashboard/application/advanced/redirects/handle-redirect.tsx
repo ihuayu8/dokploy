@@ -181,18 +181,18 @@ export const HandleRedirect = ({
 			</DialogTrigger>
 			<DialogContent className="max-h-screen overflow-y-auto sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Redirects</DialogTitle>
+					<DialogTitle>重定向</DialogTitle>
 					<DialogDescription>
-						Redirects are used to redirect requests to another url.
+						重定向用于将请求转发到另一个 URL
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 
 				<div className="md:col-span-2">
-					<Label>Presets</Label>
+					<Label>预设</Label>
 					<Select onValueChange={onPresetSelect} value={presetSelected}>
 						<SelectTrigger>
-							<SelectValue placeholder="No preset selected" />
+							<SelectValue placeholder="没有选择预设" />
 						</SelectTrigger>
 						<SelectContent>
 							{redirectPresets.map((preset) => (
@@ -218,7 +218,7 @@ export const HandleRedirect = ({
 								name="regex"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Regex</FormLabel>
+										<FormLabel>正则</FormLabel>
 										<FormControl>
 											<Input placeholder="^http://localhost/(.*)" {...field} />
 										</FormControl>
@@ -232,7 +232,7 @@ export const HandleRedirect = ({
 								name="replacement"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Replacement</FormLabel>
+										<FormLabel>重写</FormLabel>
 										<FormControl>
 											<Input placeholder="http://mydomain/$${1}" {...field} />
 										</FormControl>
@@ -248,10 +248,9 @@ export const HandleRedirect = ({
 								render={({ field }) => (
 									<FormItem className="flex flex-row items-center justify-between p-3 mt-4 border rounded-lg shadow-sm">
 										<div className="space-y-0.5">
-											<FormLabel>Permanent</FormLabel>
+											<FormLabel>永久</FormLabel>
 											<FormDescription>
-												Set the permanent option to true to apply a permanent
-												redirection.
+												开启此选项后将启用永久重定向
 											</FormDescription>
 										</div>
 										<FormControl>
@@ -272,7 +271,7 @@ export const HandleRedirect = ({
 							form="hook-form-add-redirect"
 							type="submit"
 						>
-							{redirectId ? "Update" : "Create"}
+							{redirectId ? "更新" : "创建"}
 						</Button>
 					</DialogFooter>
 				</Form>

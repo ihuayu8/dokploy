@@ -69,67 +69,56 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { AddApplication } from "@/components/dashboard/project/add-application";
 
 const TEMPLATE_BASE_URL_KEY = "dokploy_template_base_url";
 
 interface Props {
 	projectId: string;
-	baseUrl?: string;
+	projectName?: string;
 }
 
-export const AddShop = ({ projectId, baseUrl }: Props) => {
+export const AddShop = ({ projectId, projectName }: Props) => {
 	const [query, setQuery] = useState("");
 	const [open, setOpen] = useState(false);
 	const [viewMode, setViewMode] = useState<"detailed" | "icon">("detailed");
 	const [selectedTags, setSelectedTags] = useState<string[]>([]);
-	const [customBaseUrl, setCustomBaseUrl] = useState<string | undefined>(() => {
-		// Try to get from props first, then localStorage
-		if (baseUrl) return baseUrl;
-		if (typeof window !== "undefined") {
-			return localStorage.getItem(TEMPLATE_BASE_URL_KEY) || undefined;
-		}
-		return undefined;
-	});
+	const [visible, setVisible] = useState(false);
+	const [order, setOrder] = useState<string>("install-desc");
+	const [appShopId, setAppShopId] = useState<string | null>(null);
+	const [appShopName, setAppShopName] = useState<string | null>(null);
 
-	// Save to localStorage when customBaseUrl changes
-	useEffect(() => {
-		if (customBaseUrl) {
-			localStorage.setItem(TEMPLATE_BASE_URL_KEY, customBaseUrl);
-		} else {
-			localStorage.removeItem(TEMPLATE_BASE_URL_KEY);
-		}
-	}, [customBaseUrl]);
 
 	const {
 		data,
 		isLoading: isLoadingTemplates,
 		error: errorTemplates,
 		isError: isErrorTemplates,
-	} = api.compose.templates.useQuery(
-		{ baseUrl: customBaseUrl },
+	} = api.applicationShop.allApps.useQuery(
+		{ order },
 		{
 			enabled: open,
 		},
 	);
-	const { data: isCloud } = api.settings.isCloud.useQuery();
-	const { data: servers } = api.server.withSSHKey.useQuery();
-	const { data: tags, isLoading: isLoadingTags } = api.compose.getTags.useQuery(
-		{ baseUrl: customBaseUrl },
-		{
-			enabled: open,
-		},
-	);
-	const utils = api.useUtils();
 
-	const [serverId, setServerId] = useState<string | undefined>(undefined);
-	const { mutateAsync, isLoading, error, isError } =
-		api.compose.deployTemplate.useMutation();
+	const { data: tags, isLoading: isLoadingTags } = api.applicationShop.allTags.useQuery(
+		null,
+		{
+			enabled: open,
+		},
+	);
+
+	const handleCreate = (id, name)=>{
+		setAppShopId(id)
+		setAppShopName(name);
+		setVisible(true)
+	}
 
 	const templates =
 		data?.filter((template) => {
 			const matchesTags =
 				selectedTags.length === 0 ||
-				template.tags.some((tag) => selectedTags.includes(tag));
+				template.tags?.some((tag) => selectedTags.includes(tag));
 			const matchesQuery =
 				query === "" ||
 				template.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -138,7 +127,10 @@ export const AddShop = ({ projectId, baseUrl }: Props) => {
 		}) || [];
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<>
+			<AddApplication projectId={projectId} projectName={projectName} useTemplate={true} visibleOut={visible}
+							setVisibleOut={setVisible} appShopId={appShopId} appShopName={appShopName} setTempVisible={setVisible}></AddApplication>
+			<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger className="w-full">
 				<DropdownMenuItem
 					className="w-full cursor-pointer space-x-3"
@@ -155,7 +147,7 @@ export const AddShop = ({ projectId, baseUrl }: Props) => {
 							<div>
 								<DialogTitle>从应用商店创建</DialogTitle>
 								<DialogDescription>
-									从应用市场快速创建一个应用
+									从应用商店快速创建一个应用
 								</DialogDescription>
 							</div>
 							<div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -165,14 +157,25 @@ export const AddShop = ({ projectId, baseUrl }: Props) => {
 									className="w-full sm:w-[200px]"
 									value={query}
 								/>
-								{/*<Input*/}
-								{/*	placeholder="Base URL (optional)"*/}
-								{/*	onChange={(e) =>*/}
-								{/*		setCustomBaseUrl(e.target.value || undefined)*/}
-								{/*	}*/}
-								{/*	className="w-full sm:w-[300px]"*/}
-								{/*	value={customBaseUrl || ""}*/}
-								{/*/>*/}
+								<Select value={order} onValueChange={setOrder}>
+									<SelectTrigger className="lg:w-[280px]">
+										<SelectValue placeholder="排序..." />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="install-desc">
+											最热门
+										</SelectItem>
+										<SelectItem value="intime-desc">
+											最新
+										</SelectItem>
+										<SelectItem value="name-asc">
+											名称 (A-Z)
+										</SelectItem>
+										<SelectItem value="name-desc">
+											名称 (Z-A)
+										</SelectItem>
+									</SelectContent>
+								</Select>
 								<Popover modal={true}>
 									<PopoverTrigger asChild>
 										<Button
@@ -198,7 +201,7 @@ export const AddShop = ({ projectId, baseUrl }: Props) => {
 											/>
 											{isLoadingTags && (
 												<span className="py-6 text-center text-sm">
-													Loading Tags....
+													加载标签中....
 												</span>
 											)}
 											<CommandEmpty>没有找到标签</CommandEmpty>
@@ -206,23 +209,23 @@ export const AddShop = ({ projectId, baseUrl }: Props) => {
 												<CommandGroup>
 													{tags?.map((tag) => (
 														<CommandItem
-															value={tag}
-															key={tag}
+															value={tag.value}
+															key={tag.value}
 															onSelect={() => {
-																if (selectedTags.includes(tag)) {
+																if (selectedTags.includes(tag.value)) {
 																	setSelectedTags(
-																		selectedTags.filter((t) => t !== tag),
+																		selectedTags.filter((t) => t !== tag.value),
 																	);
 																	return;
 																}
-																setSelectedTags([...selectedTags, tag]);
+																setSelectedTags([...selectedTags, tag.value]);
 															}}
 														>
-															{tag}
+															{tag.value}
 															<CheckIcon
 																className={cn(
 																	"ml-auto h-4 w-4",
-																	selectedTags.includes(tag)
+																	selectedTags.includes(tag.value)
 																		? "opacity-100"
 																		: "opacity-0",
 																)}
@@ -270,12 +273,6 @@ export const AddShop = ({ projectId, baseUrl }: Props) => {
 
 				<ScrollArea className="h-[calc(98vh-8rem)]">
 					<div className="p-6">
-						{isError && (
-							<AlertBlock type="error" className="mb-4">
-								{error?.message}
-							</AlertBlock>
-						)}
-
 						{isErrorTemplates && (
 							<AlertBlock type="error" className="mb-4">
 								{errorTemplates?.message}
@@ -307,7 +304,7 @@ export const AddShop = ({ projectId, baseUrl }: Props) => {
 							>
 								{templates?.map((template) => (
 									<div
-										key={template?.id}
+										key={template?.appShopId}
 										className={cn(
 											"flex flex-col border rounded-lg overflow-hidden relative",
 											viewMode === "icon" && "h-[200px]",
@@ -315,7 +312,7 @@ export const AddShop = ({ projectId, baseUrl }: Props) => {
 										)}
 									>
 										<Badge className="absolute top-2 right-2" variant="blue">
-											{template?.version}
+											{template?.versionNum}
 										</Badge>
 										<div
 											className={cn(
@@ -324,7 +321,7 @@ export const AddShop = ({ projectId, baseUrl }: Props) => {
 											)}
 										>
 											<img
-												src={`${customBaseUrl || "https://templates.dokploy.com/"}/blueprints/${template?.id}/${template?.logo}`}
+												src={`${template?.logo}`}
 												className={cn(
 													"object-contain",
 													viewMode === "detailed" ? "size-24" : "size-16",
@@ -372,27 +369,27 @@ export const AddShop = ({ projectId, baseUrl }: Props) => {
 										>
 											{viewMode === "detailed" && (
 												<div className="flex gap-2">
-													{template?.links?.github && (
+													{template?.github && (
 														<Link
-															href={template?.links?.github}
+															href={template?.github}
 															target="_blank"
 															className="text-muted-foreground hover:text-foreground transition-colors"
 														>
 															<GithubIcon className="size-5" />
 														</Link>
 													)}
-													{template?.links?.website && (
+													{template?.website && (
 														<Link
-															href={template?.links?.website}
+															href={template?.website}
 															target="_blank"
 															className="text-muted-foreground hover:text-foreground transition-colors"
 														>
 															<Globe className="size-5" />
 														</Link>
 													)}
-													{template?.links?.docs && (
+													{template?.docs && (
 														<Link
-															href={template?.links?.docs}
+															href={template?.docs}
 															target="_blank"
 															className="text-muted-foreground hover:text-foreground transition-colors"
 														>
@@ -401,116 +398,17 @@ export const AddShop = ({ projectId, baseUrl }: Props) => {
 													)}
 												</div>
 											)}
-											<AlertDialog>
-												<AlertDialogTrigger asChild>
-													<Button
-														variant="secondary"
-														size="sm"
-														className={cn(
-															"w-auto",
-															viewMode === "detailed" && "w-auto",
-														)}
-													>
-														Create
-													</Button>
-												</AlertDialogTrigger>
-												<AlertDialogContent>
-													<AlertDialogHeader>
-														<AlertDialogTitle>
-															Are you absolutely sure?
-														</AlertDialogTitle>
-														<AlertDialogDescription>
-															This will create an application from the{" "}
-															{template?.name} template and add it to your
-															project.
-														</AlertDialogDescription>
-
-														<div>
-															<TooltipProvider delayDuration={0}>
-																<Tooltip>
-																	<TooltipTrigger asChild>
-																		<Label className="break-all w-fit flex flex-row gap-1 items-center pb-2 pt-3.5">
-																			Select a Server{" "}
-																			{!isCloud ? "(Optional)" : ""}
-																			<HelpCircle className="size-4 text-muted-foreground" />
-																		</Label>
-																	</TooltipTrigger>
-																	<TooltipContent
-																		className="z-[999] w-[300px]"
-																		align="start"
-																		side="top"
-																	>
-																		<span>
-																			If no server is selected, the application
-																			will be deployed on the server where the
-																			user is logged in.
-																		</span>
-																	</TooltipContent>
-																</Tooltip>
-															</TooltipProvider>
-
-															<Select
-																onValueChange={(e) => {
-																	setServerId(e);
-																}}
-															>
-																<SelectTrigger>
-																	<SelectValue placeholder="Select a Server" />
-																</SelectTrigger>
-																<SelectContent>
-																	<SelectGroup>
-																		{servers?.map((server) => (
-																			<SelectItem
-																				key={server.serverId}
-																				value={server.serverId}
-																			>
-																				<span className="flex items-center gap-2 justify-between w-full">
-																					<span>{server.name}</span>
-																					<span className="text-muted-foreground text-xs self-center">
-																						{server.ipAddress}
-																					</span>
-																				</span>
-																			</SelectItem>
-																		))}
-																		<SelectLabel>
-																			Servers ({servers?.length})
-																		</SelectLabel>
-																	</SelectGroup>
-																</SelectContent>
-															</Select>
-														</div>
-													</AlertDialogHeader>
-													<AlertDialogFooter>
-														<AlertDialogCancel>Cancel</AlertDialogCancel>
-														<AlertDialogAction
-															disabled={isLoading}
-															onClick={async () => {
-																const promise = mutateAsync({
-																	projectId,
-																	serverId: serverId || undefined,
-																	id: template.id,
-																	baseUrl: customBaseUrl,
-																});
-																toast.promise(promise, {
-																	loading: "Setting up...",
-																	success: () => {
-																		utils.project.one.invalidate({
-																			projectId,
-																		});
-																		setOpen(false);
-																		return `${template.name} template created successfully`;
-																	},
-																	error: () => {
-																		return `An error occurred deploying ${template.name} template`;
-																	},
-																});
-															}}
-														>
-															Confirm
-														</AlertDialogAction>
-													</AlertDialogFooter>
-												</AlertDialogContent>
-											</AlertDialog>
+											<Button
+												variant="secondary"
+												size="sm"
+												onClick={()=>handleCreate(template?.appShopId, template?.name)}
+												className={cn(
+													"w-auto",
+													viewMode === "detailed" && "w-auto",
+												)}
+											>
+												创建
+											</Button>
 										</div>
 									</div>
 								))}
@@ -520,5 +418,6 @@ export const AddShop = ({ projectId, baseUrl }: Props) => {
 				</ScrollArea>
 			</DialogContent>
 		</Dialog>
+		</>
 	);
 };

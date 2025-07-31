@@ -14,6 +14,7 @@ import { ShowDockerLogs } from "@/components/dashboard/application/logs/show";
 import { ShowPreviewDeployments } from "@/components/dashboard/application/preview-deployments/show-preview-deployments";
 import { ShowSchedules } from "@/components/dashboard/application/schedules/show-schedules";
 import { UpdateApplication } from "@/components/dashboard/application/update-application";
+import { ReleaseApplication } from "@/components/dashboard/application/release-application";
 import { ShowVolumeBackups } from "@/components/dashboard/application/volume-backups/show-volume-backups";
 import { DeleteService } from "@/components/dashboard/compose/delete-service";
 import { ContainerFreeMonitoring } from "@/components/dashboard/monitoring/free/container/show-free-container-monitoring";
@@ -140,7 +141,7 @@ const Service = (
 										onClick={() => {
 											if (data?.server?.ipAddress) {
 												copy(data.server.ipAddress);
-												toast.success("IP Address Copied!");
+												toast.success("IP地址已复制");
 											}
 										}}
 										variant={
@@ -151,7 +152,7 @@ const Service = (
 													: "destructive"
 										}
 									>
-										{data?.server?.name || "Dokploy Server"}
+										{(data?.server?.name || "Dokploy Server") + " | " +data?.server?.ipAddress}
 									</Badge>
 									{data?.server?.serverStatus === "inactive" && (
 										<TooltipProvider delayDuration={0}>
@@ -167,9 +168,7 @@ const Service = (
 													side="top"
 												>
 													<span>
-														You cannot, deploy this application because the
-														server is inactive, please upgrade your plan to add
-														more servers.
+														您无法部署此应用程序，因为该服务器已停用。请将您的应用转移至其他节点使用！
 													</span>
 												</TooltipContent>
 											</Tooltip>
@@ -178,6 +177,7 @@ const Service = (
 								</div>
 
 								<div className="flex flex-row gap-2 justify-end">
+									<ReleaseApplication applicationId={applicationId} />
 									<UpdateApplication applicationId={applicationId} />
 									{(auth?.role === "owner" || auth?.canDeleteServices) && (
 										<DeleteService id={applicationId} type="application" />
@@ -191,20 +191,18 @@ const Service = (
 									<div className="max-w-3xl mx-auto flex flex-col items-center justify-center self-center gap-3">
 										<ServerOff className="size-10 text-muted-foreground self-center" />
 										<span className="text-center text-base text-muted-foreground">
-											This service is hosted on the server {data.server.name},
-											but this server has been disabled because your current
-											plan doesn't include enough servers. Please purchase more
-											servers to regain access to this application.
+											此服务托管在[{data.server.name}]
+											服务器上，但该服务器已停用。建议您将该服务转移到其他节点使用。
 										</span>
-										<span className="text-center text-base text-muted-foreground">
-											Go to{" "}
-											<Link
-												href="/dashboard/settings/billing"
-												className="text-primary"
-											>
-												Billing
-											</Link>
-										</span>
+										{/*<span className="text-center text-base text-muted-foreground">*/}
+										{/*	Go to{" "}*/}
+										{/*	<Link*/}
+										{/*		href="/dashboard/settings/billing"*/}
+										{/*		className="text-primary"*/}
+										{/*	>*/}
+										{/*		Billing*/}
+										{/*	</Link>*/}
+										{/*</span>*/}
 									</div>
 								</div>
 							) : (
@@ -327,7 +325,7 @@ const Service = (
 											<ShowRedirects applicationId={applicationId} />
 											<ShowSecurity applicationId={applicationId} />
 											<ShowPorts applicationId={applicationId} />
-											<ShowTraefikConfig applicationId={applicationId} />
+											{/*<ShowTraefikConfig applicationId={applicationId} />*/}
 										</div>
 									</TabsContent>
 								</Tabs>

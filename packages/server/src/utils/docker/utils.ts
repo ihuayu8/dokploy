@@ -14,6 +14,9 @@ import type { RedisNested } from "../databases/redis";
 import { execAsync, execAsyncRemote } from "../process/execAsync";
 import { spawnAsync } from "../process/spawnAsync";
 import { getRemoteDocker } from "../servers/remote-docker";
+import {db} from "@dokploy/server/db";
+import {applications, server} from "@dokploy/server/db/schema";
+import {eq, sql} from "drizzle-orm";
 
 interface RegistryAuth {
 	username: string;
@@ -115,9 +118,26 @@ export const stopService = async (appName: string) => {
 	}
 };
 
-export const stopServiceRemote = async (serverId: string, appName: string) => {
+export const stopServiceRemote = async (serverId: string, appName: string, application:any) => {
 	try {
 		await execAsyncRemote(serverId, `docker service scale ${appName}=0 `);
+
+		// 停止应用后恢复资源数
+		await db.transaction(async (tx) => {
+			// 计算归还资源量
+			const standList = await tx.query.stand.findMany()
+			const currentRsc = standList.find(item=>item.id === application.currentStand)?.resource || 0
+			const previewResource = application.currentReplicas * currentRsc
+
+			// @ts-ignore
+			await tx.update(server).set({
+				resourceUsed: sql`${server.resourceUsed} - ${previewResource}`
+			}).where(eq(server.serverId, application.serverId))
+				.returning()
+			await tx.update(applications).set({
+				currentReplicas: 0
+			}).where(eq(applications.applicationId, application.applicationId)).returning()
+		})
 	} catch (error) {
 		console.error(error);
 		return error;
@@ -229,9 +249,9 @@ export const startService = async (appName: string) => {
 	}
 };
 
-export const startServiceRemote = async (serverId: string, appName: string) => {
+export const startServiceRemote = async (serverId: string, appName: string, application:any) => {
 	try {
-		await execAsyncRemote(serverId, `docker service scale ${appName}=1 `);
+		await execAsyncRemote(serverId, `docker service scale ${appName}=${application.replicas} `);
 	} catch (error) {
 		console.error(error);
 		throw error;
@@ -425,7 +445,9 @@ export const generateBindMounts = (mounts: ApplicationNested["mounts"]) => {
 		return [];
 	}
 
+
 	return mounts
+		// @ts-ignore
 		.filter((mount) => mount.type === "bind")
 		.map((mount) => ({
 			Type: "bind" as const,

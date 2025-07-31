@@ -4,7 +4,7 @@ import { db } from "@dokploy/server/db";
 import {
 	type ServiceType,
 	type apiCreateMount,
-	mounts,
+	mounts, buildVolumeName,
 } from "@dokploy/server/db/schema";
 import {
 	createFile,
@@ -19,6 +19,9 @@ export type Mount = typeof mounts.$inferSelect;
 
 export const createMount = async (input: typeof apiCreateMount._type) => {
 	try {
+		// 生成数据卷名称
+		input.volumeName = buildVolumeName(input.volumeName || "")
+
 		const { serviceId, ...rest } = input;
 		const value = await db
 			.insert(mounts)

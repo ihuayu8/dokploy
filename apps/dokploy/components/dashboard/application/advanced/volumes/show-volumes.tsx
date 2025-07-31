@@ -42,16 +42,15 @@ export const ShowVolumes = ({ id, type }: Props) => {
 		<Card className="bg-background">
 			<CardHeader className="flex flex-row justify-between flex-wrap gap-4">
 				<div>
-					<CardTitle className="text-xl">Volumes</CardTitle>
+					<CardTitle className="text-xl">数据卷</CardTitle>
 					<CardDescription>
-						If you want to persist data in this service use the following config
-						to setup the volumes
+						配置数据卷以在服务器中持久化存储数据
 					</CardDescription>
 				</div>
 
 				{data && data?.mounts.length > 0 && (
 					<AddVolumes serviceId={id} refetch={refetch} serviceType={type}>
-						Add Volume
+						添加数据卷
 					</AddVolumes>
 				)}
 			</CardHeader>
@@ -60,17 +59,16 @@ export const ShowVolumes = ({ id, type }: Props) => {
 					<div className="flex w-full flex-col items-center justify-center gap-3 pt-10">
 						<Package className="size-8 text-muted-foreground" />
 						<span className="text-base text-muted-foreground">
-							No volumes/mounts configured
+							未配置任何卷 / 挂载项
 						</span>
 						<AddVolumes serviceId={id} refetch={refetch} serviceType={type}>
-							Add Volume
+							添加数据卷
 						</AddVolumes>
 					</div>
 				) : (
 					<div className="flex flex-col pt-2 gap-4">
 						<AlertBlock type="warning">
-							Please remember to click Redeploy after adding, editing, or
-							deleting a mount to apply the changes.
+							请注意，在添加、编辑或删除挂载项后，请点击 “重新部署” 以应用更改。
 						</AlertBlock>
 						<div className="flex flex-col gap-6">
 							{data?.mounts.map((mount) => (
@@ -82,14 +80,14 @@ export const ShowVolumes = ({ id, type }: Props) => {
 										{/* <Package className="size-8 self-center text-muted-foreground" /> */}
 										<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 flex-col gap-4 sm:gap-8">
 											<div className="flex flex-col gap-1">
-												<span className="font-medium">Mount Type</span>
+												<span className="font-medium">挂载类型</span>
 												<span className="text-sm text-muted-foreground">
 													{mount.type.toUpperCase()}
 												</span>
 											</div>
 											{mount.type === "volume" && (
 												<div className="flex flex-col gap-1">
-													<span className="font-medium">Volume Name</span>
+													<span className="font-medium">数据卷名称</span>
 													<span className="text-sm text-muted-foreground">
 														{mount.volumeName}
 													</span>
@@ -98,30 +96,30 @@ export const ShowVolumes = ({ id, type }: Props) => {
 
 											{mount.type === "file" && (
 												<div className="flex flex-col gap-1">
-													<span className="font-medium">Content</span>
+													<span className="font-medium">文件内容</span>
 													<span className="text-sm text-muted-foreground line-clamp-[10] whitespace-break-spaces">
 														{mount.content}
 													</span>
 												</div>
 											)}
-											{mount.type === "bind" && (
-												<div className="flex flex-col gap-1">
-													<span className="font-medium">Host Path</span>
-													<span className="text-sm text-muted-foreground">
-														{mount.hostPath}
-													</span>
-												</div>
-											)}
+											{/*{mount.type === "bind" && (*/}
+											{/*	<div className="flex flex-col gap-1">*/}
+											{/*		<span className="font-medium">Host Path</span>*/}
+											{/*		<span className="text-sm text-muted-foreground">*/}
+											{/*			{mount.hostPath}*/}
+											{/*		</span>*/}
+											{/*	</div>*/}
+											{/*)}*/}
 											{mount.type === "file" ? (
 												<div className="flex flex-col gap-1">
-													<span className="font-medium">File Path</span>
+													<span className="font-medium">文件名称</span>
 													<span className="text-sm text-muted-foreground">
 														{mount.filePath}
 													</span>
 												</div>
 											) : (
 												<div className="flex flex-col gap-1">
-													<span className="font-medium">Mount Path</span>
+													<span className="font-medium">挂载路径</span>
 													<span className="text-sm text-muted-foreground">
 														{mount.mountPath}
 													</span>
@@ -136,8 +134,8 @@ export const ShowVolumes = ({ id, type }: Props) => {
 												serviceType={type}
 											/>
 											<DialogAction
-												title="Delete Volume"
-												description="Are you sure you want to delete this volume?"
+												title="删除数据卷"
+												description="确认删除此数据卷吗?"
 												type="destructive"
 												onClick={async () => {
 													await deleteVolume({
@@ -145,10 +143,10 @@ export const ShowVolumes = ({ id, type }: Props) => {
 													})
 														.then(() => {
 															refetch();
-															toast.success("Volume deleted successfully");
+															toast.success("删除成功");
 														})
 														.catch(() => {
-															toast.error("Error deleting volume");
+															toast.error("系统异常");
 														});
 												}}
 											>

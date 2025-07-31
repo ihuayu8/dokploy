@@ -1,10 +1,10 @@
 import {TRPCError} from "@trpc/server";
 import {
-    type apiCreateApplication, server,
+    type apiCreateApplication, server, stand,
 } from "@dokploy/server/db/schema";
 import {Application} from "@dokploy/server/services/application";
 import {db} from "@dokploy/server/db";
-import {and, eq} from "drizzle-orm";
+import {and, asc, eq, inArray} from "drizzle-orm";
 
 interface ContainerSize {
     stand: string,
@@ -53,12 +53,25 @@ export const allocateCluster = async () => {
 }
 
 // 根据规格计算cpu和内存限制
-export const setRealStand = (input: typeof apiCreateApplication._type | Partial<Application>) => {
-    const standard = standMap[input.stand || ""] || {
-        cpu: null,
-        mem: null
-    };
-    if(!standard.mem){
+export const setRealStand = async (input: typeof apiCreateApplication._type | Partial<Application>) => {
+    let stdList:any = [];
+    const serverInfo = await db.query.server.findFirst({
+        where: eq(server.serverId, input.serverId || ""),
+    });
+
+    if(!!serverInfo && !!serverInfo.standList && serverInfo.standList.length > 0){
+        stdList = await db.query.stand.findMany({
+            orderBy: asc(stand.num),
+            where: inArray(stand.id, serverInfo.standList),
+        });
+    }else{
+        stdList = await db.query.stand.findMany({
+            orderBy: asc(stand.num),
+        });
+    }
+    // @ts-ignore
+    const standard = stdList.find(item => item.id === input.stand)
+    if(!standard){
         throw new TRPCError({
             code: 'FORBIDDEN',
             message: "无该实例规格！"
@@ -66,10 +79,10 @@ export const setRealStand = (input: typeof apiCreateApplication._type | Partial<
     }
     try {
         const size : ContainerSize = {
-            memoryReservation: standard.mem,
-            memoryLimit: standard.mem,
-            cpuReservation: standard.cpu,
-            cpuLimit: standard.cpu,
+            memoryReservation: standard.memlimit,
+            memoryLimit: standard.memlimit,
+            cpuReservation: standard.cpulimit,
+            cpuLimit: standard.cpulimit,
             stand: input.stand || ""
         }
         return size
@@ -82,6 +95,13 @@ export const setRealStand = (input: typeof apiCreateApplication._type | Partial<
         })
     }
 
+}
+
+export function getRandomPort() {
+    // 计算范围大小：49000 - 10000 + 1 = 39001
+    const range = 39001;
+    // 生成 0 到 range-1 之间的随机整数，再加上最小值 10000
+    return Math.floor(Math.random() * range) + 10000;
 }
 
 // 1GB = 1073741824 bytes 1MB = 1048576

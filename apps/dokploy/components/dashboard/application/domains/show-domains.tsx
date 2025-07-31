@@ -163,15 +163,14 @@ export const ShowDomains = ({ id, type }: Props) => {
 						<div className="flex w-full flex-row gap-4 min-h-[40vh] justify-center items-center">
 							<Loader2 className="size-5 animate-spin text-muted-foreground" />
 							<span className="text-base text-muted-foreground">
-								Loading domains...
+								加载中...
 							</span>
 						</div>
 					) : data?.length === 0 ? (
 						<div className="flex w-full flex-col items-center justify-center gap-3 min-h-[40vh]">
 							<GlobeIcon className="size-8 text-muted-foreground" />
 							<span className="text-base text-muted-foreground">
-								To access the application it is required to set at least 1
-								domain
+								请设置域名以访问该应用
 							</span>
 							<div className="flex flex-row gap-4 flex-wrap">
 								<AddDomain id={id} type={type}>

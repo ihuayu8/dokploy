@@ -188,13 +188,13 @@ export const UpdateVolume = ({
 			</DialogTrigger>
 			<DialogContent className="max-h-screen  overflow-y-auto sm:max-w-3xl">
 				<DialogHeader>
-					<DialogTitle>Update</DialogTitle>
-					<DialogDescription>Update the mount</DialogDescription>
+					<DialogTitle>更新</DialogTitle>
+					<DialogDescription>更新挂载</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 				{type === "file" && (
 					<AlertBlock type="warning">
-						Updating the mount will recreate the file or directory.
+						更新挂载项将会重新创建文件或目录。
 					</AlertBlock>
 				)}
 
@@ -233,6 +233,7 @@ export const UpdateVolume = ({
 													placeholder="Volume Name"
 													{...field}
 													value={field.value || ""}
+													disabled={true}
 												/>
 											</FormControl>
 											<FormMessage />

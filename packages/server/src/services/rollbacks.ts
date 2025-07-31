@@ -52,7 +52,7 @@ export const createRollback = async (
 			gitlab,
 			gitea,
 			...rest
-		} = await findApplicationById(deployment.applicationId);
+		} = await findApplicationById(deployment.applicationId, null);
 
 		await tx
 			.update(rollbacks)
@@ -134,7 +134,7 @@ export const removeRollbackById = async (rollbackId: string) => {
 				throw new Error("Deployment not found");
 			}
 
-			const application = await findApplicationById(deployment.applicationId);
+			const application = await findApplicationById(deployment.applicationId, null);
 			await deleteRollbackImage(rollback.image, application.serverId);
 
 			await db
@@ -159,7 +159,7 @@ export const rollback = async (rollbackId: string) => {
 		throw new Error("Deployment not found");
 	}
 
-	const application = await findApplicationById(deployment.applicationId);
+	const application = await findApplicationById(deployment.applicationId, null);
 
 	if (!result.fullContext) {
 		throw new Error("Rollback context not found");

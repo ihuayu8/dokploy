@@ -99,7 +99,9 @@ export const server = pgTable("server", {
 	standList:text("standList").array(),
 	rate: numeric("rate"),
 	type: text("type"),
-	num: integer("num")
+	num: integer("num"),
+	resourceLimit: integer("resource_limit"),
+	resourceUsed: integer("resource_used"),
 
 });
 

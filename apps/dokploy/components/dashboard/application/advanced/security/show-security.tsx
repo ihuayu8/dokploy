@@ -32,13 +32,13 @@ export const ShowSecurity = ({ applicationId }: Props) => {
 		<Card className="bg-background">
 			<CardHeader className="flex flex-row justify-between flex-wrap gap-4">
 				<div>
-					<CardTitle className="text-xl">Security</CardTitle>
-					<CardDescription>Add basic auth to your application</CardDescription>
+					<CardTitle className="text-xl">安全</CardTitle>
+					<CardDescription>添加基础授权到您的应用</CardDescription>
 				</div>
 
 				{data && data?.security.length > 0 && (
 					<HandleSecurity applicationId={applicationId}>
-						Add Security
+						添加授权
 					</HandleSecurity>
 				)}
 			</CardHeader>
@@ -47,10 +47,10 @@ export const ShowSecurity = ({ applicationId }: Props) => {
 					<div className="flex w-full flex-col items-center justify-center gap-3 pt-10">
 						<LockKeyhole className="size-8 text-muted-foreground" />
 						<span className="text-base text-muted-foreground">
-							No security configured
+							没有授权设置
 						</span>
 						<HandleSecurity applicationId={applicationId}>
-							Add Security
+							添加授权
 						</HandleSecurity>
 					</div>
 				) : (

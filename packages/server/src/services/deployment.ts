@@ -74,7 +74,7 @@ export const createDeployment = async (
 		"deploymentId" | "createdAt" | "status" | "logPath"
 	>,
 ) => {
-	const application = await findApplicationById(deployment.applicationId);
+	const application = await findApplicationById(deployment.applicationId, null);
 
 	try {
 		await removeLastTenDeployments(

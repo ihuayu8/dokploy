@@ -44,7 +44,7 @@ export const createRedirect = async (
 				});
 			}
 
-			const application = await findApplicationById(redirect.applicationId);
+			const application = await findApplicationById(redirect.applicationId, null);
 
 			createRedirectMiddleware(application, redirect);
 		});
@@ -74,7 +74,7 @@ export const removeRedirectById = async (redirectId: string) => {
 			});
 		}
 
-		const application = await findApplicationById(response.applicationId);
+		const application = await findApplicationById(response.applicationId, null);
 
 		await removeRedirectMiddleware(application, response);
 
@@ -108,7 +108,7 @@ export const updateRedirectById = async (
 				message: "Redirect not found",
 			});
 		}
-		const application = await findApplicationById(redirect.applicationId);
+		const application = await findApplicationById(redirect.applicationId, null);
 
 		await updateRedirectMiddleware(application, redirect);
 

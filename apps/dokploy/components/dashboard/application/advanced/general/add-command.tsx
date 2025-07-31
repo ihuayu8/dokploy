@@ -64,13 +64,13 @@ export const AddCommand = ({ applicationId }: Props) => {
 			command: data?.command,
 		})
 			.then(async () => {
-				toast.success("Command Updated");
+				toast.success("保存成功");
 				await utils.application.one.invalidate({
 					applicationId,
 				});
 			})
 			.catch(() => {
-				toast.error("Error updating the command");
+				toast.error("系统出错，请联系管理员");
 			});
 	};
 
@@ -78,10 +78,9 @@ export const AddCommand = ({ applicationId }: Props) => {
 		<Card className="bg-background">
 			<CardHeader className="flex flex-row justify-between">
 				<div>
-					<CardTitle className="text-xl">Run Command</CardTitle>
+					<CardTitle className="text-xl">启动命令</CardTitle>
 					<CardDescription>
-						Run a custom command in the container after the application
-						initialized
+						可更改镜像的启动命令，一般留空即可
 					</CardDescription>
 				</div>
 			</CardHeader>
@@ -97,9 +96,9 @@ export const AddCommand = ({ applicationId }: Props) => {
 								name="command"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Command</FormLabel>
+										<FormLabel>命令</FormLabel>
 										<FormControl>
-											<Input placeholder="Custom command" {...field} />
+											<Input placeholder="例如: ./bin/nginx" {...field} />
 										</FormControl>
 
 										<FormMessage />
@@ -109,7 +108,7 @@ export const AddCommand = ({ applicationId }: Props) => {
 						</div>
 						<div className="flex justify-end">
 							<Button isLoading={isLoading} type="submit" className="w-fit">
-								Save
+								保存
 							</Button>
 						</div>
 					</form>

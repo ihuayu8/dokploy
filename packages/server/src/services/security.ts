@@ -28,7 +28,7 @@ export const createSecurity = async (
 ) => {
 	try {
 		await db.transaction(async (tx) => {
-			const application = await findApplicationById(data.applicationId);
+			const application = await findApplicationById(data.applicationId, null);
 
 			const securityResponse = await tx
 				.insert(security)
@@ -71,7 +71,7 @@ export const deleteSecurityById = async (securityId: string) => {
 			});
 		}
 
-		const application = await findApplicationById(result.applicationId);
+		const application = await findApplicationById(result.applicationId, null);
 
 		await removeSecurityMiddleware(application, result);
 		return result;

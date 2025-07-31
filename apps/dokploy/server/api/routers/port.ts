@@ -22,7 +22,7 @@ export const portRouter = createTRPCRouter({
 			} catch (error) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message: "Error input: Inserting port",
+					message: error.message,
 					cause: error,
 				});
 			}

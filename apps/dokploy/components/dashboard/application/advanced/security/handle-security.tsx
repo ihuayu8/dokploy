@@ -81,7 +81,7 @@ export const HandleSecurity = ({
 			securityId: securityId || "",
 		})
 			.then(async () => {
-				toast.success(securityId ? "Security Updated" : "Security Created");
+				toast.success(securityId ? "更新成功" : "创建成功");
 				await utils.application.one.invalidate({
 					applicationId,
 				});
@@ -116,9 +116,9 @@ export const HandleSecurity = ({
 			</DialogTrigger>
 			<DialogContent className="max-h-screen  overflow-y-auto sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Security</DialogTitle>
+					<DialogTitle>访问授权</DialogTitle>
 					<DialogDescription>
-						{securityId ? "Update" : "Add"} security to your application
+						{securityId ? "更新" : "添加"} 访问授权到您的应用
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
@@ -135,7 +135,7 @@ export const HandleSecurity = ({
 								name="username"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Username</FormLabel>
+										<FormLabel>用户名</FormLabel>
 										<FormControl>
 											<Input placeholder="test1" {...field} />
 										</FormControl>
@@ -149,7 +149,7 @@ export const HandleSecurity = ({
 								name="password"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Password</FormLabel>
+										<FormLabel>密码</FormLabel>
 										<FormControl>
 											<Input placeholder="test" {...field} />
 										</FormControl>
@@ -167,7 +167,7 @@ export const HandleSecurity = ({
 							form="hook-form-add-security"
 							type="submit"
 						>
-							{securityId ? "Update" : "Create"}
+							{securityId ? "更新" : "创建"}
 						</Button>
 					</DialogFooter>
 				</Form>

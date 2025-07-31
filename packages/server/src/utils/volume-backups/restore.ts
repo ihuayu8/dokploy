@@ -102,7 +102,7 @@ export const restoreVolume = async (
 	`;
 
 	if (serviceType === "application") {
-		const application = await findApplicationById(id);
+		const application = await findApplicationById(id, null);
 		return `
 		echo "=== VOLUME RESTORE FOR APPLICATION ==="
 		echo "Application: ${application.appName}"
