@@ -54,6 +54,8 @@ void app.prepare().then(async () => {
 			await initSchedules();
 			await initVolumeBackupsCronJobs();
 			await sendDokployRestartNotifications();
+		}else{
+			await initCronJobs();
 		}
 
 		if (IS_CLOUD && process.env.NODE_ENV === "production") {

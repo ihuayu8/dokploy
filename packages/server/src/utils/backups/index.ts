@@ -15,6 +15,7 @@ import { member } from "@dokploy/server/db/schema";
 import type { BackupSchedule } from "@dokploy/server/services/backup";
 import { eq } from "drizzle-orm";
 import { startLogCleanup } from "../access-log/handler";
+import {billingProcess, charging} from "@dokploy/server/utils/billing";
 
 export const initCronJobs = async () => {
 	console.log("Setting up cron jobs....");
@@ -29,6 +30,16 @@ export const initCronJobs = async () => {
 	if (!admin) {
 		return;
 	}
+
+	// 开始计费服务
+	console.log(`[计费服务定时任务]注册成功！**********`)
+	scheduleJob("billingProcess", "* * * * *", async () => {
+		await billingProcess()
+	})
+	scheduleJob("charging", "10 * * * *", async () => {
+		await charging()
+	})
+
 
 	if (admin.user.enableDockerCleanup) {
 		scheduleJob("docker-cleanup", "0 0 * * *", async () => {

@@ -177,7 +177,7 @@ export const createApplication = async (
 	});
 };
 
-export const findApplicationById = async (applicationId: string, txo : any) => {
+export const findApplicationById = async (applicationId: string, txo? : any) => {
 	const application = await (txo?txo:db).query.applications.findFirst({
 		where: eq(applications.applicationId, applicationId),
 		with: {

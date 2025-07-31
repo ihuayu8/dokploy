@@ -9,7 +9,7 @@ export const stand = pgTable("stand", {
     cpulabel: text("cpulabel"),
     memlimit: text("memlimit"),
     memlabel: text("memlabel"),
-    price: numeric("price"),
+    price: numeric("price").notNull(),
     num: integer("num"),
     resource: integer("resource"),
 });
