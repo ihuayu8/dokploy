@@ -45,7 +45,6 @@ export const getContainerState = async (
     let disk: any[] = []
     let network: any[] = []
     let block: any[] = []
-
     const containerInfo = JSON.parse(infoRes.stdout) as any;
     Object.entries(containerInfo).forEach(([key, value]) => {
         const arr = value as Array<any>;

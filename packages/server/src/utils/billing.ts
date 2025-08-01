@@ -1,11 +1,15 @@
 import {TRPCError} from "@trpc/server";
 import {
     type apiCreateApplication, applications, billing, billingStandDetail, voucher, server, stand, users_temp,
+    billingNetworkDetail, networkCount, projects
 } from "@dokploy/server/db/schema";
 import {Application, findApplicationById, updateApplicationStatus} from "@dokploy/server/services/application";
 import {db} from "@dokploy/server/db";
 import {and, asc, desc, eq, gt, gte, inArray, ne, sql, lt} from "drizzle-orm";
 import {stopService, stopServiceRemote} from "@dokploy/server/utils/docker/utils";
+import {getServiceContainersByAppName} from "@dokploy/server/services/docker";
+import {getContainerState} from "@dokploy/server/monitoring/service";
+import {integer, text} from "drizzle-orm/pg-core";
 
 interface ContainerSize {
     stand: string,
@@ -125,8 +129,9 @@ export async function billingProcess() {
 
     // 插入计费表
     const billingList: any = []
-    appList.forEach(item => {
-        // 计算本小时费用
+    for (const item of appList) {
+        /** 计算资源计费 **/
+            // 计算本小时费用
         const server = serverList.find(server => item.serverId === server.serverId)
         if (!server) {
             console.error(`[${new Date()} - 服务计费查询]计费失败，服务器信息不存在，applicationId=${item.applicationId}, 
@@ -152,14 +157,88 @@ export async function billingProcess() {
             // @ts-ignore
             organizationId: project.organizationId,
         })
-    })
+
+        /** 流量计费计费 **/
+        getServiceContainersByAppName(item.appName, server.serverId).then(containers => {
+            if (containers && containers.length > 0) {
+                for (const container of containers) {
+                    if (container.state !== 'running') {
+                        continue;
+                    }
+                    getContainerState(container.containerId, container.name, item.serverId || "", container.node, item.appName).then(async (res) => {
+                        const network = res?.network
+                        if (network && network.length > 0) {
+                            const inMb = parseInt(network[network.length - 1].value.inputMb.replaceAll("MB").trim())
+                            const outMb = parseInt(network[network.length - 1].value.outputMb.replaceAll("MB").trim())
+                            // 开启事务
+                            await db.transaction(async (tx) => {
+                                // 查询是否有该容器
+                                const billingnw = await tx.query.billingNetworkDetail.findFirst({
+                                    where: and(
+                                        eq(billingNetworkDetail.applicationId, item.applicationId),
+                                        eq(billingNetworkDetail.containerId, container.containerId)
+                                    )
+                                })
+                                let usedChange = 0;
+                                if (!!billingnw) {
+                                    usedChange += inMb + outMb - (billingnw?.currentUsed || 0)
+                                    // 更新计费详情表
+                                    await tx.update(billingNetworkDetail).set({
+                                        currentUsed: inMb + outMb,
+                                        updateAt: new Date()
+                                    }).where(and(
+                                        eq(billingNetworkDetail.applicationId, item.applicationId),
+                                        eq(billingNetworkDetail.containerId, container.containerId)
+                                    )).returning();
+                                } else {
+                                    usedChange += inMb + outMb
+                                    await tx.insert(billingNetworkDetail).values({
+                                        applicationId: item.applicationId,
+                                        containerId: container.containerId,
+                                        lastUsed: 0,
+                                        currentUsed: inMb + outMb,
+                                        serverId: item.serverId,
+                                        status: 0,
+                                        updateAt: new Date()
+                                    }).returning()
+                                }
+                                // 获取当前年月
+                                const now = new Date();
+                                const year = now.getFullYear();
+                                let month = (now.getMonth() + 1).toString().padStart(2, '0');
+                                const yearMonth = `${year}${month}`;
+                                // 更新流量使用表
+                                // @ts-ignore
+                                await tx.insert(networkCount).values({
+                                    organizationId: project?.organizationId || "",
+                                    currentUsed: usedChange,
+                                    all: server.freeNetwork,
+                                    serverId: item.serverId,
+                                    yearmonth: yearMonth,
+                                }).onConflictDoUpdate({
+                                    target: [networkCount.yearmonth, networkCount.organizationId, networkCount.serverId],
+                                    set: {
+                                        all: server.freeNetwork || 0,
+                                        currentUsed: sql`${networkCount.currentUsed}
+                                        +
+                                        ${usedChange}`,
+                                    }
+                                })
+                            })
+                        }
+                    })
+                }
+            }
+        })
+
+    }
 
     // 实际插入
     await db.insert(billingStandDetail).values(billingList).returning()
     console.log(`[${new Date()} - 服务计费查询]计费查询服务结束`)
 }
 
-// 计费查询服务
+// 计费扣费服务
 export async function charging() {
     // 查询所有组织
     const orgList = await db.query.organization.findMany()
@@ -167,7 +246,7 @@ export async function charging() {
     for (const org of orgList) {
         /** 计算资源计费 **/
 
-        // 获取当前时间
+            // 获取当前时间
         const now = new Date();
 
         // 计算上个小时的结束时间（当前小时的0分0秒）
@@ -182,11 +261,11 @@ export async function charging() {
 
         // 获取一小时内的计费账单详情
         const computeList = await db.query.billingStandDetail.findMany({
-                where: and(
-                    eq(billingStandDetail.organizationId, org.id),
-                    gte(billingStandDetail.createdAt, startOfLastHour), // 大于等于上个小时起点
-                    lt(billingStandDetail.createdAt, endOfLastHour)     // 小于当前小时起点
-                )
+            where: and(
+                eq(billingStandDetail.organizationId, org.id),
+                gte(billingStandDetail.createdAt, startOfLastHour), // 大于等于上个小时起点
+                lt(billingStandDetail.createdAt, endOfLastHour)     // 小于当前小时起点
+            )
         })
         console.log(`[${new Date()} - 扣费并生成账单]获取到计费项条数为：${computeList.length}`)
         // 按服务分组
@@ -216,7 +295,7 @@ export async function charging() {
                     lt(billing.createdAt, nextHour)     // 小于下个小时
                 )
             })
-            if(!!billingInfo){
+            if (!!billingInfo) {
                 console.warn(`[${new Date()} - 扣费并生成账单]当前应用 ${key} 本时段已经计费，不再重复计费！`)
                 continue
             }
@@ -234,7 +313,7 @@ export async function charging() {
             let voucherId = "";
 
             // 是否有专用代金券
-            for(const vc of vouchers) {
+            for (const vc of vouchers) {
                 if (vc.standIds && vc.standIds.includes(detail.standId)
                     && (!vc.serverIds || vc.serverIds.includes(detail.serverId))) {
                     voucherId = vc.voucherId
@@ -258,17 +337,7 @@ export async function charging() {
                 }).where(eq(voucher.voucherId, voucherId)).returning()
             } else {
                 // 余额计费
-                const user = await db.update(users_temp).set({
-                    balance: sql`${users_temp.balance}
-                    -
-                    ${detail.amount}`
-                }).where(eq(users_temp.id, org.ownerId)).returning().then((res:any) => res[0]);
-                if (user.balance <= 0) {
-                    // 用户余额已经不足立即停止该应用
-                    const service = await findApplicationById(detail.applicationId);
-                    await stopServiceRemote(service.serverId, service.appName, service);
-                    await updateApplicationStatus(detail.applicationId, "idle");
-                }
+                await userCharge(org.ownerId, detail.amount, org.id)
             }
             console.log(`[${new Date()} - 扣费并生成账单]当前应用 ${key} 【计算资源】计费完成，扣费渠道为${voucherId === "" ? '账户余额' : '代金券'}, 计费金额为${detail.amount}`)
             // 插入实际计费表
@@ -283,7 +352,103 @@ export async function charging() {
             }).returning()
         }
 
-        console.log(`[${new Date()} - 扣费并生成账单]流程结束，全部计费完成！`)
+        console.log(`[${new Date()} - 扣费并生成账单]计算资源流程结束，全部计费完成！`)
 
     }
+
+    /** 流量计费 **/
+    console.log(`[${new Date()} - 扣费并生成账单]开始流量计费！`)
+    // 获取当前年月
+    const now = new Date();
+    const year = now.getFullYear();
+    let month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const yearMonth = `${year}${month}`;
+    const ntList = await db.query.networkCount.findMany({
+        where: eq(networkCount.yearmonth, yearMonth)
+    })
+    // 获取所有服务器
+    const serverList = await db.query.server.findMany();
+
+    for (const nt of ntList) {
+        if (nt.currentUsed >= nt.all) {
+            let overCount = 0;
+            let lastUsed = 0;
+            if (nt.lastUsed === 0) {
+                // 用量超过了免费流量，且没有计费过
+                overCount = Math.floor((nt.currentUsed - nt.all) / 1024)
+                lastUsed = nt.all + overCount * 1024
+            } else {
+                overCount = Math.floor((nt.currentUsed - nt.lastUsed) / 1024)
+                lastUsed = nt.lastUsed + overCount * 1024
+            }
+            if (overCount >= 1) {
+                // 扣费流量
+                const server = serverList.find(item => item.serverId === nt.serverId)
+                const price = Number(server?.exceedNetworkFee || 0) * overCount
+                const org = orgList.find(item=>item.id === nt.organizationId)
+
+                // 余额计费
+                await userCharge(org?.ownerId || "", price, nt.organizationId || "")
+
+                await db.update(networkCount).set({
+                    lastUsed: lastUsed
+                }).where(and(
+                    eq(networkCount.yearmonth, nt.yearmonth || ""),
+                    eq(networkCount.organizationId, nt.organizationId || ""),
+                    eq(networkCount.serverId, nt.serverId || "")
+                )).returning()
+
+                // 插入实际计费表
+                await db.insert(billing).values({
+                    // @ts-ignore
+                    type: 1,
+                    amount: price,
+                    applicationId: "-",
+                    userId: org?.ownerId,
+                    organizationId: nt.organizationId,
+                    payType: 0,
+                    voucherId: "-",
+                }).returning()
+
+
+                console.log(`[${new Date()} - 扣费并生成账单]组织ID ${nt.organizationId} 本次计费流量 ${overCount} GB, 费用 ${price}！`)
+            } else {
+                console.log(`[${new Date()} - 扣费并生成账单]组织ID ${nt.organizationId} 本次计费流量不超过1GB，暂不计费！`)
+            }
+        } else {
+            console.log(`[${new Date()} - 扣费并生成账单]组织ID ${nt.organizationId} 本次没有超过免费流量限制，暂不计费！`)
+        }
+
+    }
+
+}
+
+// 用户余额扣费方法
+async function userCharge(userId:string, amount:any, orgId:string){
+    // 余额计费
+    const user = await db.update(users_temp).set({
+        balance: sql`${users_temp.balance}
+                    -
+                    ${amount}`
+    }).where(eq(users_temp.id, userId)).returning().then((res: any) => res[0]);
+
+    if (user.balance < 0) {
+        // 欠费后立即停止该用户组织的全部应用
+        let projectStrList : string[] = []
+        const projectList = await db.query.projects.findMany({
+            where: eq(projects.organizationId, orgId)
+        })
+        projectList.forEach(item=>{
+            projectStrList.push(item.projectId)
+        })
+        const apps = await db.query.applications.findMany({
+            where: inArray(applications.projectId, projectStrList)
+        })
+        for (const service of apps) {
+            await stopServiceRemote(service.serverId || "", service.appName, service);
+            await updateApplicationStatus(service.applicationId, "idle");
+        }
+
+    }
+
 }

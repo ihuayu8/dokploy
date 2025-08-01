@@ -31,6 +31,7 @@
   },
   "scripts": {
     "build": "npm run switch:prod && rm -rf ./dist && tsc --project tsconfig.server.json && tsc-alias -p tsconfig.server.json",
+    "build:dev": "npm run switch:prod && tsc --project tsconfig.server.json && tsc-alias -p tsconfig.server.json",
     "build:test": "npm run switch:prod && tsc --project tsconfig.server.json && tsc-alias -p tsconfig.server.json",
     "build:types": "tsc --emitDeclarationOnly --experimenta-dts",
     "switch:dev": "node scripts/switchToSrc.js",

@@ -102,6 +102,8 @@ export const server = pgTable("server", {
 	num: integer("num"),
 	resourceLimit: integer("resource_limit"),
 	resourceUsed: integer("resource_used"),
+	freeNetwork: integer("free_network"),
+	exceedNetworkFee: numeric("exceed_network_fee").notNull().default("0"),
 
 });
 

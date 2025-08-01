@@ -315,7 +315,7 @@ export const AddApplication = ({
                                                         value={server.serverId}
                                                     >
                                                         <span
-                                                            className="flex items-center gap-2 justify-between w-full">
+                                                            className="flex items-center gap-2 justify-between">
                                                             {server.type === '1' ?
                                                                 <span
                                                                     className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">

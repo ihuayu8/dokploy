@@ -795,8 +795,11 @@ export const rebuildRemoteApplication = async ({
 
 export const getApplicationStats = async (
 	containerId:string, containerName:string, serverId:string, appName:string, node:string) => {
+	try {
+		return await getContainerState(containerId, containerName, serverId, node, appName);
+	}catch (err){
+		console.error(err)
+		return null
+	}
 
-	const data = await getContainerState(containerId, containerName, serverId, node, appName);
-
-	return data;
 };
