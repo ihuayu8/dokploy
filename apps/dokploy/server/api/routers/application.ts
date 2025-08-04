@@ -33,6 +33,7 @@ import {
 	findApplicationById,
 	findGitProviderById,
 	findProjectById,
+	getApplicationBillings,
 	getApplicationStats,
 	mechanizeDockerContainer,
 	readConfig,
@@ -50,7 +51,7 @@ import {
 	updateApplication,
 	updateApplicationStatus,
 	writeConfig,
-	writeConfigRemote,
+	writeConfigRemote, getApplicationNetworkUsed, getVolumeUse,
 	// uploadFileSchema
 } from "@dokploy/server";
 import { TRPCError } from "@trpc/server";
@@ -722,7 +723,7 @@ export const applicationRouter = createTRPCRouter({
 			if(!canDeploy){
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "账户余额、代金券额度不足，如您有代金券，请检查是否符合使用范围！",
+					message: "账户余额、代金券额度不足或账户欠费，如您有代金券，请检查是否符合使用范围！",
 				});
 			}
 
@@ -912,4 +913,26 @@ export const applicationRouter = createTRPCRouter({
 
 			return updatedApplication;
 		}),
+	getBillings: protectedProcedure
+		.input(apiFindOneApplication)
+		.query(async ({ input, ctx }) => {
+			const application = await findApplicationById(input.applicationId);
+			if (
+				application.project.organizationId !== ctx.session.activeOrganizationId
+			) {
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "You are not authorized to access this application",
+				});
+			}
+
+			const billingList = await getApplicationBillings(input.applicationId)
+			const netUsed = await getApplicationNetworkUsed(application.serverId, application.project.organizationId)
+			const volumeSize = await getVolumeUse(application.project.organizationId)
+			return {
+				billingList: billingList,
+				netUsed: netUsed,
+				volumeSize: volumeSize
+			}
+		})
 });

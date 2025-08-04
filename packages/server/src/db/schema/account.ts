@@ -66,6 +66,7 @@ export const organization = pgTable("organization", {
 	ownerId: text("owner_id")
 		.notNull()
 		.references(() => users_temp.id, { onDelete: "cascade" }),
+	volumeSize: integer("volume_size").notNull().default(0),
 });
 
 export const organizationRelations = relations(

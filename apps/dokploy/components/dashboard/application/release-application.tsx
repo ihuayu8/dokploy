@@ -21,7 +21,7 @@ import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
 import {api} from "@/utils/api";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {HelpCircle, Save} from "lucide-react";
+import {CheckIcon, ChevronsUpDown, HelpCircle, Save} from "lucide-react";
 import {useEffect, useState} from "react";
 import {useForm} from "react-hook-form";
 import {toast} from "sonner";
@@ -37,6 +37,10 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {cn} from "@/lib/utils";
+import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem} from "@/components/ui/command";
+import {ScrollArea} from "@/components/ui/scroll-area";
 
 const ReleaseApplicationSchema = z.object({
     appShopId: z.string().optional(),
@@ -70,6 +74,13 @@ export const ReleaseApplication = ({applicationId}: Props) => {
     const utils = api.useUtils();
     const {mutateAsync, error, isError, isLoading} =
         api.applicationShop.createTemplate.useMutation();
+
+    const {data:tags,  isLoading: isLoadingTags} =
+        api.applicationShop.allTags.useQuery();
+
+    useEffect(() => {
+        console.log(tags)
+    }, [tags]);
 
     const {data: myApps} = api.applicationShop.getMyApps.useQuery(
         null,
@@ -190,7 +201,68 @@ export const ReleaseApplication = ({applicationId}: Props) => {
                                                 <FormItem>
                                                     <FormLabel>标签</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="请填写该应用的标签(选填)" {...field} />
+                                                        <Popover modal={true}>
+                                                            <PopoverTrigger asChild>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    className={cn(
+                                                                        "w-full sm:w-[200px] justify-between !bg-input",
+                                                                    )}
+                                                                >
+                                                                    {isLoadingTags
+                                                                        ? "加载中...."
+                                                                        : field.value.length > 0
+                                                                            ? `选择了 ${field.value.length} 个标签`
+                                                                            : "选择标签"}
+
+                                                                    <ChevronsUpDown
+                                                                        className="ml-2 h-4 w-4 opacity-50"/>
+                                                                </Button>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className="p-0" align="start">
+                                                                <Command>
+                                                                    <CommandInput
+                                                                        placeholder="搜索标签..."
+                                                                        className="h-9"
+                                                                    />
+                                                                    {isLoadingTags && (
+                                                                        <span className="py-6 text-center text-sm">
+                                                                            加载标签中....
+                                                                        </span>
+                                                                    )}
+                                                                    <CommandEmpty>没有找到标签</CommandEmpty>
+                                                                    <ScrollArea className="h-96">
+                                                                        <CommandGroup>
+                                                                            {tags?.map((tag) => (
+                                                                                <CommandItem
+                                                                                    value={tag.value}
+                                                                                    key={tag.value}
+                                                                                    onSelect={() => {
+                                                                                        if (field.value.includes(tag.value)) {
+                                                                                            form.setValue("tags",
+                                                                                                field.value.filter((t) => t !== tag.value),
+                                                                                            );
+                                                                                            return;
+                                                                                        }
+                                                                                        form.setValue("tags" ,[...field.value, tag.value]);
+                                                                                    }}
+                                                                                >
+                                                                                    {tag.value}
+                                                                                    <CheckIcon
+                                                                                        className={cn(
+                                                                                            "ml-auto h-4 w-4",
+                                                                                            field.value.includes(tag.value)
+                                                                                                ? "opacity-100"
+                                                                                                : "opacity-0",
+                                                                                        )}
+                                                                                    />
+                                                                                </CommandItem>
+                                                                            ))}
+                                                                        </CommandGroup>
+                                                                    </ScrollArea>
+                                                                </Command>
+                                                            </PopoverContent>
+                                                        </Popover>
                                                     </FormControl>
 
                                                     <FormMessage/>
@@ -335,7 +407,7 @@ export const ReleaseApplication = ({applicationId}: Props) => {
                                 							</span>
                                 						</span>
                                                                     </SelectItem>
-                                                                    ))}
+                                                                ))}
                                                             </SelectGroup>
                                                         </SelectContent>
                                                     </Select>

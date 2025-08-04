@@ -1,5 +1,6 @@
 import {Container, readStatsFile} from "@dokploy/server/monitoring/utils";
-import {execAsyncRemote} from "@dokploy/server/utils/process/execAsync";
+import {execAsyncRemote, execAsyncRemoteOverServer} from "@dokploy/server/utils/process/execAsync";
+import {findServerById} from "@dokploy/server/services/server";
 
 interface ResourceValues {
     limits?: {
@@ -21,7 +22,8 @@ export const getContainerState = async (
     appName: string
 ) => {
     // 获取节点列表和对应IP
-    const nodeListresult = await execAsyncRemote(serverId, "docker node ls -q | xargs -I {} docker node inspect -f '{{.Description.Hostname}} {{.Status.Addr}}' {}");
+    const server = await findServerById(serverId);
+    const nodeListresult = await execAsyncRemoteOverServer(server, "docker node ls -q | xargs -I {} docker node inspect -f '{{.Description.Hostname}} {{.Status.Addr}}' {}");
     const nodeList = nodeListresult.stdout;
     const nodeMap = parseHostsToMap(nodeList)
     const nodeIp:string = nodeMap.get(node) || ""
@@ -31,14 +33,14 @@ export const getContainerState = async (
     }
 
     // 获取容器资源限制
-    const rsResult = await execAsyncRemote(serverId, `docker service inspect ${appName}`);
+    const rsResult = await execAsyncRemoteOverServer(server, `docker service inspect ${appName}`);
     const reStr = rsResult.stdout;
     const resource = getResourceLimit(reStr)
     const memStr = formatBytes(resource.MemoryBytes)
 
 
     // 请求url获取容器的相关信息
-    const infoRes= await execAsyncRemote(serverId, `curl http://${nodeIp}:8080/api/v2.0/stats/${containerName}?type=docker`)
+    const infoRes= await execAsyncRemoteOverServer(server, `curl http://${nodeIp}:8080/api/v2.0/stats/${containerName}?type=docker`)
 
     let cpu: any[] = []
     let memory: any[] = []
@@ -64,18 +66,20 @@ export const getContainerState = async (
             block.push({
                 time:item?.timestamp,
                 value:{
-                    readMb: bytesToMB(item?.diskio?.io_service_bytes[0]?.stats?.Read),
-                    writeMb: bytesToMB(item?.diskio?.io_service_bytes[0]?.stats?.Write),
+                    readMb: item?.diskio?.io_service_bytes ? (bytesToMB(item?.diskio?.io_service_bytes[0]?.stats?.Read)) : "0MB",
+                    writeMb: item?.diskio?.io_service_bytes ? (bytesToMB(item?.diskio?.io_service_bytes[0]?.stats?.Write)) : "0MB",
                 }
             })
 
             disk.push({
                 time:item?.timestamp,
                 value:{
-                    diskTotal: parseFloat(bytesToGB(item?.filesystem[0]?.capacity)),
+                    diskTotal: server.defaultDisk,
                     diskUsage: parseFloat(bytesToGB(item?.filesystem[0]?.usage)),
-                    diskFree: parseFloat(bytesToGB(item?.filesystem[0]?.capacity - item?.filesystem[0]?.usage)),
-                    diskUsedPercentage: parseFloat((item?.filesystem[0]?.usage / item?.filesystem[0]?.capacity).toFixed(2)),
+                    // @ts-ignore
+                    diskFree: (server.defaultDisk || 1) - parseFloat(bytesToGB(item?.filesystem[0]?.usage)),
+                    // @ts-ignore
+                    diskUsedPercentage: parseFloat((parseFloat(bytesToGB(item?.filesystem[0]?.usage)) / (server.defaultDisk || 1)).toFixed(2)) * 100,
                 }
             })
 
@@ -212,7 +216,7 @@ function bytesToGB(bytes: number, decimalPlaces: number = 2): string {
     return mb.toFixed(decimalPlaces);
 }
 
-function parseHostsToMap(hostsString:string) {
+export function parseHostsToMap(hostsString:string) {
     const lines = hostsString.trim().split('\n');
     const resultMap = new Map<string, string>();
 
@@ -227,4 +231,33 @@ function parseHostsToMap(hostsString:string) {
     }
 
     return resultMap;
+}
+
+export function parseVolumeLines(inputString:any) {
+    const volumeMap:Map<string, any> = new Map();
+
+    // 将输入字符串按行拆分
+    const lines = inputString.split('\n');
+
+    // 遍历每一行
+    lines.forEach((line:any, index:any) => {
+        // 去除行首尾空白字符
+        const trimmedLine = line.trim();
+
+        // 跳过空行
+        if (trimmedLine === '') return;
+
+        // 使用正则表达式匹配名称和大小部分
+        const match = trimmedLine.match(/(.*)-(\d+)$/);
+
+        if (match && match.length === 3) {
+            const name = match[1];
+            const size = parseInt(match[2], 10);
+            volumeMap.set(name, size);
+        } else {
+            console.warn(`第 ${index + 1} 行无法解析: "${trimmedLine}"`);
+        }
+    });
+
+    return volumeMap;
 }

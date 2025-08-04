@@ -25,6 +25,6 @@ export const checkBalance = async (organId : string) => {
     // TODO 检查代金券余额是否充足
 
     // 检查账户余额是否足够
-    return user.balance > 0;
+    return user.balance >= 0;
 }
 

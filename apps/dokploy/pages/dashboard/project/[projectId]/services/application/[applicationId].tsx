@@ -55,6 +55,7 @@ import { useRouter } from "next/router";
 import { type ReactElement, useEffect, useState } from "react";
 import { toast } from "sonner";
 import superjson from "superjson";
+import { ShowBilling } from "@/components/dashboard/application/billing/billing";
 
 type TabState =
 	| "projects"
@@ -240,6 +241,7 @@ const Service = (
 											<TabsTrigger value="deployments">部署列表</TabsTrigger>
 											<TabsTrigger value="logs">日志</TabsTrigger>
 											<TabsTrigger value="monitoring">监控</TabsTrigger>
+											<TabsTrigger value="billing">账单</TabsTrigger>
 											<TabsTrigger value="advanced">高级</TabsTrigger>
 										</TabsList>
 									</div>
@@ -313,6 +315,11 @@ const Service = (
 									<TabsContent value="domains" className="w-full">
 										<div className="flex flex-col gap-4 pt-2.5">
 											<ShowDomains id={applicationId} type="application" />
+										</div>
+									</TabsContent>
+									<TabsContent value="billing" className="w-full">
+										<div className="flex flex-col gap-4 pt-2.5">
+											<ShowBilling id={applicationId} type="application" />
 										</div>
 									</TabsContent>
 									<TabsContent value="advanced">

@@ -654,7 +654,7 @@ const Project = (
 											{/*	projectId={projectId}*/}
 											{/*	projectName={data?.name}*/}
 											{/*/>*/}
-											<AddTemplate projectId={projectId} />
+											{/*<AddTemplate projectId={projectId} />*/}
 											<AddShop projectId={projectId} projectName={data?.name} />
 
 											{/*<AddAiAssistant*/}

@@ -22,7 +22,7 @@ import {
 import { api } from "@/utils/api";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
-import type React from "react";
+import React from "react";
 import { useEffect, useState } from "react";
 import { badgeStateColor } from "../../application/logs/show";
 
@@ -43,7 +43,7 @@ interface Props {
 }
 
 export const DockerTerminalModal = ({ children, appName, serverId }: Props) => {
-	const { data, isLoading } = api.docker.getContainersByAppNameMatch.useQuery(
+	const { data, isLoading } = api.docker.getServiceContainersByAppName.useQuery(
 		{
 			appName,
 			serverId,
@@ -53,8 +53,14 @@ export const DockerTerminalModal = ({ children, appName, serverId }: Props) => {
 		},
 	);
 	const [containerId, setContainerId] = useState<string | undefined>();
+	const [node, setNode] = useState<string | undefined>();
 	const [mainDialogOpen, setMainDialogOpen] = useState(false);
 	const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+
+	useEffect(() => {
+		const nodeInfo = data?.find(item=>item.containerId === containerId)
+		setNode(nodeInfo?.node)
+	}, [containerId]);
 
 	const handleMainDialogOpenChange = (open: boolean) => {
 		if (!open) {
@@ -87,12 +93,12 @@ export const DockerTerminalModal = ({ children, appName, serverId }: Props) => {
 				onEscapeKeyDown={(event) => event.preventDefault()}
 			>
 				<DialogHeader>
-					<DialogTitle>Docker Terminal</DialogTitle>
+					<DialogTitle>Docker终端</DialogTitle>
 					<DialogDescription>
-						Easy way to access to docker container
+						方便快捷的访问容器内部
 					</DialogDescription>
 				</DialogHeader>
-				<Label>Select a container to view logs</Label>
+				<Label>选择一个容器以访问终端控制台</Label>
 				<Select onValueChange={setContainerId} value={containerId}>
 					<SelectTrigger>
 						{isLoading ? (
@@ -117,7 +123,7 @@ export const DockerTerminalModal = ({ children, appName, serverId }: Props) => {
 									</Badge>
 								</SelectItem>
 							))}
-							<SelectLabel>Containers ({data?.length})</SelectLabel>
+							<SelectLabel>容器数量 ({data?.length})</SelectLabel>
 						</SelectGroup>
 					</SelectContent>
 				</Select>
@@ -125,6 +131,7 @@ export const DockerTerminalModal = ({ children, appName, serverId }: Props) => {
 					serverId={serverId || ""}
 					id="terminal"
 					containerId={containerId || "select-a-container"}
+					node={node || ""}
 				/>
 				<Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
 					<DialogContent onEscapeKeyDown={(event) => event.preventDefault()}>

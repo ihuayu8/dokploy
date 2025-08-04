@@ -1,9 +1,10 @@
 import type http from "node:http";
-import { findServerById, validateRequest } from "@dokploy/server";
+import {execAsyncRemoteOverServer, findServerById, validateRequest} from "@dokploy/server";
 import { spawn } from "node-pty";
 import { Client } from "ssh2";
 import { WebSocketServer } from "ws";
 import { getShell } from "./utils";
+import {parseHostsToMap} from "@dokploy/server/monitoring/service";
 
 export const setupDockerContainerTerminalWebSocketServer = (
 	server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>,
@@ -32,6 +33,7 @@ export const setupDockerContainerTerminalWebSocketServer = (
 		const containerId = url.searchParams.get("containerId");
 		const activeWay = url.searchParams.get("activeWay");
 		const serverId = url.searchParams.get("serverId");
+		const node = url.searchParams.get("node");
 		const { user, session } = await validateRequest(req);
 
 		if (!containerId) {
@@ -49,13 +51,28 @@ export const setupDockerContainerTerminalWebSocketServer = (
 				if (!server.sshKeyId)
 					throw new Error("No SSH key available for this server");
 
+				// 获取hostname
+				const hostnameRes = await execAsyncRemoteOverServer(server, "hostname");
+				const hostname = hostnameRes.stdout;
+				let commond = "";
+				if(hostname.trim() === node.trim()){
+					const psresult = await execAsyncRemoteOverServer(server, `docker ps|grep ${containerId}`);
+					const cid = psresult.stdout.substring(0, 12)
+					commond = `docker exec -it ${cid} ${activeWay}`
+				}else{
+					const psresult = await execAsyncRemoteOverServer(server, `ssh root@${node} "docker ps|grep ${containerId}"`);
+					const cid = psresult.stdout.substring(0, 12)
+					commond = `ssh -t root@${node} "docker exec -it ${cid} ${activeWay}"`
+				}
+
+
 				const conn = new Client();
 				let _stdout = "";
 				let _stderr = "";
 				conn
 					.once("ready", () => {
 						conn.exec(
-							`docker exec -it ${containerId} ${activeWay}`,
+							commond,
 							{ pty: true },
 							(err, stream) => {
 								if (err) throw err;

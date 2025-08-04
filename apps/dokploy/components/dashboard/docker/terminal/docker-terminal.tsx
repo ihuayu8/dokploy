@@ -10,12 +10,14 @@ interface Props {
 	id: string;
 	containerId: string;
 	serverId?: string;
+	node?:string
 }
 
 export const DockerTerminal: React.FC<Props> = ({
 	id,
 	containerId,
 	serverId,
+	node
 }) => {
 	const termRef = useRef(null);
 	const [activeWay, setActiveWay] = React.useState<string | undefined>("bash");
@@ -39,7 +41,7 @@ export const DockerTerminal: React.FC<Props> = ({
 
 		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 
-		const wsUrl = `${protocol}//${window.location.host}/docker-container-terminal?containerId=${containerId}&activeWay=${activeWay}${serverId ? `&serverId=${serverId}` : ""}`;
+		const wsUrl = `${protocol}//${window.location.host}/docker-container-terminal?containerId=${containerId}&activeWay=${activeWay}${serverId ? `&serverId=${serverId}&node=${node}` : ""}`;
 
 		const ws = new WebSocket(wsUrl);
 
@@ -53,7 +55,7 @@ export const DockerTerminal: React.FC<Props> = ({
 		return () => {
 			ws.readyState === WebSocket.OPEN && ws.close();
 		};
-	}, [containerId, activeWay, id]);
+	}, [containerId, activeWay, id, node]);
 
 	return (
 		<div className="flex flex-col gap-4">

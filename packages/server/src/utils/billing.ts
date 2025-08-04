@@ -1,15 +1,16 @@
 import {TRPCError} from "@trpc/server";
 import {
     type apiCreateApplication, applications, billing, billingStandDetail, voucher, server, stand, users_temp,
-    billingNetworkDetail, networkCount, projects
+    billingNetworkDetail, networkCount, projects, mounts, organization
 } from "@dokploy/server/db/schema";
 import {Application, findApplicationById, updateApplicationStatus} from "@dokploy/server/services/application";
 import {db} from "@dokploy/server/db";
 import {and, asc, desc, eq, gt, gte, inArray, ne, sql, lt} from "drizzle-orm";
 import {stopService, stopServiceRemote} from "@dokploy/server/utils/docker/utils";
 import {getServiceContainersByAppName} from "@dokploy/server/services/docker";
-import {getContainerState} from "@dokploy/server/monitoring/service";
+import {getContainerState, parseHostsToMap, parseVolumeLines} from "@dokploy/server/monitoring/service";
 import {integer, text} from "drizzle-orm/pg-core";
+import {execAsyncRemoteOverServer} from "@dokploy/server/utils/process/execAsync";
 
 interface ContainerSize {
     stand: string,
@@ -122,7 +123,11 @@ export async function billingProcess() {
     console.log(`[${new Date()} - 服务计费查询]计费查询服务开始，本次需要计费应用数量为${appList.length}`)
 
     // 获取所有服务器
-    const serverList = await db.query.server.findMany();
+    const serverList = await db.query.server.findMany({
+        with: {
+            sshKey: true
+        }
+    });
 
     // 获取所有规格
     const standList = await db.query.stand.findMany();
@@ -230,12 +235,81 @@ export async function billingProcess() {
                 }
             }
         })
-
     }
 
     // 实际插入
     await db.insert(billingStandDetail).values(billingList).returning()
+
+    /** 数据卷计费查询 **/
+    await volumeCheck(serverList, appList);
+
     console.log(`[${new Date()} - 服务计费查询]计费查询服务结束`)
+}
+
+// 数据卷使用量统计
+export async function volumeCheck(serverList:any, appList:any) {
+    console.log(`[${new Date()} - 数据卷用量查询]服务开始`)
+    for (const server of serverList) {
+        if(server.serverStatus != "active") {
+            continue
+        }
+
+        // 获取当前服务器上所有节点
+        let nodeListresult;
+        try{
+            nodeListresult = await execAsyncRemoteOverServer(server, "docker node ls -q | xargs -I {} docker node inspect -f '{{.Description.Hostname}} {{.Status.Addr}}' {}");
+        }catch (error){
+            console.warn(`[${new Date()} - 数据卷用量查询]服务器 ${server.name} 已离线，请检查！`, error)
+            continue
+        }
+        const nodeList = nodeListresult.stdout;
+        const nodeMap = parseHostsToMap(nodeList)
+
+        const hostnameRes= await execAsyncRemoteOverServer(server, "hostname");
+        const hostname = hostnameRes.stdout.trim()
+
+
+        const orgSizeMap:any = {};
+
+        for (const [node, ip] of nodeMap){
+            let volumesRes;
+            if(hostname === node){
+                // 主节点
+                volumesRes = await execAsyncRemoteOverServer(server, "docker volume ls --format \"{{.Name}}\" | while read vol; do echo -n \"$vol-\"; du -s $(docker inspect -f '{{.Mountpoint}}' $vol) | awk '{print $1}'; done")
+            }else{
+                try {
+                    volumesRes = await execAsyncRemoteOverServer(server, `ssh root@${node} 'docker volume ls --format "{{.Name}}" | while read vol; do echo -n "$vol-"; du -s $(docker inspect -f "{{.Mountpoint}}" "$vol") | awk "{print \\$1}"; done'`)
+                }catch (error){
+                    console.warn(`[${new Date()} - 数据卷用量查询]查询失败，服务器 ${server.name} - 节点 ${node} 已离线，请检查！`, error)
+                    continue
+                }
+            }
+            const volumeStr = volumesRes?.stdout.trim();
+            const volumes = parseVolumeLines(volumeStr);
+            for(const [name, size] of volumes) {
+                // 更新大小
+                const updateRes = await db.update(mounts).set({
+                    size: size || 0
+                }).where(eq(mounts.volumeName, name)).returning();
+                if(updateRes.length > 0 ){
+                    // @ts-ignore
+                    const orgInfo = appList?.find(app=>app.applicationId === updateRes[0]?.applicationId)
+                    if(orgSizeMap[orgInfo?.project?.organizationId]){
+                        orgSizeMap[orgInfo?.project?.organizationId] += size || 0
+                    }else{
+                        orgSizeMap[orgInfo?.project?.organizationId] = size || 0
+                    }
+                }
+            }
+        }
+
+        // 更新总用量
+        for (const orgId in orgSizeMap){
+            await db.update(organization).set({
+                volumeSize: orgSizeMap[orgId]
+            }).where(eq(organization.id, orgId))
+        }
+    }
 }
 
 // 计费扣费服务
@@ -378,6 +452,8 @@ export async function charging() {
                 overCount = Math.floor((nt.currentUsed - nt.all) / 1024)
                 lastUsed = nt.all + overCount * 1024
             } else {
+                // 如果上次计费流量小于免费流量，从免费流量开始计费
+                if(nt.lastUsed < nt.all) nt.lastUsed = nt.all;
                 overCount = Math.floor((nt.currentUsed - nt.lastUsed) / 1024)
                 lastUsed = nt.lastUsed + overCount * 1024
             }

@@ -4,7 +4,8 @@ import {
 	type apiCreateApplication, apiFindMonitoringStats,
 	applications, applicationShopVersion, applicationShopDomains,
 	buildAppName, buildVolumeName, appliationShopMounts, mounts,
-	applicationShopports, server
+	applicationShopports, server, billing, deployments, networkCount,
+	organization
 } from "@dokploy/server/db/schema";
 import { getAdvancedStats } from "@dokploy/server/monitoring/utils";
 import {
@@ -41,7 +42,7 @@ import {
 } from "@dokploy/server/utils/providers/gitlab";
 import { createTraefikConfig } from "@dokploy/server/utils/traefik/application";
 import { TRPCError } from "@trpc/server";
-import {and, eq, sql} from "drizzle-orm";
+import {and, desc, eq, sql} from "drizzle-orm";
 import { encodeBase64 } from "../utils/docker/utils";
 import { getDokployUrl } from "./admin";
 import {
@@ -801,5 +802,37 @@ export const getApplicationStats = async (
 		console.error(err)
 		return null
 	}
-
 };
+
+export const getApplicationBillings = async (applicationId:string)=>{
+	return await db.query.billing.findMany({
+		where: eq(billing.applicationId, applicationId),
+		orderBy: [desc(billing.createdAt)],
+		limit: 100
+	})
+}
+
+export const getApplicationNetworkUsed = async (serverId:string, orgId:string)=>{
+	// 获取当前年月
+	const now = new Date();
+	const year = now.getFullYear();
+	let month = (now.getMonth() + 1).toString().padStart(2, '0');
+	const yearMonth = `${year}${month}`;
+	return db.query.networkCount.findFirst({
+		where: and(
+			eq(networkCount.serverId, serverId),
+			eq(networkCount.organizationId, orgId)
+		),
+	});
+}
+
+export const getVolumeUse = async (orgId:string)=>{
+	return db.query.organization.findFirst({
+		columns: {
+			volumeSize: true
+		},
+		where: and(
+			eq(organization.id, orgId),
+		),
+	});
+}

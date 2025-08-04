@@ -118,5 +118,6 @@ export const deploymentWorker = new Worker(
 	{
 		autorun: false,
 		connection: redisConfig,
+		concurrency: 10,
 	},
 );

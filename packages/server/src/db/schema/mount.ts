@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgEnum, pgTable, text } from "drizzle-orm/pg-core";
+import {integer, pgEnum, pgTable, text} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { nanoid } from "nanoid";
 import { z } from "zod";
@@ -57,6 +57,7 @@ export const mounts = pgTable("mount", {
 	composeId: text("composeId").references(() => compose.composeId, {
 		onDelete: "cascade",
 	}),
+	size: integer("size").notNull().default(0)
 });
 
 export const appliationShopMounts = pgTable("application_shop_mount", {
