@@ -8,6 +8,8 @@ FROM base AS build
 COPY . /usr/src/app
 WORKDIR /usr/src/app
 
+RUN echo "deb http://mirrors.tencent.com/debian/ bookworm main contrib non-free non-free-firmware\ndeb-src http://mirrors.tencent.com/debian/ bookworm main contrib non-free non-free-firmware\ndeb http://mirrors.tencent.com/debian/ bookworm-updates main contrib non-free non-free-firmware\ndeb-src http://mirrors.tencent.com/debian/ bookworm-updates main contrib non-free non-free-firmware\ndeb http://mirrors.tencent.com/debian/ bookworm-backports main contrib non-free non-free-firmware\ndeb-src http://mirrors.tencent.com/debian/ bookworm-backports main contrib non-free non-free-firmware\ndeb http://mirrors.tencent.com/debian-security bookworm-security main contrib non-free non-free-firmware\ndeb-src http://mirrors.tencent.com/debian-security bookworm-security main contrib non-free non-free-firmware" > /etc/apt/sources.list
+
 RUN apt-get update && apt-get install -y python3 make g++ git python3-pip pkg-config libsecret-1-dev && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
