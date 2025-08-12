@@ -25,7 +25,7 @@ $:
 canary:
   push:
     - runner:
-        cpus: 64
+        cpus: 16
     - services:
         - docker #声明后，流水线内可以直接使用docker命令
       env: 
