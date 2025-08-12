@@ -25,6 +25,7 @@ import {
 import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import TicketList from "@/pages/dashboard/ticket/index";
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -146,3 +147,5 @@ export const TicketTable = ({ search }: TicketTableProps) => {
     </div>
   );
 };
+
+export default TicketTable;
