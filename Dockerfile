@@ -12,10 +12,10 @@ RUN echo "deb http://mirrors.tencent.com/debian/ bookworm main contrib non-free 
 
 RUN npm config set registry https://registry.npmmirror.com
 
-RUN apt-get update && apt-get install -y python3 make g++ git python3-pip pkg-config libsecret-1-dev && rm -rf /var/lib/apt/lists/*
+RUN apt update && apt-get install -y python3 make g++ git python3-pip pkg-config libsecret-1-dev && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm install
 
 # Deploy only the dokploy app
 
