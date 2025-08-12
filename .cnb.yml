@@ -16,12 +16,12 @@ $:
       stages:
         - name: tb
           script: npm config set registry https://registry.npmmirror.com
-        - name: pnpm
-          script: npm install -g pnpm 
-        - name: install
-          script: pnpm install
-        - name: copy
-          script: cp apps/dokploy/.env.example apps/dokploy/.env
+#        - name: pnpm
+#          script: npm install -g pnpm
+#        - name: install
+#          script: pnpm install
+#        - name: copy
+#          script: cp apps/dokploy/.env.example apps/dokploy/.env
 canary:
   push:
     - runner:
