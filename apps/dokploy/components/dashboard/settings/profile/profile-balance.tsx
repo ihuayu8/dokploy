@@ -12,7 +12,7 @@ import {Input} from "@/components/ui/input";
 import {useEffect, useState} from "react";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {toast} from "sonner";
-import { QRCodeSVG } from 'qrcode.react';
+// import { QRCodeSVG } from 'qrcode.react';
 import * as React from "react";
 import {cn} from "@/lib/utils";
 
@@ -111,13 +111,14 @@ export const ProfileBalance = () => {
                         <DialogTitle>充值</DialogTitle>
                     </DialogHeader>
                     <div className="flex flex-col justify-center items-center gap-2">
-                        {loadingRecharge ? <div>创建订单中，请稍等...</div> : (<><QRCodeSVG
-                            value={payUrl}
-                            size={200}
-                            fgColor="#24292e"
-                            bgColor="#f6f8fa"
-                            level="H"
-                            includeMargin={true}/>
+                        {loadingRecharge ? <div>创建订单中，请稍等...</div> : (<>
+                            {/*<QRCodeSVG*/}
+                            {/*value={payUrl}*/}
+                            {/*size={200}*/}
+                            {/*fgColor="#24292e"*/}
+                            {/*bgColor="#f6f8fa"*/}
+                            {/*level="H"*/}
+                            {/*includeMargin={true}/>*/}
                             <div className="flex items-center justify-end gap-4">
                                 <img
                                     src="/images/alipay.svg"
