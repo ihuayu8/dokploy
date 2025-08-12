@@ -88,6 +88,7 @@ import { Logo } from "../shared/logo";
 import { Button } from "../ui/button";
 import { UpdateServerButton } from "./update-server";
 import { UserNav } from "./user-nav";
+import { NoticeItem } from "./notice-item";
 
 // The types of the queries we are going to use
 type AuthQueryOutput = inferRouterOutputs<AppRouter>["user"]["get"];
@@ -150,6 +151,12 @@ const MENU: Menu = {
 			isSingle: true,
 			title: "项目",
 			url: "/dashboard/projects",
+			icon: Folder,
+		},
+		{
+			isSingle: true,
+			title: "工单",
+			url: "/dashboard/ticket",
 			icon: Folder,
 		},
 		{
@@ -525,8 +532,20 @@ function SidebarLogo() {
 	const { data: activeOrganization } = authClient.useActiveOrganization();
 	const _utils = api.useUtils();
 
-	const { data: invitations, refetch: refetchInvitations } =
-		api.user.getInvitations.useQuery();
+	// const { data: invitations, refetch: refetchInvitations } =
+	// 	api.user.getInvitations.useQuery();
+
+	const { data: notices, refetch: refetchNotices } =
+		api.user.getNotice.useQuery();
+
+	const [unread, setUnread] = useState(0);
+
+	useEffect(() => {
+		if(notices && notices.length > 0){
+			const unread = notices.filter((item) => item.notice_check === null).length;
+			setUnread(unread);
+		}
+	}, [notices]);
 
 	const [_activeTeam, setActiveTeam] = useState<
 		typeof activeOrganization | null
@@ -657,14 +676,14 @@ function SidebarLogo() {
 															});
 													}}
 												>
-													<Button
-														variant="ghost"
-														size="icon"
-														className="group hover:bg-red-500/10"
-														isLoading={isRemoving}
-													>
-														<Trash2 className="size-4 text-primary group-hover:text-red-500" />
-													</Button>
+													{/*<Button*/}
+													{/*	variant="ghost"*/}
+													{/*	size="icon"*/}
+													{/*	className="group hover:bg-red-500/10"*/}
+													{/*	isLoading={isRemoving}*/}
+													{/*>*/}
+													{/*	<Trash2 className="size-4 text-primary group-hover:text-red-500" />*/}
+													{/*</Button>*/}
 												</DialogAction>
 											</div>
 										)}
@@ -673,7 +692,7 @@ function SidebarLogo() {
 								{(user?.role === "owner" || isCloud) && (
 									<>
 										<DropdownMenuSeparator />
-										<AddOrganization />
+										{/*<AddOrganization />*/}
 									</>
 								)}
 							</DropdownMenuContent>
@@ -693,9 +712,9 @@ function SidebarLogo() {
 									)}
 								>
 									<Bell className="size-4" />
-									{invitations && invitations.length > 0 && (
-										<span className="absolute -top-0 -right-0 flex size-4 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
-											{invitations.length}
+									{unread > 0 && (
+										<span className="absolute -top-0 -right-0 flex size-4 items-center justify-center rounded-full bg-blue-500 text-xs text-white animate-pulse-slow">
+											{unread}
 										</span>
 									)}
 								</Button>
@@ -705,56 +724,15 @@ function SidebarLogo() {
 								side={"right"}
 								className="w-80"
 							>
-								<DropdownMenuLabel>Pending Invitations</DropdownMenuLabel>
+								<DropdownMenuLabel>公告</DropdownMenuLabel>
 								<div className="flex flex-col gap-2">
-									{invitations && invitations.length > 0 ? (
-										invitations.map((invitation) => (
-											<div key={invitation.id} className="flex flex-col gap-2">
-												<DropdownMenuItem
-													className="flex flex-col items-start gap-1 p-3"
-													onSelect={(e) => e.preventDefault()}
-												>
-													<div className="font-medium">
-														{invitation?.organization?.name}
-													</div>
-													<div className="text-xs text-muted-foreground">
-														Expires:{" "}
-														{new Date(invitation.expiresAt).toLocaleString()}
-													</div>
-													<div className="text-xs text-muted-foreground">
-														Role: {invitation.role}
-													</div>
-												</DropdownMenuItem>
-												<DialogAction
-													title="Accept Invitation"
-													description="Are you sure you want to accept this invitation?"
-													type="default"
-													onClick={async () => {
-														const { error } =
-															await authClient.organization.acceptInvitation({
-																invitationId: invitation.id,
-															});
-
-														if (error) {
-															toast.error(
-																error.message || "Error accepting invitation",
-															);
-														} else {
-															toast.success("Invitation accepted successfully");
-															await refetchInvitations();
-															await refetch();
-														}
-													}}
-												>
-													<Button size="sm" variant="secondary">
-														Accept Invitation
-													</Button>
-												</DialogAction>
-											</div>
+									{notices && notices.length > 0 ? (
+										notices.map(({notice, notice_check}) => (
+											<NoticeItem key={notice.noticeId} notice={notice} noticeCheck={notice_check} refetchNotices={refetchNotices}></NoticeItem>
 										))
 									) : (
 										<DropdownMenuItem disabled>
-											No pending invitations
+											暂时没有公告
 										</DropdownMenuItem>
 									)}
 								</div>

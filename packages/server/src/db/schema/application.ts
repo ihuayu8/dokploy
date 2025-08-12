@@ -27,6 +27,7 @@ import { server } from "./server";
 import { applicationStatus, certificateType, triggerType } from "./shared";
 import { sshKeys } from "./ssh-key";
 import { generateAppName } from "./utils";
+import {applicationShopInfo} from "@dokploy/server/db/schema/application-shop";
 export const sourceType = pgEnum("sourceType", [
 	"docker",
 	"git",
@@ -234,6 +235,7 @@ export const applications = pgTable("application", {
 	stand: text("stand"),
 	currentReplicas: integer("current_replicas").default(0),
 	currentStand: text("current_stand").default("0"),
+	shopId: text("shop_id"),
 });
 
 export const applicationsRelations = relations(
@@ -242,6 +244,10 @@ export const applicationsRelations = relations(
 		project: one(projects, {
 			fields: [applications.projectId],
 			references: [projects.projectId],
+		}),
+		applicationShopInfo: one(applicationShopInfo, {
+			fields: [applications.shopId],
+			references: [applicationShopInfo.appShopId],
 		}),
 		deployments: many(deployments),
 		customGitSSHKey: one(sshKeys, {

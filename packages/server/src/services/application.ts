@@ -107,7 +107,8 @@ export const createApplication = async (
 				...templateInfo,
 				...input,
 				appName,
-				...cSize
+				...cSize,
+				shopId: input.appShopId
 			})
 			.returning()
 			.then((value) => value[0]);
@@ -182,6 +183,7 @@ export const findApplicationById = async (applicationId: string, txo? : any) => 
 	const application = await (txo?txo:db).query.applications.findFirst({
 		where: eq(applications.applicationId, applicationId),
 		with: {
+			applicationShopInfo: true,
 			project: true,
 			domains: true,
 			deployments: true,

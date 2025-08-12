@@ -111,6 +111,7 @@ const config = {
 				"caret-blink": "caret-blink 1.25s ease-out infinite",
 				"accordion-down": "accordion-down 0.2s ease-out",
 				"accordion-up": "accordion-up 0.2s ease-out",
+				'pulse-slow': 'pulse 2s cubic-bezier(0.2, 0, 0.6, 1) infinite',
 			},
 		},
 	},

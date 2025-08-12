@@ -16,7 +16,6 @@ export const ProfileVoucher = () => {
     const { data, refetch, isLoading } = api.user.getVouchers.useQuery()
     useEffect(()=>{
         setVoucherList(data || [])
-        console.log(data)
     }, [isLoading])
 
     // @ts-ignore
@@ -41,7 +40,7 @@ export const ProfileVoucher = () => {
                     </CardHeader>
                     <CardContent className="space-y-2 py-8 border-t">
                         {voucherList.map((item)=>(
-                            <div style={{display: "flex", flexDirection: "column", marginBottom: "1rem"}}>
+                            <div style={{display: "flex", flexDirection: "column", marginBottom: "1rem"}} key={item.voucherId}>
                                 <div style={{marginBottom: "5px", display:"flex"}}>
                                     <span className="text-xs" style={{fontWeight: "700"}}>{item.vName} </span>
                                     <span className="text-xs text-gray-600" style={{marginLeft: "8px"}}>

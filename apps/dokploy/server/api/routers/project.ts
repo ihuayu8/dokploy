@@ -123,6 +123,9 @@ export const projectRouter = createTRPCRouter({
 								applications.applicationId,
 								accessedServices,
 							),
+							with: {
+								applicationShopInfo: true,
+							},
 						},
 						compose: {
 							where: buildServiceFilter(compose.composeId, accessedServices),

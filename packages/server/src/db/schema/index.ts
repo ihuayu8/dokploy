@@ -39,3 +39,4 @@ export * from "./volume-backups";
 export * from "./voucher"
 export * from "./stand";
 export * from "./billing";
+export * from "./ticket"

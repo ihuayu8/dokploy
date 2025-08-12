@@ -56,6 +56,7 @@ import { type ReactElement, useEffect, useState } from "react";
 import { toast } from "sonner";
 import superjson from "superjson";
 import { ShowBilling } from "@/components/dashboard/application/billing/billing";
+import {AlertBlock} from "@/components/shared/alert-block";
 
 type TabState =
 	| "projects"
@@ -122,8 +123,18 @@ const Service = (
 										<div className="absolute -right-1  -top-2">
 											<StatusTooltip status={data?.applicationStatus} />
 										</div>
-
-										<GlobeIcon className="h-6 w-6 text-muted-foreground" />
+										{data?.applicationShopInfo?.logo ? (
+											<img
+												src={`${data?.applicationShopInfo?.logo}`}
+												className={cn(
+													"object-contain",
+													"size-8",
+												)}
+												alt={data?.applicationShopInfo?.name}
+											/>
+										):(
+											<GlobeIcon className="h-6 w-6 text-muted-foreground" />
+										)}
 									</div>
 									{data?.name}
 								</CardTitle>
@@ -134,6 +145,12 @@ const Service = (
 								<span className="text-sm text-muted-foreground">
 									{data?.appName}
 								</span>
+								{data?.server?.tips && (
+									<AlertBlock
+										type="warning">
+										{data?.server?.tips}
+									</AlertBlock>
+								)}
 							</div>
 							<div className="flex flex-col h-fit w-fit gap-2">
 								<div className="flex flex-row h-fit w-fit gap-2">

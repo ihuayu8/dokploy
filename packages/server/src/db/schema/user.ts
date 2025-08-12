@@ -351,3 +351,41 @@ export const apiUpdateUser = createSchema.partial().extend({
 		.optional(),
 	logCleanupCron: z.string().optional().nullable(),
 });
+
+
+export const rechargeOrder = pgTable("recharge_order", {
+	id: text("id")
+		.notNull()
+		.primaryKey(),
+	amount: numeric("amount"),
+	payAmount: numeric("pay_amount"),
+	userId: text("user_id").notNull(),
+	status: text("status").notNull().default("0"),
+	couponId: text("coupon_id"),
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+	endAt: timestamp("end_at"),
+})
+
+export const notice = pgTable("notice", {
+	noticeId: integer("notice_id")
+		.notNull()
+		.primaryKey(),
+	title: text("title"),
+	content: text("content"),
+	isPinned: boolean("is_pinned").notNull().default(false),
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+})
+
+export const noticeCheck = pgTable("notice_check", {
+	noticeId: integer("notice_id"),
+	userId: text("userId"),
+	status: boolean("status").notNull().default(true),
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+})
+
+export const noticeRelations = relations(notice, ({ one, many }) => ({
+	noticeCheck: one(noticeCheck, {
+		fields: [notice.noticeId],
+		references: [noticeCheck.noticeId],
+	}),
+}));

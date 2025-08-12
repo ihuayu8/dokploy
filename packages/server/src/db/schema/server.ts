@@ -105,6 +105,7 @@ export const server = pgTable("server", {
 	freeNetwork: integer("free_network"),
 	exceedNetworkFee: numeric("exceed_network_fee").notNull().default("0"),
 	defaultDisk: numeric("default_disk").notNull().default("1"),
+	tips: text("tips"),
 
 });
 

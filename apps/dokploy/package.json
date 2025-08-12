@@ -131,6 +131,7 @@
 		"postgres": "3.4.4",
 		"public-ip": "6.0.2",
 		"qrcode": "^1.5.3",
+		"qrcode.react": "^4.2.0",
 		"react": "18.2.0",
 		"react-confetti-explosion": "2.1.2",
 		"react-day-picker": "8.10.1",
@@ -198,6 +199,8 @@
 		]
 	},
 	"commitlint": {
-		"extends": ["@commitlint/config-conventional"]
+		"extends": [
+			"@commitlint/config-conventional"
+		]
 	}
 }

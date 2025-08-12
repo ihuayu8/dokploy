@@ -40,6 +40,7 @@ import { rollbackRouter } from "./routers/rollbacks";
 import { volumeBackupsRouter } from "./routers/volume-backups";
 import {applicationShopInfo} from "@dokploy/server/db/schema/application-shop";
 import {applicationShopRouter} from "@/server/api/routers/app-shop";
+import { ticketRouter } from "./routers/ticket";
 /**
  * This is the primary router for your server.
  *
@@ -50,6 +51,7 @@ export const appRouter = createTRPCRouter({
 	admin: adminRouter,
 	docker: dockerRouter,
 	project: projectRouter,
+	ticket: ticketRouter,
 	application: applicationRouter,
 	applicationShop: applicationShopRouter,
 	mysql: mysqlRouter,

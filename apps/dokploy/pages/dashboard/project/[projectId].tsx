@@ -127,6 +127,8 @@ export const extractServices = (data: Project | undefined) => {
 			status: item.applicationStatus,
 			description: item.description,
 			serverId: item.serverId,
+			shopId: item.shopId,
+			applicationShopInfo: item.applicationShopInfo,
 		})) || [];
 
 	const mariadb: Services[] =
@@ -1017,8 +1019,18 @@ const Project = (
 																		</div>
 
 																		<span className="text-sm font-medium text-muted-foreground self-start">
-																			{service.type === "application" && (
+																			{service.type === "application" && !service.shopId && (
 																				<GlobeIcon className="h-6 w-6" />
+																			)}
+																			{service.type === "application" && !!service.shopId && (
+																				<img
+																					src={`${service?.applicationShopInfo?.logo}`}
+																					className={cn(
+																						"object-contain",
+																						"size-10",
+																					)}
+																					alt={service?.applicationShopInfo?.name}
+																				/>
 																			)}
 																		</span>
 																	</div>

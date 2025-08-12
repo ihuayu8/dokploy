@@ -11,6 +11,7 @@ import {
 	updateUser,
 } from "@dokploy/server";
 import { db } from "@dokploy/server/db";
+import {nanoid} from "nanoid";
 import {
 	account,
 	apiAssignPermissions,
@@ -18,11 +19,11 @@ import {
 	apiUpdateUser,
 	apikey,
 	invitation,
-	member, users_temp, voucher
+	member, users_temp, voucher, rechargeOrder, noticeCheck, notice
 } from "@dokploy/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import * as bcrypt from "bcrypt";
-import { and, asc, eq, gt } from "drizzle-orm";
+import {and, asc, desc, eq, gt, sql} from "drizzle-orm";
 import { z } from "zod";
 import {
 	adminProcedure,
@@ -124,6 +125,32 @@ export const userRouter = createTRPCRouter({
 
 		return userInfo;
 	}),
+	// 获取通知公告
+	getNotice: protectedProcedure.query(async ({ ctx }) => {
+		const notices = await db
+			.select()
+			.from(notice)
+			.leftJoin(noticeCheck, and(
+				eq(notice.noticeId, noticeCheck.noticeId),
+				eq(noticeCheck.userId, ctx.user.id)
+			))
+			.limit(5)
+			.orderBy(desc(notice.noticeId))
+
+		return notices;
+	}),
+	// 用户公告已读
+	readNotice: protectedProcedure.input(z.object({
+		noticeId: z.number()
+	})).mutation(async ({ input, ctx }) => {
+		try{
+			await db.insert(noticeCheck).values({
+				noticeId: input.noticeId,
+				userId: ctx.user.id,
+			})
+		}catch (e){
+		}
+	}),
 	// 获取用户代金券列表
 	getVouchers: protectedProcedure.query(async ({ ctx }) => {
 		const voucherList = await db.query.voucher.findMany({
@@ -134,6 +161,73 @@ export const userRouter = createTRPCRouter({
 		})
 
 		return voucherList;
+	}),
+	// 用户充值-生成订单并返回支付二维码
+	recharge: protectedProcedure.input(z.object({
+		amount: z.number().min(0)
+	})).mutation(async ({ input, ctx }) => {
+		// 生成订单号
+		const orderId = nanoid();
+		let res;
+		try{
+			res = await fetch("http://atte.ihuayu8.cn/pay/gen_order", {
+				method: "POST",
+				body: JSON.stringify({
+					name: "用户充值",
+					amount: input.amount.toString(),
+					userId: "",
+					mercId: "",
+					mercNum: "",
+					callUrl: "http://frp-fly.com:34715/api/payment?token=huayu5355408",
+					thirdOrderId: orderId
+				})
+			})
+		}catch (e){
+			console.error(e)
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "创建订单失败，请稍后再试！",
+			});
+		}
+		const data = await res?.json();
+		if(data.code !== 200){
+			console.error(res)
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "创建订单失败，请稍后再试！",
+			});
+		}
+
+		//插入订单表
+		await db.insert(rechargeOrder).values({
+			id: orderId,
+			amount: input.amount || 0,
+			payAmount: input.amount,
+			userId: ctx.session.userId || "",
+			status: "0",
+			couponId: "",
+		})
+
+		return {
+			orderId,
+			payUrl: data.data.payUrl
+		};
+	}),
+	// 查询订单状态
+	getOrderStatus: protectedProcedure
+		.input(z.object({
+			orderId: z.string()
+		}))
+		.query(async ({ ctx,input }) => {
+			const order = await db.query.rechargeOrder.findFirst({
+				where: eq(rechargeOrder.id, input.orderId),
+				columns: {
+					status: true,
+					amount: true,
+				}
+			})
+
+		return order;
 	}),
 	haveRootAccess: protectedProcedure.query(async ({ ctx }) => {
 		if (!IS_CLOUD) {
