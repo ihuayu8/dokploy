@@ -44,3 +44,15 @@ jobs:
           tags: |
             docker.cnb.cool/ihuayu8/dokploy:latest
             docker.cnb.cool/ihuayu8/dokploy:${{ steps.get_time.outputs.BUILD_TIME }}
+
+      # 部署到远程服务器
+      - name: Deploy to Remote Server via SSH
+        uses: appleboy/ssh-action@master # 使用社区提供的 SSH Action
+        with:
+          host: ${{ secrets.REMOTE_HOST }} # 从 GitHub Secrets 读取远程服务器 IP 或主机名
+          username: ${{ secrets.REMOTE_USER }} # 从 GitHub Secrets 读取远程服务器登录用户名
+          password: ${{ secrets.REMOTE_PASSWORD }} # 从 GitHub Secrets 读取 SSH 私钥
+          script: |
+            echo "连接到远程服务器成功..."
+            docker service update --image docker.cnb.cool/ihuayu8/dokploy:${{ steps.get_time.outputs.BUILD_TIME }} dokploy
+            echo "部署成功!"
