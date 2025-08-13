@@ -34,7 +34,9 @@ WORKDIR /app
 # Set production
 ENV NODE_ENV=production
 
-RUN apt-get update && apt-get install -y curl unzip zip apache2-utils iproute2 rsync git-lfs && git lfs install && rm -rf /var/lib/apt/lists/*
+RUN echo "deb http://mirrors.tencent.com/debian/ bookworm main contrib non-free non-free-firmware\ndeb-src http://mirrors.tencent.com/debian/ bookworm main contrib non-free non-free-firmware\ndeb http://mirrors.tencent.com/debian/ bookworm-updates main contrib non-free non-free-firmware\ndeb-src http://mirrors.tencent.com/debian/ bookworm-updates main contrib non-free non-free-firmware\ndeb http://mirrors.tencent.com/debian/ bookworm-backports main contrib non-free non-free-firmware\ndeb-src http://mirrors.tencent.com/debian/ bookworm-backports main contrib non-free non-free-firmware\ndeb http://mirrors.tencent.com/debian-security bookworm-security main contrib non-free non-free-firmware\ndeb-src http://mirrors.tencent.com/debian-security bookworm-security main contrib non-free non-free-firmware" > /etc/apt/sources.list
+
+RUN apt update && apt-get install -y curl unzip zip apache2-utils iproute2 rsync git-lfs && git lfs install && rm -rf /var/lib/apt/lists/*
 
 # Copy only the necessary files
 COPY --from=build /prod/dokploy/.next ./.next
