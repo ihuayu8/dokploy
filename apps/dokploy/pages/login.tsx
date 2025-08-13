@@ -94,10 +94,10 @@ export default function Home({ IS_CLOUD }: Props) {
 				return;
 			}
 
-			toast.success("Logged in successfully");
+			toast.success("登录成功");
 			router.push("/dashboard/projects");
 		} catch {
-			toast.error("An error occurred while logging in");
+			toast.error("登录失败，服务器错误");
 		} finally {
 			setIsLoginLoading(false);
 		}

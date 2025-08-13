@@ -8,9 +8,13 @@ import {
     LifeBuoy, Mail, Menu, Shield, Star, Users
 } from "lucide-react";
 import Link from "next/link";
+import {authClient} from "@/lib/auth-client";
+import {useState} from "react";
 
 // SaaS门户页面组件
 export default function SaaSPortalPage() {
+    const { data: session } = authClient.useSession();
+
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
             {/* 导航栏 */}
@@ -18,7 +22,7 @@ export default function SaaSPortalPage() {
                 <div className="container flex h-16 items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Globe className="h-8 w-8 text-blue-600" />
-                        <span className="text-xl font-bold tracking-tight hidden sm:inline-block">
+                        <span className="text-xl font-bold tracking-tight inline-block">
                             海纳百川
                         </span>
                     </div>
@@ -32,18 +36,24 @@ export default function SaaSPortalPage() {
                     </nav>
 
                     <div className="flex items-center gap-3">
-                        <Link href="/login">
-                            <Button variant="ghost" size="sm">登录</Button>
-                        </Link>
-                        <Link href="/register">
-                            <Button size="sm">免费试用</Button>
-                        </Link>
+                        {!session?.user && (
+                            <><Link href="/login">
+                                <Button variant="ghost" size="sm">登录</Button>
+                            </Link><Link href="/register">
+                                <Button size="sm">免费试用</Button>
+                            </Link></>
+                        )}
+                        {session?.user && (
+                            <Link href="/dashboard/projects">
+                                <Button size="sm">控制台</Button>
+                            </Link>
+                        )}
 
                         {/* 移动端菜单按钮 */}
-                        <Button variant="ghost" size="icon" className="md:hidden">
-                            <Menu className="h-5 w-5" />
-                            <span className="sr-only">打开菜单</span>
-                        </Button>
+                        {/*<Button variant="ghost" size="icon" className="md:hidden">*/}
+                        {/*    <Menu className="h-5 w-5" />*/}
+                        {/*    <span className="sr-only">打开菜单</span>*/}
+                        {/*</Button>*/}
                     </div>
                 </div>
             </header>
@@ -61,15 +71,23 @@ export default function SaaSPortalPage() {
                                 您可以用<span className="text-blue-400">极低的成本</span>轻松部署、管理和扩展容器应用，减少运维复杂性，提高开发效率。
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4">
+                                {!session?.user && (
                                 <Link href="/register">
                                     <Button size="lg" className="gap-2">
                                         开始免费试用
                                         <ChevronRight className="h-4 w-4" />
                                     </Button>
                                 </Link>
-                                <Link href="#demo">
-                                    <Button size="lg" variant="secondary">观看演示</Button>
-                                </Link>
+                                )}
+                                {session?.user && (
+                                    <Link href="/dashboard/projects">
+                                        <Button size="lg" className="gap-2">
+                                            前往控制台
+                                            <ChevronRight className="h-4 w-4" />
+                                        </Button>
+                                    </Link>
+                                )}
+
                             </div>
                             <p className="text-xs text-muted-foreground">无需信用卡 · 最多90天免费试用 · 随时取消</p>
                         </div>
@@ -215,7 +233,7 @@ export default function SaaSPortalPage() {
                             <Badge variant="outline" className="mb-4">客户评价</Badge>
                             <h2 className="text-3xl md:text-4xl font-bold mb-4">用户如何评价我们</h2>
                             <p className="text-muted-foreground">
-                                听听我们的客户分享他们使用Dokploy的体验和成果
+                                听听我们的客户分享他们使用海纳百川的体验和成果
                             </p>
                         </div>
 
