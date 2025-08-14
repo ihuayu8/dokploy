@@ -54,5 +54,7 @@ jobs:
           password: ${{ secrets.REMOTE_PASSWORD }} # 从 GitHub Secrets 读取 SSH 私钥
           script: |
             echo "连接到远程服务器成功..."
-            docker service update --image docker.cnb.cool/ihuayu8/dokploy:${{ steps.get_time.outputs.BUILD_TIME }} dokploy
+            docker pull docker.cnb.cool/ihuayu8/dokploy:latest
+            echo "镜像拉取成功..."
+            docker service update --image docker.cnb.cool/ihuayu8/dokploy:latest dokploy
             echo "部署成功!"
