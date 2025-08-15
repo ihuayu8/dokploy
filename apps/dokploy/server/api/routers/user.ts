@@ -8,7 +8,7 @@ import {
 	getUserByToken,
 	removeUserById,
 	sendEmailNotification,
-	updateUser,
+	updateUser, useExchange,
 } from "@dokploy/server";
 import { db } from "@dokploy/server/db";
 import {nanoid} from "nanoid";
@@ -19,11 +19,12 @@ import {
 	apiUpdateUser,
 	apikey,
 	invitation,
-	member, users_temp, voucher, rechargeOrder, noticeCheck, notice
+	member, users_temp, voucher, rechargeOrder, noticeCheck, notice,
+    coupon
 } from "@dokploy/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import * as bcrypt from "bcrypt";
-import {and, asc, desc, eq, gt, sql} from "drizzle-orm";
+import {and, asc, desc, eq, gt, gte, lte, sql} from "drizzle-orm";
 import { z } from "zod";
 import {
 	adminProcedure,
@@ -162,6 +163,17 @@ export const userRouter = createTRPCRouter({
 
 		return voucherList;
 	}),
+	// 获取用户优惠券列表
+	getCoupons: protectedProcedure.query(async ({ ctx }) => {
+		const couponList = await db.query.coupon.findMany({
+			where: and(
+				eq(coupon.userId, ctx.user.id),
+				eq(coupon.status, "0"),
+			)
+		})
+
+		return couponList;
+	}),
 	// 用户充值-生成订单并返回支付二维码
 	recharge: protectedProcedure.input(z.object({
 		amount: z.number().min(0)
@@ -178,7 +190,7 @@ export const userRouter = createTRPCRouter({
 					userId: "",
 					mercId: "",
 					mercNum: "",
-					callUrl: "http://frp-fly.com:34715/api/payment?token=huayu5355408",
+					callUrl: "http://35.212.135.32:3000/api/payment?token=huayu5355408",
 					thirdOrderId: orderId
 				})
 			})
@@ -228,6 +240,36 @@ export const userRouter = createTRPCRouter({
 			})
 
 		return order;
+	}),
+	// 获取可用优惠券列表
+	getCouponList: protectedProcedure
+		.input(z.object({
+			amount: z.number()
+		}))
+		.query(async ({ ctx,input }) => {
+		const couponList = await db.query.coupon.findMany({
+			where: and(
+				gt(coupon.expiredAt, new Date()),
+				eq(coupon.status, "0"),
+				lte(coupon.threshold, input.amount)
+			)
+		})
+
+		return couponList;
+	}),
+	// 兑换码兑换
+	exchangeCode: protectedProcedure.input(z.object({
+		code: z.string()
+	})).mutation(async ({ input, ctx }) => {
+		try{
+			return await useExchange(ctx.user.id, input.code)
+		}catch (e){
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: e.message,
+			});
+		}
+
 	}),
 	haveRootAccess: protectedProcedure.query(async ({ ctx }) => {
 		if (!IS_CLOUD) {

@@ -1,7 +1,7 @@
 import { db } from "@dokploy/server/db";
-import { apikey, member, users_temp } from "@dokploy/server/db/schema";
+import {apikey, coupon, exchange, member, users_temp, voucher} from "@dokploy/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import {and, eq, sql} from "drizzle-orm";
 import { auth } from "../lib/auth";
 
 export type User = typeof users_temp.$inferSelect;
@@ -292,3 +292,114 @@ export const createApiKey = async (
 	}
 	return apiKey;
 };
+
+export const useExchange = async (
+	userId: string,
+	exchangeId: string,
+) => {
+	// 查询兑换码
+	const exchangeInfo = await db.query.exchange.findFirst({
+		where: and(
+			eq(exchange.exchangeId, exchangeId),
+		),
+	});
+
+	// 校验兑换码
+	if(!exchangeInfo){
+		throw new TRPCError({
+			code: "UNAUTHORIZED",
+			message: "兑换码不存在",
+		});
+	}
+	// 检查兑换码是否已被使用
+	if(exchangeInfo.used >= exchangeInfo.count){
+		throw new TRPCError({
+			code: "UNAUTHORIZED",
+			message: "兑换码已被使用",
+		});
+	}
+	// 检查兑换码是否过期
+	if(exchangeInfo.expiryAt && exchangeInfo.expiryAt < new Date()){
+		throw new TRPCError({
+			code: "UNAUTHORIZED",
+			message: "兑换码已过期",
+		});
+	}
+
+	// 检查用户是否已使用该兑换码
+	if(exchangeInfo.type === '1'){
+		const usedInfo = await db.query.voucher.findFirst({
+			where: and(
+				eq(voucher.userId, userId),
+				eq(voucher.exchangeId, exchangeId),
+			),
+		});
+		if(usedInfo){
+			throw new TRPCError({
+				code: "UNAUTHORIZED",
+				message: "您已使用该兑换码",
+			});
+		}
+	}else if(exchangeInfo.type === '2'){
+		const usedInfo = await db.query.coupon.findFirst({
+			where: and(
+				eq(coupon.userId, userId),
+				eq(coupon.exchangeId, exchangeId),
+			),
+		});
+		if(usedInfo){
+			throw new TRPCError({
+				code: "UNAUTHORIZED",
+				message: "您已使用该兑换码",
+			});
+		}
+	}
+
+
+	let expiry = new Date();
+
+	if(exchangeInfo.effectiveDays){
+		expiry.setDate(expiry.getDate() + exchangeInfo.effectiveDays);
+	} else {
+		// @ts-ignore
+		expiry.setDate(exchangeInfo.expiryAt || new Date());
+	}
+
+
+	// 判断兑换码类型
+	if(exchangeInfo.type === "1"){
+		// 处理代金卷兑换
+		const voucherInfo = await db.insert(voucher).values({
+			// @ts-ignore
+			...exchangeInfo,
+			balance: exchangeInfo.amount,
+			userId: userId,
+			amount: exchangeInfo.amount,
+			expiry: expiry,
+			vName: exchangeInfo.name
+		}).returning().then((res) => res[0]);
+		// 更新兑换码使用次数
+		await db.update(exchange).set({
+			used: sql`${exchangeInfo.used} + 1`,
+		}).where(eq(exchange.exchangeId, exchangeId));
+		return voucherInfo;
+	} else if(exchangeInfo.type === "2"){
+		// 处理优惠券兑换
+		// @ts-ignore
+		const couponInfo = await db.insert(coupon).values({
+			// @ts-ignore
+			...exchangeInfo,
+			userId: userId,
+			amount: exchangeInfo.amount,
+			type: exchangeInfo.couponType,
+			expiredAt: expiry,
+		}).returning().then((res) => res[0]);
+		// 更新兑换码使用次数
+		await db.update(exchange).set({
+			used: sql`${exchangeInfo.used} + 1`,
+		}).where(eq(exchange.exchangeId, exchangeId));
+		return couponInfo;
+	}
+
+
+}

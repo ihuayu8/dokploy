@@ -364,6 +364,8 @@ export const rechargeOrder = pgTable("recharge_order", {
 	couponId: text("coupon_id"),
 	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 	endAt: timestamp("end_at"),
+	payType: text("pay_type"),
+	customerId: text("customer_id"),
 })
 
 export const notice = pgTable("notice", {

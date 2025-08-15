@@ -8,7 +8,7 @@ export default async function handler(
 ) {
     if (req.method === 'POST') {
         const { token } = req.query;
-        const { amount,third_order_id,endTime } = req.body;
+        const { amount,third_order_id,endTime,payType,customerId } = req.body;
         console.log("req",req.body);
         // 验证token
         if (token != 'huayu5355408') {
@@ -62,6 +62,8 @@ export default async function handler(
             .set({
                 status: '1',
                 endTime: endTime,
+                payType: payType,
+                customerId: customerId,
             })
             .where(eq(rechargeOrder.id, order.id));
 

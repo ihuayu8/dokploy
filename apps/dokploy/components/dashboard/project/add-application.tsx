@@ -45,6 +45,7 @@ import {toast} from "sonner";
 import {z} from "zod";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Label} from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
 
 const AddTemplateSchema = z.object({
     name: z.string().min(1, {
@@ -146,6 +147,7 @@ export const AddApplication = ({
         form.setValue("stand", standList?.[0].id || "1")
     }, [standList]);
 
+    const [currentServer, setCurrentServer] = useState(null)
 
     // 当选择服务节点的时候
     useEffect(() => {
@@ -153,6 +155,7 @@ export const AddApplication = ({
         const hasMatchingServer = servers?.some(item =>
             item.serverId === form.getValues().serverId && item.type === '1'
         );
+        setCurrentServer(servers?.find(item => item.serverId === form.getValues().serverId))
 
         setShowTip(!!hasMatchingServer);
 
@@ -318,11 +321,11 @@ export const AddApplication = ({
                                                             className="flex items-center gap-2 justify-between">
                                                             {server.type === '1' ?
                                                                 <span
-                                                                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                                                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                                                   建站
                                                                 </span> :
                                                                 <span
-                                                                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                                                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                                                                   通用
                                                                 </span>
                                                             }
@@ -333,19 +336,19 @@ export const AddApplication = ({
                                                             <span>
                                                                 {(server.resourceUsed/server.resourceLimit) < 0.6 ? (
                                                                     <span
-                                                                        className="inline-flex items-center px-2 py-1 text-sm font-medium bg-green-800 text-white">
+                                                                        className="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-800 text-white">
                                                                       正常
                                                                     </span>
                                                                 ):''}
                                                                 {(server.resourceUsed/server.resourceLimit) >= 0.6 && (server.resourceUsed/server.resourceLimit) < 1 ? (
                                                                     <span
-                                                                        className="inline-flex items-center px-2 py-1 text-sm font-medium bg-orange-400 text-white">
+                                                                        className="inline-flex items-center px-2 py-1 text-xs font-medium bg-orange-400 text-white">
                                                                       拥挤
                                                                     </span>
                                                                 ):''}
                                                                 {(server.resourceUsed/server.resourceLimit) >= 1 ? (
                                                                     <span
-                                                                        className="inline-flex items-center px-2 py-1 text-sm font-medium bg-red-800 text-white">
+                                                                        className="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-800 text-white">
                                                                       满载
                                                                     </span>
                                                                 ):''}
@@ -361,6 +364,16 @@ export const AddApplication = ({
                                 </FormItem>
                             )}
                         />
+                        {currentServer && (
+                            <Card className="p-3 text-xs flex flex-col gap-3 text-gray-500">
+                                <div className="w-full"><span className="font-bold">说明: </span>{currentServer?.tips}</div>
+                                <div className="flex flex-row gap-5">
+                                    <span><span className="font-bold">免费流量：</span>{currentServer?.freeNetwork} GB</span>
+                                    <span><span className="font-bold">容器存储：</span>{currentServer?.defaultDisk} GB</span>
+                                    <span><span className="font-bold">流量超出费用：</span>{currentServer?.exceedNetworkFee}元/GB</span>
+                                </div>
+                            </Card>
+                        )}
                         {showTip && <AlertBlock
                             type="warning">建站型节点不允许部署代理等持续高带宽占用应用，违者封禁账户且不退款</AlertBlock>}
                         <FormField

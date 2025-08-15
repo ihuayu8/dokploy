@@ -15,12 +15,20 @@ import {toast} from "sonner";
 import { QRCodeSVG } from 'qrcode.react';
 import * as React from "react";
 import {cn} from "@/lib/utils";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 export const ProfileBalance = () => {
     const { data, refetch, isLoading } = api.user.getBalance.useQuery()
     let balance = data?.balance
     const [visible, setVisible] = useState(false)
     const [rechargeAmount, setRechargeAmount] = useState(0)
+    const [couponId, setCouponId] = useState("")
+
+    const { data: couponList, refetch: refetchCouponList } = api.user.getCouponList.useQuery({
+        amount: rechargeAmount
+    },{
+        enabled: rechargeAmount !== 0
+    })
 
     const {mutateAsync, isLoading: loadingRecharge, error, isError} =
         api.user.recharge.useMutation();
@@ -48,7 +56,7 @@ export const ProfileBalance = () => {
     }, [orderInfo]);
 
     // 添加金额输入处理函数
-    const handleAmountChange = () => {
+    const handleAmountCheck = () => {
         // 只允许数字和小数点，且最多两位小数
         if (/^\d*(\.\d{0,2})?$/.test(String(rechargeAmount)) && rechargeAmount > 0) {
             return true
@@ -56,8 +64,19 @@ export const ProfileBalance = () => {
         return false
     };
 
+    const handleAmountChange = (amount: any) => {
+        setRechargeAmount(Number(amount.target.value))
+        if (Number(amount.target.value) && Number(amount.target.value) != 0){
+            refetchCouponList().then(r => {
+                console.log(r)
+            })
+        }else {
+            setCouponId("")
+        }
+    }
+
     const handleRecharge = () => {
-        if(!handleAmountChange()){
+        if(!handleAmountCheck()){
             toast.error("请输入正确的金额");
             return
         }
@@ -93,10 +112,24 @@ export const ProfileBalance = () => {
                         <Input
                             placeholder="请输入充值金额"
                             value={rechargeAmount}
-                            type="number"
-                            onChange={amount => setRechargeAmount(Number(amount.target.value))}
+                            onChange={handleAmountChange}
                         />
                         <div className="flex items-center justify-end gap-2" style={{marginTop: "1rem"}}>
+                            <Select value={couponId} onValueChange={setCouponId}>
+                                <SelectTrigger className="lg:w-[280px]">
+                                    <SelectValue placeholder="选择优惠券" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {(couponList?.length === 0 || !couponList) && (
+                                        <SelectItem value="none">暂无可用优惠券</SelectItem>
+                                    )}
+                                    {couponList?.map(item => (
+                                        <SelectItem key={item.id} value={item.id}>
+                                            {item.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                             <Button type="submit" onClick={handleRecharge}>
                                 <BadgeJapaneseYen className="size-4 text-muted" />
                                 立即充值

@@ -13,7 +13,7 @@ export const voucher = pgTable("voucher", {
     exchangeId: text("exchangeId"),
     vType: text("vType"),
     validity: integer("validity"), // Admin ID who created the AI settings
-    expiry: text("expiry"),
+    expiry: timestamp("expiry", { withTimezone: true }),
     userId: text("userId").notNull(),
     serverIds: text("serverIds").array(),
     standIds: text("standIds").array(),
@@ -24,7 +24,7 @@ export const voucher = pgTable("voucher", {
 });
 
 export const coupon = pgTable("coupon", {
-    id: text("couponId")
+    id: text("id")
         .notNull()
         .primaryKey()
         .$defaultFn(() => nanoid()),
@@ -43,4 +43,32 @@ export const coupon = pgTable("coupon", {
         .notNull()
         .$defaultFn(() => new Date()),
     exchangeId: text("exchangeId"),
+    userId: text("userId").notNull(),
 });
+
+export const exchange = pgTable("exchange", {
+    exchangeId: text("exchangeId")
+        .notNull()
+        .primaryKey()
+        .$defaultFn(() => nanoid()),
+    name: text("name").notNull(),
+    type: text("type").notNull(),
+    count: integer("count").notNull(),
+    used: integer("used").notNull(),
+    expiry: timestamp("expiry", { withTimezone: true }),
+    effectiveDays: integer("effective_days"),
+    serverIds: text("serverIds").array(),
+    standIds: text("standIds").array(),
+    status: text("status").notNull().default("0"),
+    amount: numeric("amount").notNull(),
+    couponType: text("coupon_type").notNull(),
+    discountRate: numeric("discount_rate").notNull(),
+    highest: numeric("highest"),
+    threshold: numeric("threshold"),
+    reduced: numeric("reduced"), // Admin ID who created the AI settings
+    desc: text("desc"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+        .notNull()
+        .$defaultFn(() => new Date()),
+    expiryAt: timestamp("expiry_at", { withTimezone: true }),
+})
