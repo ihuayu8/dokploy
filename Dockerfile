@@ -45,23 +45,24 @@ COPY --from=build /prod/dokploy/node_modules ./node_modules
 
 
 # Install docker
-RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && rm get-docker.sh && curl https://rclone.org/install.sh | bash
+#RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && rm get-docker.sh && curl https://rclone.org/install.sh | bash
+RUN curl https://rclone.org/install.sh | bash
 
 # Install Nixpacks and tsx
 # | VERBOSE=1 VERSION=1.21.0 bash
 
-ARG NIXPACKS_VERSION=1.39.0
-RUN curl -sSL https://nixpacks.com/install.sh -o install.sh \
-    && chmod +x install.sh \
-    && ./install.sh \
-    && pnpm install -g tsx
-
-# Install Railpack
-ARG RAILPACK_VERSION=0.0.64
-RUN curl -sSL https://railpack.com/install.sh | bash
-
-# Install buildpacks
-COPY --from=buildpacksio/pack:0.35.0 /usr/local/bin/pack /usr/local/bin/pack
+#ARG NIXPACKS_VERSION=1.39.0
+#RUN curl -sSL https://nixpacks.com/install.sh -o install.sh \
+#    && chmod +x install.sh \
+#    && ./install.sh \
+#    && pnpm install -g tsx
+#
+## Install Railpack
+#ARG RAILPACK_VERSION=0.0.64
+#RUN curl -sSL https://railpack.com/install.sh | bash
+#
+## Install buildpacks
+#COPY --from=buildpacksio/pack:0.35.0 /usr/local/bin/pack /usr/local/bin/pack
 
 EXPOSE 3000
 CMD [ "pnpm", "start" ]

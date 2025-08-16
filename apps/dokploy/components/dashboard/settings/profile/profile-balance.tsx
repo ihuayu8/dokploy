@@ -112,6 +112,7 @@ export const ProfileBalance = () => {
                         <Input
                             placeholder="请输入充值金额"
                             value={rechargeAmount}
+                            type="number"
                             onChange={handleAmountChange}
                         />
                         <div className="flex items-center justify-end gap-2" style={{marginTop: "1rem"}}>

@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import {rechargeOrder, users_temp} from "@dokploy/server/db/schema";
 import {eq, sql} from "drizzle-orm";
+import {db} from "@dokploy/server/db";
 
 export default async function handler(
     req: NextApiRequest,
