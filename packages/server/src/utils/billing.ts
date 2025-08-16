@@ -120,7 +120,7 @@ export async function billingProcess() {
             project: true
         }
     })
-    console.log(`[${new Date()} - 服务计费查询]计费查询服务开始，本次需要计费应用数量为${appList.length}`)
+    console.log(`[${new Date().toLocaleString()} - 服务计费查询]计费查询服务开始，本次需要计费应用数量为${appList.length}`)
 
     // 获取所有服务器
     const serverList = await db.query.server.findMany({
@@ -139,13 +139,13 @@ export async function billingProcess() {
             // 计算本小时费用
         const server = serverList.find(server => item.serverId === server.serverId)
         if (!server) {
-            console.error(`[${new Date()} - 服务计费查询]计费失败，服务器信息不存在，applicationId=${item.applicationId}, 
+            console.error(`[${new Date().toLocaleString()} - 服务计费查询]计费失败，服务器信息不存在，applicationId=${item.applicationId}, 
             serverId=${item.serverId}`)
             return;
         }
         const stand = standList.find(stand => stand.id === item.currentStand)
         if (!stand) {
-            console.error(`[${new Date()} - 服务计费查询]计费失败，实例规格信息不存在，applicationId=${item.applicationId}, 
+            console.error(`[${new Date().toLocaleString()} - 服务计费查询]计费失败，实例规格信息不存在，applicationId=${item.applicationId}, 
             standId=${item.stand}`)
             return;
         }
@@ -238,17 +238,19 @@ export async function billingProcess() {
     }
 
     // 实际插入
-    await db.insert(billingStandDetail).values(billingList).returning()
+    if(billingList.length > 0){
+        await db.insert(billingStandDetail).values(billingList).returning()
+    }
 
     /** 数据卷计费查询 **/
     await volumeCheck(serverList, appList);
 
-    console.log(`[${new Date()} - 服务计费查询]计费查询服务结束`)
+    console.log(`[${new Date().toLocaleString()} - 服务计费查询]计费查询服务结束`)
 }
 
 // 数据卷使用量统计
 export async function volumeCheck(serverList:any, appList:any) {
-    console.log(`[${new Date()} - 数据卷用量查询]服务开始`)
+    console.log(`[${new Date().toLocaleString()} - 数据卷用量查询]服务开始`)
     for (const server of serverList) {
         if(server.serverStatus != "active") {
             continue
@@ -259,7 +261,7 @@ export async function volumeCheck(serverList:any, appList:any) {
         try{
             nodeListresult = await execAsyncRemoteOverServer(server, "docker node ls -q | xargs -I {} docker node inspect -f '{{.Description.Hostname}} {{.Status.Addr}}' {}");
         }catch (error){
-            console.warn(`[${new Date()} - 数据卷用量查询]服务器 ${server.name} 已离线，请检查！`, error)
+            console.warn(`[${new Date().toLocaleString()} - 数据卷用量查询]服务器 ${server.name} 已离线，请检查！`, error)
             continue
         }
         const nodeList = nodeListresult.stdout;
@@ -280,7 +282,7 @@ export async function volumeCheck(serverList:any, appList:any) {
                 try {
                     volumesRes = await execAsyncRemoteOverServer(server, `ssh root@${node} 'docker volume ls --format "{{.Name}}" | while read vol; do echo -n "$vol-"; du -s $(docker inspect -f "{{.Mountpoint}}" "$vol") | awk "{print \\$1}"; done'`)
                 }catch (error){
-                    console.warn(`[${new Date()} - 数据卷用量查询]查询失败，服务器 ${server.name} - 节点 ${node} 已离线，请检查！`, error)
+                    console.warn(`[${new Date().toLocaleString()} - 数据卷用量查询]查询失败，服务器 ${server.name} - 节点 ${node} 已离线，请检查！`, error)
                     continue
                 }
             }
@@ -331,7 +333,7 @@ export async function charging() {
         const startOfLastHour = new Date(endOfLastHour);
         startOfLastHour.setHours(endOfLastHour.getHours() - 1);
 
-        console.log(`[${new Date()} - 扣费并生成账单]服务开始，本次计费时间段为：${startOfLastHour} - ${endOfLastHour}`)
+        console.log(`[${new Date().toLocaleString()} - 扣费并生成账单]服务开始，本次计费时间段为：${startOfLastHour} - ${endOfLastHour}`)
 
         // 获取一小时内的计费账单详情
         const computeList = await db.query.billingStandDetail.findMany({
@@ -341,7 +343,7 @@ export async function charging() {
                 lt(billingStandDetail.createdAt, endOfLastHour)     // 小于当前小时起点
             )
         })
-        console.log(`[${new Date()} - 扣费并生成账单]获取到计费项条数为：${computeList.length}`)
+        console.log(`[${new Date().toLocaleString()} - 扣费并生成账单]获取到计费项条数为：${computeList.length}`)
         // 按服务分组
         const appGroupMap: any = {} // 计算资源价格分组
         computeList.forEach(compute => {
@@ -370,7 +372,7 @@ export async function charging() {
                 )
             })
             if (!!billingInfo) {
-                console.warn(`[${new Date()} - 扣费并生成账单]当前应用 ${key} 本时段已经计费，不再重复计费！`)
+                console.warn(`[${new Date().toLocaleString()} - 扣费并生成账单]当前应用 ${key} 本时段已经计费，不再重复计费！`)
                 continue
             }
 
@@ -413,7 +415,7 @@ export async function charging() {
                 // 余额计费
                 await userCharge(org.ownerId, detail.amount, org.id)
             }
-            console.log(`[${new Date()} - 扣费并生成账单]当前应用 ${key} 【计算资源】计费完成，扣费渠道为${voucherId === "" ? '账户余额' : '代金券'}, 计费金额为${detail.amount}`)
+            console.log(`[${new Date().toLocaleString()} - 扣费并生成账单]当前应用 ${key} 【计算资源】计费完成，扣费渠道为${voucherId === "" ? '账户余额' : '代金券'}, 计费金额为${detail.amount}`)
             // 插入实际计费表
             await db.insert(billing).values({
                 type: 0,
@@ -426,12 +428,12 @@ export async function charging() {
             }).returning()
         }
 
-        console.log(`[${new Date()} - 扣费并生成账单]计算资源流程结束，全部计费完成！`)
+        console.log(`[${new Date().toLocaleString()} - 扣费并生成账单]计算资源流程结束，全部计费完成！`)
 
     }
 
     /** 流量计费 **/
-    console.log(`[${new Date()} - 扣费并生成账单]开始流量计费！`)
+    console.log(`[${new Date().toLocaleString()} - 扣费并生成账单]开始流量计费！`)
     // 获取当前年月
     const now = new Date();
     const year = now.getFullYear();
@@ -487,12 +489,12 @@ export async function charging() {
                 }).returning()
 
 
-                console.log(`[${new Date()} - 扣费并生成账单]组织ID ${nt.organizationId} 本次计费流量 ${overCount} GB, 费用 ${price}！`)
+                console.log(`[${new Date().toLocaleString()} - 扣费并生成账单]组织ID ${nt.organizationId} 本次计费流量 ${overCount} GB, 费用 ${price}！`)
             } else {
-                console.log(`[${new Date()} - 扣费并生成账单]组织ID ${nt.organizationId} 本次计费流量不超过1GB，暂不计费！`)
+                console.log(`[${new Date().toLocaleString()} - 扣费并生成账单]组织ID ${nt.organizationId} 本次计费流量不超过1GB，暂不计费！`)
             }
         } else {
-            console.log(`[${new Date()} - 扣费并生成账单]组织ID ${nt.organizationId} 本次没有超过免费流量限制，暂不计费！`)
+            console.log(`[${new Date().toLocaleString()} - 扣费并生成账单]组织ID ${nt.organizationId} 本次没有超过免费流量限制，暂不计费！`)
         }
 
     }

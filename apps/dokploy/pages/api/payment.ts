@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import {rechargeOrder, users_temp} from "@dokploy/server/db/schema";
+import {rechargeOrder, users_temp} from "@/server/db/schema";
 import {eq, sql} from "drizzle-orm";
-import {db} from "@dokploy/server/db";
+import { db } from "@/server/db";
 
 export default async function handler(
     req: NextApiRequest,
@@ -10,7 +10,6 @@ export default async function handler(
     if (req.method === 'POST') {
         const { token } = req.query;
         const { amount,third_order_id,endTime,payType,customerId } = req.body;
-        console.log("req",req.body);
         // 验证token
         if (token != 'huayu5355408') {
             res.status(400).json({
