@@ -158,6 +158,7 @@ export const userRouter = createTRPCRouter({
 			where: and(
 				eq(voucher.userId, ctx.user.id),
 				eq(voucher.status, "0"),
+				gt(voucher.expiry, new Date()),
 			)
 		})
 
@@ -169,6 +170,7 @@ export const userRouter = createTRPCRouter({
 			where: and(
 				eq(coupon.userId, ctx.user.id),
 				eq(coupon.status, "0"),
+				gt(coupon.expiredAt, new Date()),
 			)
 		})
 
@@ -176,8 +178,30 @@ export const userRouter = createTRPCRouter({
 	}),
 	// 用户充值-生成订单并返回支付二维码
 	recharge: protectedProcedure.input(z.object({
-		amount: z.number().min(0)
+		amount: z.number().min(0),
+		couponId: z.string().optional()
 	})).mutation(async ({ input, ctx }) => {
+		let payAmount = input.amount;
+		if(input.couponId && input.couponId != ""){
+			// 校验优惠券是否可用
+			const couponInfo = await db.query.coupon.findFirst({
+				where: and(
+					eq(coupon.id, input.couponId),
+					gt(coupon.expiredAt, new Date()),
+					eq(coupon.status, "0"),
+					lte(coupon.threshold, input.amount)
+				)
+			})
+			if (couponInfo && couponInfo.type == 1){
+				// 如果是折扣券，计算折扣后的金额
+				payAmount = (input.amount * (1-couponInfo.discountRate) >= couponInfo.highest) ? input.amount - couponInfo.highest : input.amount * couponInfo.discountRate;
+			}else if (couponInfo && couponInfo.type == 2){
+				// 如果是满减券，计算满减后的金额
+				payAmount = input.amount - couponInfo.reduced;
+			}
+			payAmount = payAmount.toFixed(2);
+		}
+
 		// 生成订单号
 		const orderId = nanoid();
 		let res;
@@ -186,7 +210,7 @@ export const userRouter = createTRPCRouter({
 				method: "POST",
 				body: JSON.stringify({
 					name: "用户充值",
-					amount: input.amount.toString(),
+					amount: payAmount.toString(),
 					userId: "",
 					mercId: "",
 					mercNum: "",
@@ -214,14 +238,16 @@ export const userRouter = createTRPCRouter({
 		await db.insert(rechargeOrder).values({
 			id: orderId,
 			amount: input.amount || 0,
-			payAmount: input.amount,
+			payAmount: payAmount,
 			userId: ctx.session.userId || "",
 			status: "0",
-			couponId: "",
+			couponId: input.couponId || "",
 		})
 
 		return {
 			orderId,
+			amount: input.amount,
+			payAmount: payAmount,
 			payUrl: data.data.payUrl
 		};
 	}),

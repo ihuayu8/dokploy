@@ -6,27 +6,27 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import {BadgeJapaneseYen, Wallet} from "lucide-react";
-import { api } from "@/utils/api";
+import {api} from "@/utils/api";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {useEffect, useState} from "react";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {toast} from "sonner";
-import { QRCodeSVG } from 'qrcode.react';
+import {QRCodeSVG} from 'qrcode.react';
 import * as React from "react";
 import {cn} from "@/lib/utils";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 export const ProfileBalance = () => {
-    const { data, refetch, isLoading } = api.user.getBalance.useQuery()
+    const {data, refetch, isLoading} = api.user.getBalance.useQuery()
     let balance = data?.balance
     const [visible, setVisible] = useState(false)
     const [rechargeAmount, setRechargeAmount] = useState(0)
     const [couponId, setCouponId] = useState("")
 
-    const { data: couponList, refetch: refetchCouponList } = api.user.getCouponList.useQuery({
+    const {data: couponList, refetch: refetchCouponList} = api.user.getCouponList.useQuery({
         amount: rechargeAmount
-    },{
+    }, {
         enabled: rechargeAmount !== 0
     })
 
@@ -34,8 +34,9 @@ export const ProfileBalance = () => {
         api.user.recharge.useMutation();
     const [orderId, setOrderId] = useState("")
     const [payUrl, setPayUrl] = useState("")
+    const [payAmount, setPayAmount] = useState(0)
 
-    const { data:orderInfo } = api.user.getOrderStatus.useQuery(
+    const {data: orderInfo} = api.user.getOrderStatus.useQuery(
         {orderId: orderId},
         {
             refetchOnWindowFocus: false,
@@ -46,7 +47,7 @@ export const ProfileBalance = () => {
     )
 
     useEffect(() => {
-        if(orderInfo?.status === "1"){
+        if (orderInfo?.status === "1") {
             refetch()
             setVisible(false)
             setOrderId("")
@@ -66,26 +67,28 @@ export const ProfileBalance = () => {
 
     const handleAmountChange = (amount: any) => {
         setRechargeAmount(Number(amount.target.value))
-        if (Number(amount.target.value) && Number(amount.target.value) != 0){
+        if (Number(amount.target.value) && Number(amount.target.value) != 0) {
             refetchCouponList().then(r => {
                 console.log(r)
             })
-        }else {
+        } else {
             setCouponId("")
         }
     }
 
     const handleRecharge = () => {
-        if(!handleAmountCheck()){
+        if (!handleAmountCheck()) {
             toast.error("请输入正确的金额");
             return
         }
         mutateAsync({
-            amount: rechargeAmount
-        }).then(res=>{
+            amount: rechargeAmount,
+            couponId: couponId
+        }).then(res => {
             setPayUrl(res.payUrl)
             setOrderId(res.orderId)
-        }).catch(err=>{
+            setPayAmount(res.payAmount)
+        }).catch(err => {
             toast.error("订单创建失败，请稍后再试！")
         })
         setVisible(true)
@@ -99,14 +102,14 @@ export const ProfileBalance = () => {
                     <CardHeader className="flex flex-row gap-2 flex-wrap justify-between items-center">
                         <div>
                             <CardTitle className="text-xl flex flex-row gap-2">
-                                <Wallet className="size-6 text-muted-foreground self-center" />
+                                <Wallet className="size-6 text-muted-foreground self-center"/>
                                 余额
                             </CardTitle>
                             <CardDescription>
                                 管理您的账户余额
                             </CardDescription>
                         </div>
-                        <span style={{fontWeight: 700}}>￥{ balance }</span>
+                        <span style={{fontWeight: 700}}>￥{balance}</span>
                     </CardHeader>
                     <CardContent className="space-y-2 py-8 border-t">
                         <Input
@@ -118,7 +121,7 @@ export const ProfileBalance = () => {
                         <div className="flex items-center justify-end gap-2" style={{marginTop: "1rem"}}>
                             <Select value={couponId} onValueChange={setCouponId}>
                                 <SelectTrigger className="lg:w-[280px]">
-                                    <SelectValue placeholder="选择优惠券" />
+                                    <SelectValue placeholder="选择优惠券"/>
                                 </SelectTrigger>
                                 <SelectContent>
                                     {(couponList?.length === 0 || !couponList) && (
@@ -132,7 +135,7 @@ export const ProfileBalance = () => {
                                 </SelectContent>
                             </Select>
                             <Button type="submit" onClick={handleRecharge}>
-                                <BadgeJapaneseYen className="size-4 text-muted" />
+                                <BadgeJapaneseYen className="size-4 text-muted"/>
                                 立即充值
                             </Button>
                         </div>
@@ -145,40 +148,45 @@ export const ProfileBalance = () => {
                         <DialogTitle>充值</DialogTitle>
                     </DialogHeader>
                     <div className="flex flex-col justify-center items-center gap-2">
-                        {loadingRecharge ? <div>创建订单中，请稍等...</div> : (<>
-                            <QRCodeSVG
-                            value={payUrl}
-                            size={200}
-                            fgColor="#24292e"
-                            bgColor="#f6f8fa"
-                            level="H"
-                            includeMargin={true}/>
-                            <div className="flex items-center justify-end gap-4">
-                                <img
-                                    src="/images/alipay.svg"
-                                    className={cn(
-                                        "object-contain",
-                                        "size-10",
-                                    )}
-                                />
-                                <img
-                                    src="/images/weichat.svg"
-                                    className={cn(
-                                        "object-contain",
-                                        "size-10",
-                                    )}
-                                />
-                                <img
-                                    src="/images/yun.svg"
-                                    className={cn(
-                                        "object-contain",
-                                        "size-10",
-                                    )}
-                                />
-                            </div>
-                            <div className="text-gray-500 text-sm">请使用 微信/支付宝/云闪付 APP扫码支付</div>
-                            <div>订单已生成，请在3分钟内完成支付</div>
-                        </>)
+                        {loadingRecharge ? <div>创建订单中，请稍等...</div> : (
+                            <>
+                                <div>
+                                    充值金额：{rechargeAmount}元
+                                    实际支付金额：{payAmount}元
+                                </div>
+                                <QRCodeSVG
+                                    value={payUrl}
+                                    size={200}
+                                    fgColor="#24292e"
+                                    bgColor="#f6f8fa"
+                                    level="H"
+                                    includeMargin={true}/>
+                                <div className="flex items-center justify-end gap-4">
+                                    <img
+                                        src="/images/alipay.svg"
+                                        className={cn(
+                                            "object-contain",
+                                            "size-10",
+                                        )}
+                                    />
+                                    <img
+                                        src="/images/weichat.svg"
+                                        className={cn(
+                                            "object-contain",
+                                            "size-10",
+                                        )}
+                                    />
+                                    <img
+                                        src="/images/yun.svg"
+                                        className={cn(
+                                            "object-contain",
+                                            "size-10",
+                                        )}
+                                    />
+                                </div>
+                                <div className="text-gray-500 text-sm">请使用 微信/支付宝/云闪付 APP扫码支付</div>
+                                <div>订单已生成，请在3分钟内完成支付</div>
+                            </>)
                         }
 
                     </div>

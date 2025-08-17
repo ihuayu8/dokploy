@@ -31,6 +31,11 @@ export const ProfileCoupon = () => {
                         <UseExchange />
                     </CardHeader>
                     <CardContent className="space-y-2 py-8 border-t p-10">
+                        {coupons?.length === 0 && (
+                            <div className="text-center text-gray-500">
+                                暂无优惠券
+                            </div>
+                        )}
                         {coupons?.map((coupon) => (
                             <div
                                 key={coupon.id}
@@ -73,10 +78,6 @@ export const ProfileCoupon = () => {
                             <div
                                 className="bg-neutral px-5 py-3 flex justify-between items-center border-t border-gray-100">
                                 <span className="text-xs text-gray-500">券号：{coupon.id}</span>
-                                {/*<button*/}
-                                {/*    className="bg-primary hover:bg-primary/90 text-white text-sm py-1.5 px-4 rounded-full transition-colors duration-200">*/}
-                                {/*    立即使用*/}
-                                {/*</button>*/}
                             </div>
                         </div>
                         ))}

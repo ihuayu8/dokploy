@@ -24,6 +24,7 @@ import { useRouter } from "next/router";
 import { toast } from "sonner";
 import { DockerTerminalModal } from "../../settings/web-server/docker-terminal-modal";
 import {TRPCClientError} from "@trpc/client";
+import {ShowInstruction} from "@/components/dashboard/application/general/generic/show-instruction";
 interface Props {
 	applicationId: string;
 }
@@ -313,6 +314,9 @@ export const ShowGeneralApplication = ({ applicationId }: Props) => {
 					</div>
 				</CardContent>
 			</Card>
+			{data?.applicationShopInfo && (
+				<ShowInstruction applicationShopInfo={data?.applicationShopInfo} />
+			)}
 			<ShowProviderForm applicationId={applicationId} />
 			{/*<ShowBuildChooseForm applicationId={applicationId} />*/}
 		</>

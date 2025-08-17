@@ -122,6 +122,7 @@ export const users_temp = pgTable("user_temp", {
 	stripeSubscriptionId: text("stripeSubscriptionId"),
 	serversQuantity: integer("serversQuantity").notNull().default(0),
 	balance: numeric("balance"),
+	firstRecharge: boolean("first_recharge").notNull().default(false),
 });
 
 export const usersRelations = relations(users_temp, ({ one, many }) => ({

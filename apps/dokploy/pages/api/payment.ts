@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import {rechargeOrder, users_temp} from "@/server/db/schema";
-import {eq, sql} from "drizzle-orm";
+import {coupon, rechargeOrder, users_temp, voucher} from "@/server/db/schema";
+import {and, eq, or, sql} from "drizzle-orm";
 import { db } from "@/server/db";
 
 export default async function handler(
@@ -50,12 +50,60 @@ export default async function handler(
             return;
         }
 
+        // 更新优惠券状态
+        if(order.couponId && order.couponId != ""){
+            await db.update(coupon)
+                .set({
+                    status: '1',
+                })
+                .where(eq(coupon.id, order.couponId));
+        }
+
         // 用户增加余额
         await db.update(users_temp)
             .set({
                 balance: sql`${users_temp.balance} + ${order.amount}`,
             })
             .where(eq(users_temp.id, order.userId));
+
+
+        console.log(`[用户充值]充值成功！用户ID[${order.userId}], 充值金额[${order.amount}],实际支付金额[${order.payAmount}]`)
+
+        // 查询该顾客是否支付过
+        const customer = await db.query.rechargeOrder.findFirst({
+            where: or(
+                eq(rechargeOrder.customerId, customerId),
+                and(
+                    eq(rechargeOrder.userId, order.userId),
+                    eq(rechargeOrder.status, '1')
+                ),
+            ),
+        });
+        if(!customer?.id){
+            await db.update(users_temp)
+                .set({
+                    firstRecharge: true,
+                })
+                .where(eq(users_temp.id, order.userId));
+            // 赠送优惠券和代金券
+            await db.insert(coupon).values({
+                name: "新用户首充5折优惠券",
+                type: "1",
+                discountRate: 0.5,
+                highest: 10,
+                threshold: 1,
+                desc: "新用户专享首充5折优惠券，最高优惠10元",
+                expiredAt: new Date(Date.now() + 2 * 30 * 24 * 60 * 60 * 1000),
+                userId: order.userId,
+            })
+            await db.insert(voucher).values({
+                vName: "新用户首充代金券",
+                amount: 5,
+                balance: 5,
+                expiry: new Date(Date.now() + 2 * 30 * 24 * 60 * 60 * 1000),
+                userId: order.userId,
+            })
+        }
 
         // 更新订单状态
         await db.update(rechargeOrder)
@@ -66,8 +114,6 @@ export default async function handler(
                 customerId: customerId,
             })
             .where(eq(rechargeOrder.id, order.id));
-
-        console.log(`[用户充值]充值成功！用户ID[${order.userId}], 充值金额[${order.amount}],实际支付金额[${order.payAmount}]`)
 
         res.status(200).json({
             success: true,

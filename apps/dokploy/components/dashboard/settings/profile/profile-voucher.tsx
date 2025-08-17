@@ -42,6 +42,11 @@ export const ProfileVoucher = () => {
                         <UseExchange />
                     </CardHeader>
                     <CardContent className="space-y-2 py-8 border-t">
+                        {voucherList?.length === 0 && (
+                            <div className="text-center text-gray-500">
+                                暂无代金券
+                            </div>
+                        )}
                         {voucherList.map((item)=>(
                             <div style={{display: "flex", flexDirection: "column", marginBottom: "2rem"}} key={item.voucherId}>
                                 <div style={{marginBottom: "5px", display:"flex"}}>
